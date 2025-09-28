@@ -15,7 +15,7 @@ declare global {
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
-  const isSchedule = searchParams.get('schedule') === 'true';
+  const isSchedule = searchParams?.get('schedule') === 'true';
   
   const pickupInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
@@ -57,11 +57,12 @@ export default function BookingPage() {
 
   // Check URL parameters for destination
   useEffect(() => {
-    const destination = searchParams.get('destination');
-    if (destination) {
-      setFormData(prev => ({ ...prev, destination: decodeURIComponent(destination) }));
-    }
-  }, [searchParams]);
+  if (!searchParams) return;
+  const destination = searchParams.get('destination');
+  if (destination) {
+    setFormData(prev => ({ ...prev, destination: decodeURIComponent(destination) }));
+  }
+}, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
