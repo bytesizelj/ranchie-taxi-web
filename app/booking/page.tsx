@@ -5,17 +5,17 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Target, Calendar, Clock, Users, Phone, MessageSquare, User } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
-import { Loader } from '@googlemaps/js-api-loader';
 
 declare global {
   interface Window {
     google: any;
+    googleMapsLoaded?: boolean;
   }
 }
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
-  const isSchedule = searchParams.get('schedule') === 'true';
+  const isSchedule = searchParams?.get('schedule') === 'true';
   
   const pickupInputRef = useRef<HTMLInputElement>(null);
   const destinationInputRef = useRef<HTMLInputElement>(null);
@@ -33,30 +33,110 @@ export default function BookingPage() {
 
   // Set default date to today and initialize Google Places Autocomplete
   useEffect(() => {
-  const today = new Date().toISOString().split('T')[0];
-  setFormData(prev => ({ ...prev, date: today }));
+    const today = new Date().toISOString().split('T')[0];
+    setFormData(prev => ({ ...prev, date: today }));
 
-  // Only load Google Maps on client side
-  if (typeof window === 'undefined') return;
+    // Only load Google Maps on client side
+    if (typeof window === 'undefined') return;
 
-  // Initialize Google Places Autocomplete
-  const loader = new Loader({
-    apiKey: 'AIzaSyBwGQlYvLODysT5Lgd0k-VRp0jzp2_-ix8',
-    version: 'weekly',
-    libraries: ['places']
-  });
-
-  loader.load().then(() => {
-    if (window.google && window.google.maps && window.google.maps.places) {
-      // ... rest of the Google Maps code
+    // Check if Google Maps is already loaded or being loaded
+    if (window.googleMapsLoaded || (window.google && window.google.maps)) {
+      // If already loaded, just initialize autocomplete
+      if (window.google && window.google.maps && window.google.maps.places) {
+        initializeAutocomplete();
+      }
+      return;
     }
-  }).catch((error) => {
-    console.error('Error loading Google Places:', error);
-  });
-}, []);
+
+    // Mark as loading
+    window.googleMapsLoaded = true;
+
+    // Load Google Maps script directly without using the Loader
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBwGQlYvLODysT5Lgd0k-VRp0jzp2_-ix8&libraries=places`;
+    script.async = true;
+    script.defer = true;
+    
+    script.onload = () => {
+      initializeAutocomplete();
+    };
+    
+    script.onerror = (error) => {
+      console.error('Error loading Google Maps:', error);
+      window.googleMapsLoaded = false;
+    };
+    
+    // Check if script already exists
+    const existingScript = document.querySelector(`script[src="${script.src}"]`);
+    if (!existingScript) {
+      document.head.appendChild(script);
+    } else {
+      // If script exists, wait for it to load
+      existingScript.addEventListener('load', initializeAutocomplete);
+    }
+
+    function initializeAutocomplete() {
+      if (!window.google || !window.google.maps || !window.google.maps.places) {
+        return;
+      }
+
+      // Saint Vincent and the Grenadines bounds
+      const svgBounds = new window.google.maps.LatLngBounds(
+        new window.google.maps.LatLng(12.5, -61.6), // Southwest
+        new window.google.maps.LatLng(13.5, -61.0)  // Northeast
+      );
+
+      const options = {
+        bounds: svgBounds,
+        componentRestrictions: { country: 'vc' },
+        fields: ['formatted_address', 'name'],
+        types: ['establishment', 'geocode']
+      };
+
+      // Initialize pickup autocomplete
+      if (pickupInputRef.current && !pickupInputRef.current.hasAttribute('data-autocomplete')) {
+        const pickupAutocomplete = new window.google.maps.places.Autocomplete(
+          pickupInputRef.current,
+          options
+        );
+        
+        pickupAutocomplete.addListener('place_changed', () => {
+          const place = pickupAutocomplete.getPlace();
+          // Use place name if available, otherwise use formatted address
+          const displayName = place.name || place.formatted_address || '';
+          setFormData(prev => ({ ...prev, pickup: displayName }));
+        });
+        
+        pickupInputRef.current.setAttribute('data-autocomplete', 'true');
+      }
+
+      // Initialize destination autocomplete
+      if (destinationInputRef.current && !destinationInputRef.current.hasAttribute('data-autocomplete')) {
+        const destinationAutocomplete = new window.google.maps.places.Autocomplete(
+          destinationInputRef.current,
+          options
+        );
+        
+        destinationAutocomplete.addListener('place_changed', () => {
+          const place = destinationAutocomplete.getPlace();
+          // Use place name if available, otherwise use formatted address
+          const displayName = place.name || place.formatted_address || '';
+          setFormData(prev => ({ ...prev, destination: displayName }));
+        });
+        
+        destinationInputRef.current.setAttribute('data-autocomplete', 'true');
+      }
+    }
+
+    // Cleanup function
+    return () => {
+      // Don't remove the script as it might be used by other components
+    };
+  }, []);
 
   // Check URL parameters for destination
   useEffect(() => {
+    if (!searchParams) return;
     const destination = searchParams.get('destination');
     if (destination) {
       setFormData(prev => ({ ...prev, destination: decodeURIComponent(destination) }));
@@ -76,6 +156,17 @@ export default function BookingPage() {
       day: 'numeric' 
     });
     
+    // Format time for display (convert 24hr to 12hr format)
+    const formatTime = (time24: string) => {
+      const [hours, minutes] = time24.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+      return `${hour12}:${minutes} ${ampm}`;
+    };
+    
+    const displayTime = formatTime(formData.time);
+    
     // Create WhatsApp message
     const message = `🚕 *RANCHIE TAXI BOOKING REQUEST*
 
@@ -83,7 +174,7 @@ export default function BookingPage() {
 📍 *Pickup:* ${formData.pickup}
 🎯 *Destination:* ${formData.destination}
 📅 *Date:* ${formattedDate}
-⏰ *Time:* ${formData.time}
+⏰ *Time:* ${displayTime}
 👥 *Passengers:* ${formData.passengers}
 📞 *Phone:* ${formData.phone}
 💬 *Notes:* ${formData.notes || 'None'}
@@ -102,7 +193,7 @@ Please confirm availability and provide fare quote. Thank you!`;
       pickup: formData.pickup,
       destination: formData.destination,
       date: formattedDate,
-      time: formData.time,
+      time: displayTime,
       passengers: formData.passengers + ' passenger' + (formData.passengers !== '1' ? 's' : '')
     });
     
@@ -226,14 +317,71 @@ Please confirm availability and provide fare quote. Thank you!`;
                     <Clock size={16} className="inline mr-1" />
                     Time
                   </label>
-                  <input
-                    type="time"
+                  <select
                     id="time"
                     value={formData.time}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
                     required
-                  />
+                  >
+                    <option value="">Select time</option>
+                    <optgroup label="Morning">
+                      <option value="05:00">5:00 AM</option>
+                      <option value="05:30">5:30 AM</option>
+                      <option value="06:00">6:00 AM</option>
+                      <option value="06:30">6:30 AM</option>
+                      <option value="07:00">7:00 AM</option>
+                      <option value="07:30">7:30 AM</option>
+                      <option value="08:00">8:00 AM</option>
+                      <option value="08:30">8:30 AM</option>
+                      <option value="09:00">9:00 AM</option>
+                      <option value="09:30">9:30 AM</option>
+                      <option value="10:00">10:00 AM</option>
+                      <option value="10:30">10:30 AM</option>
+                      <option value="11:00">11:00 AM</option>
+                      <option value="11:30">11:30 AM</option>
+                    </optgroup>
+                    <optgroup label="Afternoon">
+                      <option value="12:00">12:00 PM</option>
+                      <option value="12:30">12:30 PM</option>
+                      <option value="13:00">1:00 PM</option>
+                      <option value="13:30">1:30 PM</option>
+                      <option value="14:00">2:00 PM</option>
+                      <option value="14:30">2:30 PM</option>
+                      <option value="15:00">3:00 PM</option>
+                      <option value="15:30">3:30 PM</option>
+                      <option value="16:00">4:00 PM</option>
+                      <option value="16:30">4:30 PM</option>
+                      <option value="17:00">5:00 PM</option>
+                      <option value="17:30">5:30 PM</option>
+                    </optgroup>
+                    <optgroup label="Evening">
+                      <option value="18:00">6:00 PM</option>
+                      <option value="18:30">6:30 PM</option>
+                      <option value="19:00">7:00 PM</option>
+                      <option value="19:30">7:30 PM</option>
+                      <option value="20:00">8:00 PM</option>
+                      <option value="20:30">8:30 PM</option>
+                      <option value="21:00">9:00 PM</option>
+                      <option value="21:30">9:30 PM</option>
+                      <option value="22:00">10:00 PM</option>
+                      <option value="22:30">10:30 PM</option>
+                      <option value="23:00">11:00 PM</option>
+                      <option value="23:30">11:30 PM</option>
+                    </optgroup>
+                    <optgroup label="Late Night">
+                      <option value="00:00">12:00 AM</option>
+                      <option value="00:30">12:30 AM</option>
+                      <option value="01:00">1:00 AM</option>
+                      <option value="01:30">1:30 AM</option>
+                      <option value="02:00">2:00 AM</option>
+                      <option value="02:30">2:30 AM</option>
+                      <option value="03:00">3:00 AM</option>
+                      <option value="03:30">3:30 AM</option>
+                      <option value="04:00">4:00 AM</option>
+                      <option value="04:30">4:30 AM</option>
+                    </optgroup>
+                  </select>
                 </div>
               </div>
 
