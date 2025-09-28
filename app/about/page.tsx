@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Phone, Mail, MessageCircle, Star, Shield, Car, DollarSign, MapPin, Clock, Check } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Star, Shield, Car, DollarSign, MapPin, Clock, Check, Instagram, Facebook } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import GoogleMap from '@/components/GoogleMap';
 
@@ -153,7 +153,7 @@ export default function AboutPage() {
                 className="w-14 h-14 bg-gradient-to-br from-purple-600 to-pink-500 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:-translate-y-1 transition-all"
                 title="Instagram: @ranchietaxisvg"
               >
-                <span className="text-2xl">📷</span>
+                <Instagram size={24} />
               </a>
               <a 
                 href="https://www.facebook.com/ranchie.russell"
@@ -162,7 +162,7 @@ export default function AboutPage() {
                 className="w-14 h-14 bg-blue-600 rounded-xl flex items-center justify-center text-white hover:shadow-lg hover:-translate-y-1 transition-all"
                 title="Facebook: Ranchie Russell"
               >
-                <span className="text-2xl">👤</span>
+                <Facebook size={24} />
               </a>
               <a 
                 href="https://wa.me/17844932354"
