@@ -24,12 +24,12 @@ export default function ConfirmationPage() {
     
     // Get booking details from URL params (in real app, this might come from form submission)
     // For now, we'll use sample data or URL params
-    const name = searchParams.get('name') || 'Guest';
-    const pickup = searchParams.get('pickup') || 'Argyle International Airport';
-    const destination = searchParams.get('destination') || 'Villa Beach';
-    const date = searchParams.get('date') || 'Today';
-    const time = searchParams.get('time') || 'ASAP';
-    const passengers = searchParams.get('passengers') || '2 passengers';
+    const name = searchParams?.get('name') || 'Guest';
+    const pickup = searchParams?.get('pickup') || 'Argyle International Airport';
+    const destination = searchParams?.get('destination') || 'Villa Beach';
+    const date = searchParams?.get('date') || 'Today';
+    const time = searchParams?.get('time') || 'ASAP';
+    const passengers = searchParams?.get('passengers') || '2 passengers';
 
     setBookingDetails({
       bookingId,
