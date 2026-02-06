@@ -1,12 +1,15 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, MessageCircle, X } from 'lucide-react';
+import { Phone, MessageCircle, X, Volume2, VolumeX } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
 import BottomNav from '@/components/BottomNav';
 
 export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [showCard, setShowCard] = useState(false);
 
   const handleRideNow = () => {
     setShowModal(true);
@@ -15,6 +18,38 @@ export default function HomePage() {
   const closeModal = () => {
     setShowModal(false);
   };
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+    }
+  };
+  useEffect(() => {
+    // Show at 3 seconds
+    const timer1 = setTimeout(() => setShowCard(true), 3000);
+    
+    // Start the cycle at 6 seconds
+    const timer2 = setTimeout(() => {
+      setShowCard(false);
+      
+      // Repeat: show for 3s, hide for 4s
+      const interval = setInterval(() => {
+        setShowCard(true);
+        setTimeout(() => setShowCard(false), 3000);
+      }, 7000); // 3s visible + 4s hidden = 7s cycle
+      
+      // Store interval for cleanup
+      (window as any).cardInterval = interval;
+    }, 6000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      if ((window as any).cardInterval) {
+        clearInterval((window as any).cardInterval);
+      }
+    };
+  }, []);
 
   return (
     <>
@@ -52,22 +87,32 @@ export default function HomePage() {
       `}</style>
 
       {/* Hero Section with Background */}
-      <div 
-        className="min-h-screen flex items-center justify-center p-5 pb-20"
-        style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), 
-                           url('https://i.postimg.cc/mDcKk8XG/Screenshot-2025-07-25-113844-20250725-130213-0000.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
+      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden">
+        {/* Background Video */}
+        <video
+          ref={videoRef}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover z-0"
+        >
+          <source src="/videos/ranchie-taxi-award.mp4" type="video/mp4" />
+        </video>
+        {/* Dark Overlay */}
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        {/* Mute/Unmute Button */}
+        <button
+          onClick={toggleMute}
+          className="absolute bottom-24 right-4 z-30 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"
+        >
+          {isMuted ? <VolumeX size={24} className="text-gray-700" /> : <Volume2 size={24} className="text-green-600" />}
+        </button>
         {/* Main Card */}
         <div 
-          className="bg-white rounded-3xl p-8 shadow-2xl max-w-lg w-full"
-          style={{
-            animation: 'slideUp 0.6s ease-out'
-          }}
+          className={`bg-white rounded-3xl p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
+            showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          }`}
         >
           {/* Logo Section */}
           <div className="text-center mb-8">

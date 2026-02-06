@@ -22,11 +22,11 @@ const destinations = [
     price: 'Call for rates'
   },
   {
-    name: 'Villa Beach',
-    icon: '🏖️',
-    image: 'https://i.postimg.cc/tRrMhtjZ/20250725-151828.jpg',
-    description: 'Beautiful beach with restaurants and resorts. Perfect for a relaxing day by the Caribbean Sea.',
-    duration: '~18 min',
+    name: 'Young Island',
+    icon: '🏝️',
+    image: '/images/young-island.png',
+    description: 'A private island resort just 200 yards off Villa Beach. A tropical paradise perfect for day trips and unforgettable experiences.',
+    duration: '~20 min',
     price: 'Call for rates'
   },
   {
@@ -58,7 +58,15 @@ const destinations = [
 export default function DestinationsPage() {
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div 
+        className="min-h-screen pb-20"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.45)), url('/images/destinations.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -80,9 +88,9 @@ export default function DestinationsPage() {
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* Page Title */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold mb-2 font-serif">Explore Saint Vincent</h1>
-            <p className="text-gray-600 italic">Discover the beauty of our islands with Ranchie Taxi</p>
+          <div className="text-center mb-8 bg-white/80 backdrop-blur rounded-2xl p-6 shadow-lg">
+            <h1 className="text-3xl font-extrabold mb-2 font-serif text-gray-900">Explore Saint Vincent</h1>
+            <p className="text-gray-700 italic font-medium">Discover the beauty of our islands with Ranchie Taxi</p>
           </div>
 
           {/* Destinations Grid */}
@@ -96,7 +104,7 @@ export default function DestinationsPage() {
                 />
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="text-xl font-semibold">{dest.name}</h3>
+                    <h3 className="text-xl font-bold text-gray-900">{dest.name}</h3>
                     <span className="text-2xl">{dest.icon}</span>
                   </div>
                   <p className="text-gray-600 mb-4 text-sm">{dest.description}</p>

@@ -15,7 +15,15 @@ export default function AboutPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div 
+        className="min-h-screen pb-20"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.65)), url('/images/ranchie-background-use.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -49,7 +57,7 @@ export default function AboutPage() {
 
           {/* About Section */}
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <h2 className="text-2xl font-semibold mb-4">Welcome to Ranchie Taxi</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Ranchie Taxi</h2>
             <p className="text-gray-700 mb-4 leading-relaxed">
               Serving Saint Vincent and the Grenadines with pride, Ranchie Taxi is your reliable transportation 
               partner throughout our beautiful islands. With years of experience navigating every corner of SVG, 
@@ -60,6 +68,23 @@ export default function AboutPage() {
               service and local expertise make every journey memorable. We're not just drivers — we're your gateway 
               to experiencing the best of Saint Vincent and the Grenadines.
             </p>
+          </div>
+          {/* Meet Your Driver */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center">
+            <h2 className="text-xl font-bold text-gray-900 mb-5">Get in Touch</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <img 
+                src="/images/about-ranchie-taxi.png"
+                alt="Ranchie with happy customers"
+                className="w-full rounded-2xl shadow-lg"
+              />
+              <img 
+                src="/images/about-background.png"
+                alt="Ranchie with customer by van"
+                className="w-full rounded-2xl shadow-lg"
+              />
+            </div>
+            <p className="text-gray-600 italic">Ranchie with happy visitors exploring SVG</p>
           </div>
 
           {/* Features Grid */}

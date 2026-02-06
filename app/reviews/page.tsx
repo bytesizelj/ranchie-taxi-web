@@ -48,7 +48,15 @@ export default function ReviewsPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50 pb-20">
+      <div 
+        className="min-h-screen pb-20"
+        style={{
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.45)), url('/images/reviews.png')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
+        }}
+      >
         {/* Header */}
         <header className="bg-white shadow-sm sticky top-0 z-10">
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
@@ -113,7 +121,7 @@ export default function ReviewsPage() {
 
           {/* Reviews List */}
           <div className="mb-6">
-            <h2 className="text-xl font-semibold mb-5">Recent Reviews</h2>
+           <h2 className="text-xl font-bold text-gray-900 mb-5">Recent Reviews</h2>
             <div className="space-y-4">
               {reviews.map((review, index) => (
                 <div key={index} className="bg-white rounded-2xl p-6 shadow-sm">

@@ -137,7 +137,15 @@ Sent via Ranchie Taxi App`;
 
   const today = new Date().toISOString().split('T')[0];
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-orange-50/30 pb-24">
+    <div 
+      className="min-h-screen pb-24"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.55)), url('/images/book-your-ride.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
@@ -152,7 +160,7 @@ Sent via Ranchie Taxi App`;
             className="w-10 h-10 rounded-lg object-cover shadow-md"
           />
           <div className="flex-1">
-            <h1 className="text-xl font-bold font-serif bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold font-serif bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
               Book Your Ride
             </h1>
             <p className="text-xs text-gray-500">Step {currentStep} of 4</p>

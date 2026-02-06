@@ -20,6 +20,7 @@ export default function ConfirmationPageClient() {
   
   const [showConfetti, setShowConfetti] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
+  const [bookingStatus, setBookingStatus] = useState('PROCESSING');
 
   useEffect(() => {
     // Generate booking ID
@@ -48,6 +49,7 @@ export default function ConfirmationPageClient() {
     setTimeout(() => setAnimationStep(1), 700);
     setTimeout(() => setAnimationStep(2), 1200);
     setTimeout(() => setAnimationStep(3), 1700);
+    setTimeout(() => setBookingStatus('DRIVER RECEIVED BOOKING ✓'), 3000);
   }, [searchParams]);
 
   // Confetti component
@@ -214,8 +216,12 @@ export default function ConfirmationPageClient() {
           }`}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold">Trip Details</h3>
-              <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold animate-pulse">
-                PROCESSING
+              <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                bookingStatus === 'PROCESSING' 
+                  ? 'bg-green-100 text-green-700 animate-pulse' 
+                  : 'bg-green-500 text-white'
+              }`}>
+                {bookingStatus}
               </span>
             </div>
             
