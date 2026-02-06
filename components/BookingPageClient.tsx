@@ -1,479 +1,531 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft, MapPin, Target, Calendar, Clock, Users, Phone, MessageSquare, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { 
+  ArrowLeft, 
+  ArrowRight, 
+  MapPin, 
+  Calendar, 
+  Clock, 
+  Users, 
+  Check,
+  Plane,
+  Building2,
+  Palmtree,
+  Ship,
+  Car,
+  Sparkles
+} from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
-declare global {
-  interface Window {
-    google: any;
-    googleMapsLoaded?: boolean;
-  }
-}
+const popularDestinations = [
+  { id: 1, name: 'Argyle International Airport', icon: Plane, color: 'from-blue-500 to-cyan-500' },
+  { id: 2, name: 'Kingstown', icon: Building2, color: 'from-green-500 to-teal-500' },
+  { id: 3, name: 'Villa Beach', icon: Palmtree, color: 'from-orange-500 to-yellow-500' },
+  { id: 4, name: 'Port Elizabeth, Bequia', icon: Ship, color: 'from-purple-500 to-pink-500' },
+  { id: 5, name: 'Mesopotamia', icon: Palmtree, color: 'from-green-600 to-emerald-500' },
+  { id: 6, name: 'Layou', icon: Building2, color: 'from-red-500 to-orange-500' },
+];
 
-export default function BookingPage() {
-  const searchParams = useSearchParams();
-  const isSchedule = searchParams?.get('schedule') === 'true';
-  
-  const pickupInputRef = useRef<HTMLInputElement>(null);
-  const destinationInputRef = useRef<HTMLInputElement>(null);
+const quickTimes = [
+  { label: 'ASAP', value: 'ASAP' },
+  { label: '30 min', value: '30 minutes' },
+  { label: '1 hour', value: '1 hour' },
+  { label: '2 hours', value: '2 hours' },
+];
+export default function BookingPageClient() {
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [recentDestinations, setRecentDestinations] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     name: '',
+    phone: '',
     pickup: '',
     destination: '',
     date: '',
     time: '',
+    timeType: 'ASAP',
     passengers: '1',
-    phone: '',
     notes: ''
   });
 
-  // Set default date to today and initialize Google Places Autocomplete
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setFormData(prev => ({ ...prev, date: today }));
-
-    // Only load Google Maps on client side
-    if (typeof window === 'undefined') return;
-
-    // Check if Google Maps is already loaded or being loaded
-    if (window.googleMapsLoaded || (window.google && window.google.maps)) {
-      // If already loaded, just initialize autocomplete
-      if (window.google && window.google.maps && window.google.maps.places) {
-        initializeAutocomplete();
-      }
-      return;
+    const saved = localStorage.getItem('recentDestinations');
+    if (saved) {
+      setRecentDestinations(JSON.parse(saved));
     }
-
-    // Mark as loading
-    window.googleMapsLoaded = true;
-
-    // Load Google Maps script directly without using the Loader
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBwGQlYvLODysT5Lgd0k-VRp0jzp2_-ix8&libraries=places`;
-    script.async = true;
-    script.defer = true;
-    
-    script.onload = () => {
-      initializeAutocomplete();
-    };
-    
-    script.onerror = (error) => {
-      console.error('Error loading Google Maps:', error);
-      window.googleMapsLoaded = false;
-    };
-    
-    // Check if script already exists
-    const existingScript = document.querySelector(`script[src="${script.src}"]`);
-    if (!existingScript) {
-      document.head.appendChild(script);
-    } else {
-      // If script exists, wait for it to load
-      existingScript.addEventListener('load', initializeAutocomplete);
-    }
-
-    function initializeAutocomplete() {
-      if (!window.google || !window.google.maps || !window.google.maps.places) {
-        return;
-      }
-
-      // Saint Vincent and the Grenadines bounds
-      const svgBounds = new window.google.maps.LatLngBounds(
-        new window.google.maps.LatLng(12.5, -61.6), // Southwest
-        new window.google.maps.LatLng(13.5, -61.0)  // Northeast
-      );
-
-      const options = {
-        bounds: svgBounds,
-        componentRestrictions: { country: 'vc' },
-        fields: ['formatted_address', 'name'],
-        types: ['establishment', 'geocode']
-      };
-
-      // Initialize pickup autocomplete
-      if (pickupInputRef.current && !pickupInputRef.current.hasAttribute('data-autocomplete')) {
-        const pickupAutocomplete = new window.google.maps.places.Autocomplete(
-          pickupInputRef.current,
-          options
-        );
-        
-        pickupAutocomplete.addListener('place_changed', () => {
-          const place = pickupAutocomplete.getPlace();
-          // Use place name if available, otherwise use formatted address
-          const displayName = place.name || place.formatted_address || '';
-          setFormData(prev => ({ ...prev, pickup: displayName }));
-        });
-        
-        pickupInputRef.current.setAttribute('data-autocomplete', 'true');
-      }
-
-      // Initialize destination autocomplete
-      if (destinationInputRef.current && !destinationInputRef.current.hasAttribute('data-autocomplete')) {
-        const destinationAutocomplete = new window.google.maps.places.Autocomplete(
-          destinationInputRef.current,
-          options
-        );
-        
-        destinationAutocomplete.addListener('place_changed', () => {
-          const place = destinationAutocomplete.getPlace();
-          // Use place name if available, otherwise use formatted address
-          const displayName = place.name || place.formatted_address || '';
-          setFormData(prev => ({ ...prev, destination: displayName }));
-        });
-        
-        destinationInputRef.current.setAttribute('data-autocomplete', 'true');
-      }
-    }
-
-    // Cleanup function
-    return () => {
-      // Don't remove the script as it might be used by other components
-    };
   }, []);
 
-  // Check URL parameters for destination
-  useEffect(() => {
-    if (!searchParams) return;
-    const destination = searchParams.get('destination');
-    if (destination) {
-      setFormData(prev => ({ ...prev, destination: decodeURIComponent(destination) }));
+  const saveToRecent = (destination: string) => {
+    if (!destination) return;
+    const updated = [destination, ...recentDestinations.filter(d => d !== destination)].slice(0, 5);
+    setRecentDestinations(updated);
+    localStorage.setItem('recentDestinations', JSON.stringify(updated));
+  };
+
+  const nextStep = () => {
+    if (currentStep < 4) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentStep(currentStep + 1);
+        setIsAnimating(false);
+      }, 300);
     }
-  }, [searchParams]);
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Format date for message - fix timezone issue
-    const [year, month, day] = formData.date.split('-');
-    const dateObj = new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0);
-    const formattedDate = dateObj.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
-    
-    // Format time for display (convert 24hr to 12hr format)
-    const formatTime = (time24: string) => {
-      const [hours, minutes] = time24.split(':');
-      const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
-      const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-      return `${hour12}:${minutes} ${ampm}`;
-    };
-    
-    const displayTime = formatTime(formData.time);
-    
-    // Create WhatsApp message
-    const message = `🚕 *RANCHIE TAXI BOOKING REQUEST*
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrentStep(currentStep - 1);
+        setIsAnimating(false);
+      }, 300);
+    }
+  };
+  const handleSubmit = () => {
+    saveToRecent(formData.pickup);
+    saveToRecent(formData.destination);
 
-👤 *Name:* ${formData.name}
+    const message = `🚕 *RANCHIE TAXI BOOKING*
+
+👤 *Name:* ${formData.name || 'Guest'}
+📱 *Phone:* ${formData.phone || 'Not provided'}
+
 📍 *Pickup:* ${formData.pickup}
 🎯 *Destination:* ${formData.destination}
-📅 *Date:* ${formattedDate}
-⏰ *Time:* ${displayTime}
+
+📅 *Date:* ${formData.date || 'Today'}
+🕐 *Time:* ${formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
 👥 *Passengers:* ${formData.passengers}
-📞 *Phone:* ${formData.phone}
-💬 *Notes:* ${formData.notes || 'None'}
 
-Please confirm availability and provide fare quote. Thank you!`;
+📝 *Notes:* ${formData.notes || 'None'}
 
-    // Create WhatsApp URL
-    const whatsappURL = `https://wa.me/17844932354?text=${encodeURIComponent(message)}`;
-    
-    // Open WhatsApp
-    window.open(whatsappURL, '_blank');
-    
-    // Create confirmation URL with booking details
-    const confirmationParams = new URLSearchParams({
-      name: formData.name,
+Sent via Ranchie Taxi App`;
+
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/17844932354?text=${encoded}`, '_blank');
+
+    const params = new URLSearchParams({
+      name: formData.name || 'Guest',
       pickup: formData.pickup,
       destination: formData.destination,
-      date: formattedDate,
-      time: displayTime,
-      passengers: formData.passengers + ' passenger' + (formData.passengers !== '1' ? 's' : '')
+      date: formData.date || 'Today',
+      time: formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType,
+      passengers: `${formData.passengers} passenger${formData.passengers !== '1' ? 's' : ''}`
     });
     
-    // Redirect to confirmation page after a short delay (to allow WhatsApp to open)
-    setTimeout(() => {
-      window.location.href = `/confirmation?${confirmationParams.toString()}`;
-    }, 1500);
+    router.push(`/confirmation?${params.toString()}`);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.id]: e.target.value
-    }));
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return formData.pickup.length > 0;
+      case 2:
+        return formData.destination.length > 0;
+      case 3:
+        return true;
+      case 4:
+        return true;
+      default:
+        return false;
+    }
   };
 
+  const today = new Date().toISOString().split('T')[0];
   return (
-    <>
-      <div className="min-h-screen bg-gray-50 pb-20">
-        {/* Header */}
-        <header className="bg-white shadow-sm sticky top-0 z-10">
-          <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
-            <Link 
-              href="/" 
-              className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-green-50/30 to-orange-50/30 pb-24">
+      <header className="bg-white/90 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
+          <button
+            onClick={() => currentStep > 1 ? prevStep() : router.push('/')}
+            className="w-10 h-10 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center hover:from-gray-200 hover:to-gray-300 transition-all"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <img
+            src="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
+            alt="Ranchie Taxi"
+            className="w-10 h-10 rounded-lg object-cover shadow-md"
+          />
+          <div className="flex-1">
+            <h1 className="text-xl font-bold font-serif bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
+              Book Your Ride
+            </h1>
+            <p className="text-xs text-gray-500">Step {currentStep} of 4</p>
+          </div>
+          <Sparkles className="text-yellow-500 animate-pulse" size={20} />
+        </div>
+      </header>
+
+      <div className="max-w-3xl mx-auto px-4 py-4">
+        <div className="flex items-center justify-between mb-2">
+          {[1, 2, 3, 4].map((step) => (
+            <div key={step} className="flex items-center">
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-500 ${
+                  step < currentStep
+                    ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white'
+                    : step === currentStep
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white ring-4 ring-orange-200'
+                    : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {step < currentStep ? <Check size={20} /> : step}
+              </div>
+              {step < 4 && (
+                <div
+                  className={`w-12 sm:w-20 h-1 mx-1 rounded transition-all duration-500 ${
+                    step < currentStep ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="flex justify-between text-xs text-gray-500 px-1">
+          <span>Pickup</span>
+          <span>Destination</span>
+          <span>When</span>
+          <span>Review</span>
+        </div>
+      </div>
+<div className="max-w-3xl mx-auto px-4">
+        <div className={`transition-all duration-300 ${isAnimating ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'}`}>
+          
+          {currentStep === 1 && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+                    <MapPin className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Where to pick you up?</h2>
+                    <p className="text-sm text-gray-500">Enter your pickup location</p>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter pickup address..."
+                  value={formData.pickup}
+                  onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-lg transition-all"
+                />
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <Sparkles size={16} className="text-yellow-500" />
+                  Popular Pickup Points
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {popularDestinations.slice(0, 4).map((dest) => (
+                    <button
+                      key={dest.id}
+                      onClick={() => setFormData({ ...formData, pickup: dest.name })}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        formData.pickup === dest.name
+                          ? 'border-green-500 bg-green-50'
+                          : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
+                        <dest.icon className="text-white" size={16} />
+                      </div>
+                      <span className="text-sm font-medium">{dest.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {recentDestinations.length > 0 && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                    <Clock size={16} className="text-gray-400" />
+                    Recent Locations
+                  </h3>
+                  <div className="space-y-2">
+                    {recentDestinations.map((dest, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setFormData({ ...formData, pickup: dest })}
+                        className="w-full p-3 text-left rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
+                      >
+                        <MapPin size={16} className="text-gray-400" />
+                        <span className="text-sm">{dest}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {currentStep === 2 && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
+                    <MapPin className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Where are you going?</h2>
+                    <p className="text-sm text-gray-500">Enter your destination</p>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Enter destination..."
+                  value={formData.destination}
+                  onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-lg transition-all"
+                />
+              </div>
+
+              <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
+                <p className="text-sm opacity-80">Picking up from:</p>
+                <p className="font-semibold">{formData.pickup}</p>
+              </div>
+
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                  <Sparkles size={16} className="text-yellow-500" />
+                  Popular Destinations
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {popularDestinations.map((dest) => (
+                    <button
+                      key={dest.id}
+                      onClick={() => setFormData({ ...formData, destination: dest.name })}
+                      className={`p-4 rounded-xl border-2 transition-all text-left ${
+                        formData.destination === dest.name
+                          ? 'border-orange-500 bg-orange-50'
+                          : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
+                        <dest.icon className="text-white" size={16} />
+                      </div>
+                      <span className="text-sm font-medium">{dest.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+{currentStep === 3 && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Clock className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">When do you need the ride?</h2>
+                    <p className="text-sm text-gray-500">Select date and time</p>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-3">Quick Options:</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {quickTimes.map((time) => (
+                      <button
+                        key={time.value}
+                        onClick={() => setFormData({ ...formData, timeType: time.value, time: '' })}
+                        className={`py-3 px-2 rounded-xl text-sm font-semibold transition-all ${
+                          formData.timeType === time.value
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {time.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <p className="text-sm text-gray-600 mb-3">Or choose specific date & time:</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                      <input
+                        type="date"
+                        min={today}
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value, timeType: 'custom' })}
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                      <input
+                        type="time"
+                        value={formData.time}
+                        onChange={(e) => setFormData({ ...formData, time: e.target.value, timeType: 'custom' })}
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
+                  <div className="flex gap-2">
+                    {['1', '2', '3', '4', '5+'].map((num) => (
+                      <button
+                        key={num}
+                        onClick={() => setFormData({ ...formData, passengers: num })}
+                        className={`flex-1 py-3 rounded-xl font-semibold transition-all ${
+                          formData.passengers === num
+                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <MapPin size={16} />
+                  <span className="text-sm opacity-80">From:</span>
+                  <span className="font-semibold">{formData.pickup}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={16} />
+                  <span className="text-sm opacity-80">To:</span>
+                  <span className="font-semibold">{formData.destination}</span>
+                </div>
+              </div>
+            </div>
+          )}
+{currentStep === 4 && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 shadow-lg">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-teal-500 rounded-xl flex items-center justify-center">
+                    <Check className="text-white" size={24} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Review Your Booking</h2>
+                    <p className="text-sm text-gray-500">Confirm details before sending</p>
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <p className="text-sm text-gray-600 mb-3">Your Contact Info (Optional):</p>
+                  <div className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Your Name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+                    />
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Pickup</span>
+                    <span className="text-sm font-medium text-right max-w-[60%]">{formData.pickup}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Destination</span>
+                    <span className="text-sm font-medium text-right max-w-[60%]">{formData.destination}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Date</span>
+                    <span className="text-sm font-medium">{formData.date || 'Today'}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200">
+                    <span className="text-sm text-gray-600">Time</span>
+                    <span className="text-sm font-medium">
+                      {formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-sm text-gray-600">Passengers</span>
+                    <span className="text-sm font-medium">{formData.passengers}</span>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Special Notes (Optional)</label>
+                  <textarea
+                    placeholder="Any special requests? (luggage, child seat, etc.)"
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={3}
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
+                <p className="text-sm flex items-center gap-2">
+                  <Car size={16} />
+                  Your booking will be sent to Ranchie via WhatsApp for fast confirmation!
+                </p>
+              </div>
+            </div>
+          )}
+</div>
+      </div>
+
+      <div className="fixed bottom-20 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 p-4 z-30">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          {currentStep > 1 && (
+            <button
+              onClick={prevStep}
+              className="flex-1 py-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
             >
               <ArrowLeft size={20} />
-            </Link>
-            <img 
-              src="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
-              alt="Ranchie Taxi"
-              className="w-10 h-10 rounded-lg object-cover"
-            />
-            <h1 className="text-xl font-bold font-serif flex-1">Book Your Ride</h1>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <div className="max-w-3xl mx-auto px-4 py-6">
-          {/* Page Title */}
-          <div className="text-center mb-8 bg-white rounded-2xl p-6 shadow-sm">
-            <h1 className="text-3xl font-extrabold mb-2 font-serif">Book Your Island Ride</h1>
-            <p className="text-gray-600 italic">Experience comfort and reliability across Saint Vincent</p>
-          </div>
-
-          {/* Booking Form */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <form onSubmit={handleSubmit}>
-              {/* Name */}
-              <div className="mb-5">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <User size={16} className="inline mr-1" />
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                  placeholder="Enter your full name"
-                  required
-                />
-              </div>
-
-              {/* Pickup Location */}
-              <div className="mb-5">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <MapPin size={16} className="inline mr-1" />
-                  Pickup Location
-                </label>
-                <input
-                  ref={pickupInputRef}
-                  type="text"
-                  id="pickup"
-                  value={formData.pickup}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                  placeholder="Enter pickup address"
-                  required
-                />
-              </div>
-
-              {/* Destination */}
-              <div className="mb-5">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <Target size={16} className="inline mr-1" />
-                  Destination
-                </label>
-                <input
-                  ref={destinationInputRef}
-                  type="text"
-                  id="destination"
-                  value={formData.destination}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                  placeholder="Where are you going?"
-                  required
-                />
-              </div>
-
-              {/* Date and Time */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Calendar size={16} className="inline mr-1" />
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    id="date"
-                    value={formData.date}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Clock size={16} className="inline mr-1" />
-                    Time
-                  </label>
-                  <select
-                    id="time"
-                    value={formData.time}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                    required
-                  >
-                    <option value="">Select time</option>
-                    <optgroup label="Morning">
-                      <option value="05:00">5:00 AM</option>
-                      <option value="05:30">5:30 AM</option>
-                      <option value="06:00">6:00 AM</option>
-                      <option value="06:30">6:30 AM</option>
-                      <option value="07:00">7:00 AM</option>
-                      <option value="07:30">7:30 AM</option>
-                      <option value="08:00">8:00 AM</option>
-                      <option value="08:30">8:30 AM</option>
-                      <option value="09:00">9:00 AM</option>
-                      <option value="09:30">9:30 AM</option>
-                      <option value="10:00">10:00 AM</option>
-                      <option value="10:30">10:30 AM</option>
-                      <option value="11:00">11:00 AM</option>
-                      <option value="11:30">11:30 AM</option>
-                    </optgroup>
-                    <optgroup label="Afternoon">
-                      <option value="12:00">12:00 PM</option>
-                      <option value="12:30">12:30 PM</option>
-                      <option value="13:00">1:00 PM</option>
-                      <option value="13:30">1:30 PM</option>
-                      <option value="14:00">2:00 PM</option>
-                      <option value="14:30">2:30 PM</option>
-                      <option value="15:00">3:00 PM</option>
-                      <option value="15:30">3:30 PM</option>
-                      <option value="16:00">4:00 PM</option>
-                      <option value="16:30">4:30 PM</option>
-                      <option value="17:00">5:00 PM</option>
-                      <option value="17:30">5:30 PM</option>
-                    </optgroup>
-                    <optgroup label="Evening">
-                      <option value="18:00">6:00 PM</option>
-                      <option value="18:30">6:30 PM</option>
-                      <option value="19:00">7:00 PM</option>
-                      <option value="19:30">7:30 PM</option>
-                      <option value="20:00">8:00 PM</option>
-                      <option value="20:30">8:30 PM</option>
-                      <option value="21:00">9:00 PM</option>
-                      <option value="21:30">9:30 PM</option>
-                      <option value="22:00">10:00 PM</option>
-                      <option value="22:30">10:30 PM</option>
-                      <option value="23:00">11:00 PM</option>
-                      <option value="23:30">11:30 PM</option>
-                    </optgroup>
-                    <optgroup label="Late Night">
-                      <option value="00:00">12:00 AM</option>
-                      <option value="00:30">12:30 AM</option>
-                      <option value="01:00">1:00 AM</option>
-                      <option value="01:30">1:30 AM</option>
-                      <option value="02:00">2:00 AM</option>
-                      <option value="02:30">2:30 AM</option>
-                      <option value="03:00">3:00 AM</option>
-                      <option value="03:30">3:30 AM</option>
-                      <option value="04:00">4:00 AM</option>
-                      <option value="04:30">4:30 AM</option>
-                    </optgroup>
-                  </select>
-                </div>
-              </div>
-
-              {/* Passengers and Phone */}
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Users size={16} className="inline mr-1" />
-                    Passengers
-                  </label>
-                  <select
-                    id="passengers"
-                    value={formData.passengers}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                    required
-                  >
-                    {[1,2,3,4,5,6].map(num => (
-                      <option key={num} value={num}>{num} passenger{num > 1 ? 's' : ''}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    <Phone size={16} className="inline mr-1" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50"
-                    placeholder="1784-xxx-xxxx"
-                    required
-                  />
-                </div>
-              </div>
-
-              {/* Special Instructions */}
-              <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  <MessageSquare size={16} className="inline mr-1" />
-                  Special Instructions (Optional)
-                </label>
-                <textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={handleChange}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-green-500 bg-gray-50 min-h-[100px] resize-vertical"
-                  placeholder="Any special requirements or notes for the driver..."
-                />
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-4 rounded-xl font-semibold text-lg transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center justify-center gap-2"
-              >
-                <MessageSquare size={20} />
-                <span>Book via WhatsApp</span>
-              </button>
-            </form>
-          </div>
-
-          {/* Popular Destinations */}
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">Quick Destinations</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { name: 'Argyle International Airport', icon: '✈️' },
-                { name: 'Kingstown', icon: '🏙️' },
-                { name: 'Villa Beach', icon: '🏖️' },
-                { name: 'Bequia Ferry Terminal', icon: '⛴️' }
-              ].map((dest) => (
-                <button
-                  key={dest.name}
-                  type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, destination: dest.name }))}
-                  className="bg-white border-2 border-gray-200 rounded-xl p-4 hover:border-orange-500 hover:bg-orange-50 transition-all"
-                >
-                  <div className="text-2xl mb-1">{dest.icon}</div>
-                  <div className="text-sm font-medium">{dest.name}</div>
-                </button>
-              ))}
-            </div>
-          </div>
+              Back
+            </button>
+          )}
+          
+          {currentStep < 4 ? (
+            <button
+              onClick={nextStep}
+              disabled={!isStepValid()}
+              className={`flex-1 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                isStepValid()
+                  ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Continue
+              <ArrowRight size={20} />
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              className="flex-1 py-4 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              <Check size={20} />
+              Send Booking via WhatsApp
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
       <BottomNav />
-    </>
+    </div>
   );
-}
+}                                    

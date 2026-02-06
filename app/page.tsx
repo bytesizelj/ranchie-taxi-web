@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Phone, MessageCircle } from 'lucide-react';
+import { Phone, MessageCircle, X } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
 export default function HomePage() {
@@ -35,6 +35,17 @@ export default function HomePage() {
             opacity: 0;
           }
           to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes scaleIn {
+          from {
+            transform: scale(0.9);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
             opacity: 1;
           }
         }
@@ -85,20 +96,20 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-4 mb-6">
             <button
               onClick={handleRideNow}
-              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg"
+              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
               <div className="text-3xl mb-3">🚗</div>
               <h3 className="text-lg font-semibold mb-1">Ride Now</h3>
-              <p className="text-sm text-gray-600">Book instantly</p>
+              <p className="text-sm text-gray-600">Instant pickup</p>
             </button>
 
             <Link
-              href="/booking?schedule=true"
-              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg"
+              href="/booking"
+              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
               <div className="text-3xl mb-3">📅</div>
               <h3 className="text-lg font-semibold mb-1">Schedule</h3>
-              <p className="text-sm text-gray-600">Plan ahead</p>
+              <p className="text-sm text-gray-600">Book in advance</p>
             </Link>
           </div>
 
@@ -121,7 +132,7 @@ export default function HomePage() {
       {/* Ride Now Modal */}
       {showModal && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4"
           style={{
             animation: 'fadeIn 0.3s ease'
           }}
@@ -130,37 +141,69 @@ export default function HomePage() {
           }}
         >
           <div 
-            className="bg-white rounded-3xl p-8 max-w-md w-full"
+            className="bg-white rounded-3xl p-8 max-w-md w-full relative"
             style={{
-              animation: 'slideUp 0.3s ease'
+              animation: 'scaleIn 0.3s ease'
             }}
           >
-            <h3 className="text-2xl font-bold mb-4">Choose Contact Method</h3>
-            <p className="text-gray-600 mb-6">How would you like to book your ride?</p>
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-all"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Modal Header */}
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🚕</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Need a Ride Now?</h3>
+              <p className="text-gray-600">Choose how to contact Ranchie Taxi</p>
+            </div>
             
+            {/* Contact Options */}
             <div className="space-y-3">
               <a
-                href="tel:1784-493-2354"
-                className="flex items-center justify-center gap-2 bg-blue-500 text-white py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5 hover:bg-blue-600"
+                href="https://wa.me/17844932354?text=Hi%20Ranchie%20Taxi!%20I%20need%20a%20ride%20now.%20My%20pickup%20location%20is:%20"
+                className="flex items-center justify-center gap-3 bg-gradient-to-r from-green-500 to-green-600 text-white py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <Phone size={20} />
-                <span>Call Now</span>
+                <MessageCircle size={20} />
+                <span>Book via WhatsApp</span>
               </a>
               
               <a
-                href="https://wa.me/17844932354?text=Hi%20Ranchie%20Taxi!%20I%20need%20a%20ride%20now."
-                className="flex items-center justify-center gap-2 bg-green-500 text-white py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5 hover:bg-green-600"
+                href="tel:1784-493-2354"
+                className="flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
               >
-                <MessageCircle size={20} />
-                <span>WhatsApp</span>
+                <Phone size={20} />
+                <span>Call Directly</span>
               </a>
               
-              <button
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white text-gray-500">or</span>
+                </div>
+              </div>
+              
+              <Link
+                href="/booking"
                 onClick={closeModal}
-                className="w-full bg-gray-100 text-gray-700 py-4 rounded-xl font-semibold transition-all hover:bg-gray-200"
+                className="flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-4 rounded-xl font-semibold transition-all hover:bg-gray-200"
               >
-                Cancel
-              </button>
+                <span>Fill Booking Form</span>
+              </Link>
+            </div>
+
+            {/* Quick Info */}
+            <div className="mt-6 p-4 bg-orange-50 rounded-xl">
+              <p className="text-sm text-orange-800 text-center">
+                <span className="font-semibold">Quick Tip:</span> For immediate pickup, calling or WhatsApp is fastest!
+              </p>
             </div>
           </div>
         </div>
