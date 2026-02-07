@@ -91,18 +91,19 @@ export default function BookingPageClient() {
 
     const message = `🚕 *RANCHIE TAXI BOOKING*
 
-👤 *Name:* ${formData.name || 'Guest'}
-📱 *Phone:* ${formData.phone || 'Not provided'}
+*Passenger:* ${formData.name}
+*Phone:* ${formData.phone || 'Not provided'}
 
-📍 *Pickup:* ${formData.pickup}
-🎯 *Destination:* ${formData.destination}
+*Pickup:* ${formData.pickup}
+*Destination:* ${formData.destination}
 
-📅 *Date:* ${formData.date || 'Today'}
-🕐 *Time:* ${formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
-👥 *Passengers:* ${formData.passengers}
+*Date:* ${formData.date || 'Today'}
+*Time:* ${formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
+*Passengers:* ${formData.passengers}
 
-📝 *Notes:* ${formData.notes || 'None'}
+*Notes:* ${formData.notes || 'None'}
 
+----------------------------------------
 Sent via Ranchie Taxi App`;
 
     const encoded = encodeURIComponent(message);
@@ -129,7 +130,7 @@ Sent via Ranchie Taxi App`;
       case 3:
         return true;
       case 4:
-        return true;
+        return formData.name.length > 0;
       default:
         return false;
     }
@@ -429,11 +430,11 @@ Sent via Ranchie Taxi App`;
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-3">Your Contact Info (Optional):</p>
+                  <p className="text-sm text-gray-600 mb-3">Your Contact Info:</p>
                   <div className="space-y-3">
                     <input
                       type="text"
-                      placeholder="Your Name"
+                      placeholder="Your Name *"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
