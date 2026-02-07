@@ -86,32 +86,11 @@ export default function BookingPageClient() {
       }, 300);
     }
   };
-  
-  // Handle Submit
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     saveToRecent(formData.pickup);
     saveToRecent(formData.destination);
 
-    // Save booking to Firebase
-    try {
-      await addDoc(collection(db, 'bookings'), {
-        name: formData.name,
-        phone: formData.phone || 'Not provided',
-        pickup: formData.pickup,
-        destination: formData.destination,
-        date: formData.date || 'Today',
-        time: formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType,
-        passengers: formData.passengers,
-        notes: formData.notes || 'None',
-        status: 'pending',
-        createdAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error saving booking:', error);
-    }
-
-    const message = `*RANCHIE TAXI BOOKING REQUEST*
-----------------------------------------
+    const message = `🚕 *RANCHIE TAXI BOOKING*
 
 *Passenger:* ${formData.name}
 *Phone:* ${formData.phone || 'Not provided'}
@@ -143,7 +122,6 @@ Sent via Ranchie Taxi App`;
     router.push(`/confirmation?${params.toString()}`);
   };
 
-     
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
