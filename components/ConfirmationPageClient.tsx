@@ -259,6 +259,7 @@ export default function ConfirmationPageClient() {
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-6 text-white mb-6 shadow-xl">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Sparkles size={20} />
+              
               What Happens Next?
             </h3>
             <div className="space-y-3">
@@ -277,6 +278,22 @@ export default function ConfirmationPageClient() {
               ))}
             </div>
           </div>
+          {/* Leave a Review */}
+          <div className="bg-white rounded-2xl p-6 shadow-xl mb-6">
+            <h3 className="text-lg font-semibold mb-3 text-center">Had a Great Ride with Ranchie Before?</h3>
+            <p className="text-sm text-gray-600 text-center mb-4">Help others discover our service by sharing your experience!</p>
+            
+              <a href="https://www.google.com/search?q=Ranchie+Taxi+SVG"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold text-center hover:shadow-lg transition-all"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-5 h-5" />
+                <span>Leave a Google Review</span>
+              </div>
+            </a>
+          </div>          
 
           {/* Action Buttons */}
           <div className="grid grid-cols-2 gap-3 mb-6">

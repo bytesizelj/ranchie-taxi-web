@@ -88,20 +88,44 @@ export default function ReviewsPage() {
             <p className="text-gray-600">Based on {totalReviews} reviews</p>
           </div>
 
+          {/* Google Reviews Link */}
+          <a 
+            href="https://www.google.com/search?q=Ranchie+Taxi+SVG"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block bg-white rounded-2xl p-6 shadow-sm mb-6 hover:shadow-lg transition-all"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-md">
+                <img src="https://www.google.com/favicon.ico" alt="Google" className="w-8 h-8" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-gray-900">See Our Google Reviews</h3>
+                <div className="flex items-center gap-1 mt-1">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  ))}
+                  <span className="text-sm text-gray-600 ml-2">5.0 on Google</span>
+                </div>
+              </div>
+              <ArrowLeft className="rotate-180 text-gray-400" size={20} />
+            </div>
+          </a>
+
           {/* Leave Review Section */}
           <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-6 text-white text-center mb-8">
             <h2 className="text-xl font-semibold mb-2">Share Your Experience</h2>
             <p className="text-sm opacity-90 mb-5">Help others by sharing your ride experience</p>
             <div className="grid grid-cols-2 gap-3">
-              <a
-                href="https://wa.me/17844932354?text=Hi%20Ranchie%20Taxi!%20I'd%20like%20to%20leave%20a%20review%20about%20my%20recent%20ride."
+              
+                <a href="https://wa.me/17844932354?text=Hi%20Ranchie%20Taxi!%20I'd%20like%20to%20leave%20a%20review%20about%20my%20recent%20ride."
                 className="bg-white text-green-600 py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all"
               >
                 <MessageCircle size={18} />
                 <span>WhatsApp</span>
-              </a>
-              <a
-                href="https://www.google.com/search?q=ranchie+taxi+saint+vincent"
+              </a> 
+              
+                <a href="https://www.google.com/search?q=Ranchie+Taxi+SVG"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-white text-green-600 py-3 px-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-lg transition-all"
