@@ -4,6 +4,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Ranchie Taxi - Your Trusted Ride in Paradise",
   description: "Reliable taxi service across Saint Vincent & the Grenadines. Airport transfers, island tours, and local transportation.",
+  manifest: "/manifest.json",
+  themeColor: "#22c55e",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Ranchie Taxi",
+  },
   openGraph: {
     title: "Ranchie Taxi - Your Trusted Ride in Paradise",
     description: "Reliable taxi service across Saint Vincent & the Grenadines",
@@ -22,6 +29,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Ranchie Taxi" />
         {/* Google Analytics */}
         <script
           async
