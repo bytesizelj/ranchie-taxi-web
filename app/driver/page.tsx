@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -17,7 +17,9 @@ import {
   Car,
   RefreshCw,
   Lock,
-  LogOut
+  LogOut,
+  Bell,
+  BellOff
 } from 'lucide-react';
 
 interface Booking {
@@ -41,13 +43,131 @@ export default function DriverDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all');
   const [loading, setLoading] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+  
+  const previousBookingCount = useRef<number>(0);
+  const isFirstLoad = useRef<boolean>(true);
 
-  const DRIVER_PIN = 'ufuhreal?'; // Change this to Ranchie's preferred PIN
+  const DRIVER_PIN = 'ufuhreal?';
+
+  // Play notification sound
+  const playNotificationSound = () => {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Play a pleasant two-tone chime
+    const playTone = (frequency: number, startTime: number, duration: number) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = frequency;
+      oscillator.type = 'sine';
+      
+      gainNode.gain.setValueAtTime(0.3, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      
+      oscillator.start(startTime);
+      oscillator.stop(startTime + duration);
+    };
+    
+    const now = audioContext.currentTime;
+    playTone(880, now, 0.2);        // A5
+    playTone(1108, now + 0.2, 0.3); // C#6
+    playTone(1320, now + 0.4, 0.4); // E6
+  };
+
+  // Show browser notification
+  const showNotification = (booking: Booking) => {
+    if (notificationPermission === 'granted') {
+      const notification = new Notification('🚕 New Booking!', {
+        body: `${booking.name}\n${booking.pickup} → ${booking.destination}\n${booking.date} at ${booking.time}`,
+        icon: '/icons/icon-192x192.png',
+        tag: 'new-booking',
+        requireInteraction: true
+      });
+
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    }
+  };
+
+  // Request notification permission and register token
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window && 'serviceWorker' in navigator) {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      
+      if (permission === 'granted') {
+        setNotificationsEnabled(true);
+        
+        // Register FCM token
+        try {
+          // First register the Firebase messaging service worker
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          console.log('Service Worker registered:', registration);
+          
+          const { getMessaging, getToken } = await import('firebase/messaging');
+          const { initializeApp, getApps } = await import('firebase/app');
+          
+          const firebaseConfig = {
+            apiKey: "AIzaSyC49BbFJhjpHajencr1W6VlpiFwpWTeD8U",
+            authDomain: "ranchie-taxi-1e166.firebaseapp.com",
+            projectId: "ranchie-taxi-1e166",
+            storageBucket: "ranchie-taxi-1e166.firebasestorage.app",
+            messagingSenderId: "878235673378",
+            appId: "1:878235673378:web:27c56cd1c6b91207827b7b"
+          };
+          
+          const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+          const messaging = getMessaging(app);
+          
+          const token = await getToken(messaging, {
+            vapidKey: 'BC7OLgrJymcyNpkmVS-IpTI_piPh__zKKA959yzA4ko3uMT3CTipHv_9dQ23iNabe9PUTIUVjy9XRVgganNIZRc',
+            serviceWorkerRegistration: registration
+          });
+          
+          if (token) {
+            // Save token to Firestore
+            await setDoc(doc(db, 'fcmTokens', token), {
+              token: token,
+              createdAt: new Date(),
+              device: navigator.userAgent
+            });
+            console.log('FCM Token registered:', token);
+          }
+        } catch (error) {
+          console.error('Error getting FCM token:', error);
+        }
+      }
+    }
+  };
+
+  // Toggle notifications
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled) {
+      await requestNotificationPermission();
+    } else {
+      setNotificationsEnabled(false);
+    }
+  };
 
   useEffect(() => {
     const auth = localStorage.getItem('driverAuth');
     if (auth === 'true') {
       setIsAuthenticated(true);
+    }
+    
+    // Check notification permission on load
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+      if (Notification.permission === 'granted') {
+        setNotificationsEnabled(true);
+      }
     }
   }, []);
 
@@ -76,12 +196,26 @@ export default function DriverDashboard() {
       snapshot.forEach((doc) => {
         bookingsData.push({ id: doc.id, ...doc.data() } as Booking);
       });
+      
+      // Check for new bookings (only after first load)
+      if (!isFirstLoad.current && bookingsData.length > previousBookingCount.current) {
+        const newBooking = bookingsData[0]; // Most recent booking
+        
+        if (notificationsEnabled) {
+          playNotificationSound();
+          showNotification(newBooking);
+        }
+      }
+      
+      previousBookingCount.current = bookingsData.length;
+      isFirstLoad.current = false;
+      
       setBookings(bookingsData);
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, notificationsEnabled]);
 
   const updateStatus = async (bookingId: string, newStatus: string) => {
     try {
@@ -184,6 +318,18 @@ export default function DriverDashboard() {
             <p className="text-2xl font-bold">{bookings.length}</p>
             <p className="text-xs opacity-80">Total Bookings</p>
           </div>
+          {/* Notification Toggle */}
+          <button
+            onClick={toggleNotifications}
+            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+              notificationsEnabled 
+                ? 'bg-yellow-400 text-yellow-900' 
+                : 'bg-white/20 hover:bg-white/30'
+            }`}
+            title={notificationsEnabled ? 'Notifications ON' : 'Notifications OFF'}
+          >
+            {notificationsEnabled ? <Bell size={20} /> : <BellOff size={20} />}
+          </button>
           <button
             onClick={handleLogout}
             className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
@@ -193,6 +339,33 @@ export default function DriverDashboard() {
           </button>
         </div>
       </header>
+
+      {/* Notification Permission Banner */}
+      {notificationPermission === 'default' && (
+        <div className="bg-blue-50 border-b border-blue-200 px-4 py-3">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <p className="text-sm text-blue-800">
+              🔔 Enable notifications to get alerts for new bookings
+            </p>
+            <button
+              onClick={requestNotificationPermission}
+              className="px-4 py-1 bg-blue-600 text-white text-sm rounded-full hover:bg-blue-700"
+            >
+              Enable
+            </button>
+          </div>
+        </div>
+      )}
+
+      {notificationPermission === 'denied' && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-3">
+          <div className="max-w-4xl mx-auto">
+            <p className="text-sm text-red-800">
+              ⚠️ Notifications blocked. Please enable them in your browser settings to receive booking alerts.
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Today's Reminders */}

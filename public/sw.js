@@ -9,5 +9,12 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(fetch(event.request));
+  // Only handle same-origin requests
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        return new Response('Offline');
+      })
+    );
+  }
 });
