@@ -50,6 +50,18 @@ export default function RootLayout({
           }}
         />
       </head>
+      {/* Service Worker Registration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                  navigator.serviceWorker.register('/sw.js');
+                });
+              }
+            `,
+          }}
+        />
       <body className="font-sans text-gray-900 bg-gray-50">
         {children}
       </body>
