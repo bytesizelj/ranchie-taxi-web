@@ -15,7 +15,9 @@ import {
   XCircle,
   AlertCircle,
   Car,
-  RefreshCw
+  RefreshCw,
+  Lock,
+  LogOut
 } from 'lucide-react';
 
 interface Booking {
@@ -33,11 +35,40 @@ interface Booking {
 }
 
 export default function DriverDashboard() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all');
   const [loading, setLoading] = useState(true);
 
+  const DRIVER_PIN = 'ufuhreal?'; // Change this to Ranchie's preferred PIN
+
   useEffect(() => {
+    const auth = localStorage.getItem('driverAuth');
+    if (auth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = () => {
+    if (password === DRIVER_PIN) {
+      setIsAuthenticated(true);
+      localStorage.setItem('driverAuth', 'true');
+      setError('');
+    } else {
+      setError('Incorrect PIN');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    localStorage.removeItem('driverAuth');
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    
     const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -50,7 +81,7 @@ export default function DriverDashboard() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isAuthenticated]);
 
   const updateStatus = async (bookingId: string, newStatus: string) => {
     try {
@@ -93,6 +124,47 @@ export default function DriverDashboard() {
     }
   };
 
+  // Login Screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full">
+          <div className="text-center mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Lock className="text-white" size={32} />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">Driver Login</h1>
+            <p className="text-gray-500 text-sm">Enter your PIN to access the dashboard</p>
+          </div>
+          
+          <input
+            type="password"
+            placeholder="Enter PIN"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-center text-2xl tracking-widest mb-4"
+          />
+          
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          )}
+          
+          <button
+            onClick={handleLogin}
+            className="w-full py-4 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+          >
+            Login
+          </button>
+          
+          <Link href="/" className="block text-center text-gray-500 text-sm mt-4 hover:text-gray-700">
+            ← Back to Home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -108,10 +180,17 @@ export default function DriverDashboard() {
             <h1 className="text-xl font-bold">Driver Dashboard</h1>
             <p className="text-sm opacity-80">Manage your bookings</p>
           </div>
-          <div className="text-right">
+          <div className="text-right mr-2">
             <p className="text-2xl font-bold">{bookings.length}</p>
             <p className="text-xs opacity-80">Total Bookings</p>
           </div>
+          <button
+            onClick={handleLogout}
+            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+            title="Logout"
+          >
+            <LogOut size={20} />
+          </button>
         </div>
       </header>
 
