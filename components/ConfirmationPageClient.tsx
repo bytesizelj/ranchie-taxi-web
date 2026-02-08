@@ -283,7 +283,7 @@ export default function ConfirmationPageClient() {
             <h3 className="text-lg font-semibold mb-3 text-center">Had a Great Ride with Ranchie Before?</h3>
             <p className="text-sm text-gray-600 text-center mb-4">Help others discover our service by sharing your experience!</p>
             
-              <a href="https://www.google.com/search?q=Ranchie+Taxi+SVG"
+              <a href="https://g.page/r/CWuUlZeIXcgNEAE/review"
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-4 rounded-xl font-semibold text-center hover:shadow-lg transition-all"
