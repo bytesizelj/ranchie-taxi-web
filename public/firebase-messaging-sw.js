@@ -2,7 +2,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/10.7.0/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: "AIzaSyC49BbFJhjpHajencr1W6VlpiFwpWTeD8U",
+  apiKey: "AAIzaSyAoCL5lJjF0OtnjRf9l-cKU-vT3hHmk13g",
   authDomain: "ranchie-taxi-1e166.firebaseapp.com",
   projectId: "ranchie-taxi-1e166",
   storageBucket: "ranchie-taxi-1e166.firebasestorage.app",

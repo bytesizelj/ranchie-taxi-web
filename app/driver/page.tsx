@@ -115,7 +115,7 @@ export default function DriverDashboard() {
           const { initializeApp, getApps } = await import('firebase/app');
           
           const firebaseConfig = {
-            apiKey: "AIzaSyC49BbFJhjpHajencr1W6VlpiFwpWTeD8U",
+            apiKey: "AIzaSyAoCL5lJjF0OtnjRf9l-cKU-vT3hHmk13g",
             authDomain: "ranchie-taxi-1e166.firebaseapp.com",
             projectId: "ranchie-taxi-1e166",
             storageBucket: "ranchie-taxi-1e166.firebasestorage.app",
