@@ -127,7 +127,7 @@ export default function DriverDashboard() {
           const messaging = getMessaging(app);
           
           const token = await getToken(messaging, {
-            vapidKey: 'BC7OLgrJymcyNpkmVS-IpTI_piPh__zKKA959yzA4ko3uMT3CTipHv_9dQ23iNabe9PUTIUVjy9XRVgganNIZRc',
+            vapidKey: 'BDSsQM1TWmDya0nStraOFO8Zsa_B2Szvvm6LInz6rUmOmlrceF7dj7LHQDLpotSF5p6aODBpvp8MIfCffKNj-EA',
             serviceWorkerRegistration: registration
           });
           
