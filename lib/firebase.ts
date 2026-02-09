@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAoCL5lJjF0OtnjRf9l-cKU-vT3hHmk13g",
+  apiKey: "AIzaSyC49BbFJhjpHajencr1W6VlpiFwpWTeD8U",
   authDomain: "ranchie-taxi-1e166.firebaseapp.com",
   projectId: "ranchie-taxi-1e166",
   storageBucket: "ranchie-taxi-1e166.firebasestorage.app",
