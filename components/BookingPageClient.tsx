@@ -129,7 +129,10 @@ export default function BookingPageClient() {
 Sent via Ranchie Taxi App`;
 
     const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/17844932354?text=${encoded}`, '_blank');
+    window.open(`https://wa.me/17844977245?text=${encoded}`, '_blank');
+
+    // Delay redirect to allow WhatsApp to open
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     const params = new URLSearchParams({
       name: formData.name || 'Guest',

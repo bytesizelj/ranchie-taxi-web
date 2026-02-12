@@ -5,113 +5,119 @@ export default function BookingCardPage() {
     <div className="min-h-screen bg-gray-100 p-8 print:p-0 print:bg-white">
       <div className="max-w-md mx-auto">
         {/* Print Instructions */}
-        <div className="mb-6 p-4 bg-blue-50 rounded-lg print:hidden">
-          <p className="text-sm text-blue-800">
+        <div className="mb-6 p-4 bg-orange-50 rounded-lg print:hidden">
+          <p className="text-sm text-orange-800">
             <strong>Instructions:</strong> Print this page and cut out the card. 
             Laminate it and keep it in your taxi for customers to scan and book.
           </p>
           <button 
             onClick={() => window.print()}
-            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="mt-3 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
           >
             🖨️ Print Card
           </button>
         </div>
 
         {/* Booking Card */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-teal-500 print:shadow-none print:border-2">
-          <div className="bg-gradient-to-r from-teal-500 to-green-500 p-6 text-white text-center">
-            <h1 className="text-2xl font-bold">RANCHIE TAXI</h1>
-            <p className="text-teal-100 text-sm">St Vincent & the Grenadines</p>
+        <div className="bg-gradient-to-br from-yellow-400 via-orange-400 to-orange-500 rounded-2xl shadow-xl overflow-hidden print:shadow-none">
+          {/* Top Section */}
+          <div className="p-6 text-center">
+            <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1 mb-3">
+              <span className="text-white text-sm font-medium">🌴 St Vincent & the Grenadines</span>
+            </div>
+            <h1 className="text-3xl font-black text-white drop-shadow-md">RANCHIE TAXI</h1>
+            <p className="text-yellow-100 text-sm mt-1">Your Trusted Island Ride</p>
           </div>
 
-          <div className="p-6 text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Book Your Ride! 🚕
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Scan to book your taxi online<br />
-              Fast & Easy!
-            </p>
-
+          {/* QR Section */}
+          <div className="bg-white mx-4 rounded-2xl p-6 text-center shadow-inner">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-white border-2 border-gray-200 rounded-xl">
-                {/* QR Code - we'll generate this */}
+              <div className="bg-gradient-to-br from-orange-100 to-yellow-50 p-4 rounded-2xl">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ranchie-taxi-web.vercel.app/booking`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchie-taxi-web.vercel.app/booking&color=EA580C`}
                   alt="Scan to Book" 
-                  className="w-40 h-40"
+                  className="w-36 h-36"
                 />
               </div>
             </div>
-
-            <p className="text-sm text-gray-500 mb-2">
-              Scan with your phone camera
-            </p>
-
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="px-3 text-gray-400 text-sm">or visit</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-
-            <p className="text-sm font-semibold text-teal-600">
-                ranchie-taxi-web.vercel.app
+            
+            <h2 className="text-xl font-bold text-gray-800 mb-1">
+              📱 Scan & Book Instantly
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Point your camera at the code
             </p>
           </div>
 
-          <div className="bg-gray-50 px-6 py-4 text-center">
-            <p className="text-sm text-gray-600">
-              📞 +1 784-528-3843
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Award-Winning Service Since 2000
-            </p>
+          {/* Bottom Section */}
+          <div className="p-5 text-center">
+            <div className="flex items-center justify-center gap-3 text-white mb-3">
+              <div className="h-px w-12 bg-white/40"></div>
+              <span className="text-sm font-medium">or visit</span>
+              <div className="h-px w-12 bg-white/40"></div>
+            </div>
+            
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl py-3 px-4 inline-block">
+              <p className="text-white font-bold text-lg">
+                ranchie-taxi-web.vercel.app
+              </p>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-4 text-white/90 text-sm">
+              <span>📞 +1 784-528-3843</span>
+              <span>•</span>
+              <span>⭐ Award Winning</span>
+            </div>
           </div>
         </div>
 
         {/* Second Card */}
-        <div className="mt-8 print:mt-4 bg-white rounded-2xl shadow-xl overflow-hidden border-4 border-teal-500 print:shadow-none print:border-2">
-          <div className="bg-gradient-to-r from-teal-500 to-green-500 p-6 text-white text-center">
-            <h1 className="text-2xl font-bold">RANCHIE TAXI</h1>
-            <p className="text-teal-100 text-sm">St Vincent & the Grenadines</p>
-          </div>
+        <div className="mt-8 print:mt-4 bg-gradient-to-br from-yellow-400 via-orange-400 to-orange-500 rounded-2xl shadow-xl overflow-hidden print:shadow-none">
           <div className="p-6 text-center">
-            <h2 className="text-xl font-bold text-gray-800 mb-2">
-              Book Your Ride! 🚕
-            </h2>
-            <p className="text-gray-600 mb-4">
-              Scan to book your taxi online<br />
-              Fast & Easy!
-            </p>
+            <div className="inline-block bg-white/20 backdrop-blur-sm rounded-full px-4 py-1 mb-3">
+              <span className="text-white text-sm font-medium">🌴 St Vincent & the Grenadines</span>
+            </div>
+            <h1 className="text-3xl font-black text-white drop-shadow-md">RANCHIE TAXI</h1>
+            <p className="text-yellow-100 text-sm mt-1">Your Trusted Island Ride</p>
+          </div>
+
+          <div className="bg-white mx-4 rounded-2xl p-6 text-center shadow-inner">
             <div className="flex justify-center mb-4">
-              <div className="p-3 bg-white border-2 border-gray-200 rounded-xl">
+              <div className="bg-gradient-to-br from-orange-100 to-yellow-50 p-4 rounded-2xl">
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ranchietaxi.com/booking`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchie-taxi-web.vercel.app/booking&color=EA580C`}
                   alt="Scan to Book" 
-                  className="w-40 h-40"
+                  className="w-36 h-36"
                 />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mb-2">
-              Scan with your phone camera
-            </p>
-            <div className="flex items-center my-4">
-              <div className="flex-1 h-px bg-gray-200"></div>
-              <span className="px-3 text-gray-400 text-sm">or visit</span>
-              <div className="flex-1 h-px bg-gray-200"></div>
-            </div>
-            <p className="text-sm font-semibold text-teal-600">
-              ranchietaxi.com
+            
+            <h2 className="text-xl font-bold text-gray-800 mb-1">
+              📱 Scan & Book Instantly
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Point your camera at the code
             </p>
           </div>
-          <div className="bg-gray-50 px-6 py-4 text-center">
-            <p className="text-sm text-gray-600">
-              📞 +1 784-528-3843
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              Award-Winning Service Since 2000
-            </p>
+
+          <div className="p-5 text-center">
+            <div className="flex items-center justify-center gap-3 text-white mb-3">
+              <div className="h-px w-12 bg-white/40"></div>
+              <span className="text-sm font-medium">or visit</span>
+              <div className="h-px w-12 bg-white/40"></div>
+            </div>
+            
+            <div className="bg-white/20 backdrop-blur-sm rounded-xl py-3 px-4 inline-block">
+              <p className="text-white font-bold text-lg">
+                ranchie-taxi-web.vercel.app
+              </p>
+            </div>
+
+            <div className="mt-4 flex items-center justify-center gap-4 text-white/90 text-sm">
+              <span>📞 +1 784-528-3843</span>
+              <span>•</span>
+              <span>⭐ Award Winning</span>
+            </div>
           </div>
         </div>
       </div>
