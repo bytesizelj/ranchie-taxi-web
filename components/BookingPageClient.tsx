@@ -248,7 +248,7 @@ Sent via Ranchie Taxi App`;
                   placeholder="Enter pickup address..."
                   value={formData.pickup}
                   onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-lg transition-all"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
                 />
               </div>
 
@@ -316,7 +316,7 @@ Sent via Ranchie Taxi App`;
                   placeholder="Enter destination..."
                   value={formData.destination}
                   onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-lg transition-all"
+                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
                 />
               </div>
 
@@ -393,7 +393,7 @@ Sent via Ranchie Taxi App`;
                         min={today}
                         value={formData.date}
                         onChange={(e) => setFormData({ ...formData, date: e.target.value, timeType: 'custom' })}
-                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-gray-900 bg-white"
                       />
                     </div>
                     <div>
@@ -402,7 +402,7 @@ Sent via Ranchie Taxi App`;
                         type="time"
                         value={formData.time}
                         onChange={(e) => setFormData({ ...formData, time: e.target.value, timeType: 'custom' })}
-                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none"
+                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none text-gray-900 bg-white"
                       />
                     </div>
                   </div>
@@ -463,14 +463,14 @@ Sent via Ranchie Taxi App`;
                       placeholder="Your Name *"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
                     <input
                       type="tel"
                       placeholder="Phone Number"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none"
+                      className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
                   </div>
                 </div>
@@ -507,7 +507,7 @@ Sent via Ranchie Taxi App`;
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none"
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                   />
                 </div>
               </div>
