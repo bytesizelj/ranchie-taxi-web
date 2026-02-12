@@ -239,7 +239,7 @@ Sent via Ranchie Taxi App`;
                     <MapPin className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Where to pick you up?</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Where to pick you up?</h2>
                     <p className="text-sm text-gray-500">Enter your pickup location</p>
                   </div>
                 </div>
@@ -253,7 +253,7 @@ Sent via Ranchie Taxi App`;
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles size={16} className="text-yellow-500" />
                   Popular Pickup Points
                 </h3>
@@ -271,7 +271,7 @@ Sent via Ranchie Taxi App`;
                       <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
                         <dest.icon className="text-white" size={16} />
                       </div>
-                      <span className="text-sm font-medium">{dest.name}</span>
+                     <span className="text-sm font-medium text-gray-900">{dest.name}</span>
                     </button>
                   ))}
                 </div>
@@ -279,7 +279,7 @@ Sent via Ranchie Taxi App`;
 
               {recentDestinations.length > 0 && (
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
-                  <h3 className="font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                  <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Clock size={16} className="text-gray-400" />
                     Recent Locations
                   </h3>
@@ -291,7 +291,7 @@ Sent via Ranchie Taxi App`;
                         className="w-full p-3 text-left rounded-xl hover:bg-gray-50 transition-all flex items-center gap-3"
                       >
                         <MapPin size={16} className="text-gray-400" />
-                        <span className="text-sm">{dest}</span>
+                        <span className="text-sm text-gray-900">{dest}</span>
                       </button>
                     ))}
                   </div>
@@ -307,7 +307,7 @@ Sent via Ranchie Taxi App`;
                     <MapPin className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Where are you going?</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Where are you going?</h2>
                     <p className="text-sm text-gray-500">Enter your destination</p>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ Sent via Ranchie Taxi App`;
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
-                <h3 className="font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles size={16} className="text-yellow-500" />
                   Popular Destinations
                 </h3>
@@ -344,7 +344,7 @@ Sent via Ranchie Taxi App`;
                       <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
                         <dest.icon className="text-white" size={16} />
                       </div>
-                      <span className="text-sm font-medium">{dest.name}</span>
+                      <span className="text-sm font-medium text-gray-900">{dest.name}</span>
                     </button>
                   ))}
                 </div>
@@ -359,7 +359,7 @@ Sent via Ranchie Taxi App`;
                     <Clock className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">When do you need the ride?</h2>
+                    <h2 className="text-xl font-bold text-gray-900">When do you need the ride?</h2>
                     <p className="text-sm text-gray-500">Select date and time</p>
                   </div>
                 </div>
@@ -450,7 +450,7 @@ Sent via Ranchie Taxi App`;
                     <Check className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold">Review Your Booking</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Review Your Booking</h2>
                     <p className="text-sm text-gray-500">Confirm details before sending</p>
                   </div>
                 </div>

@@ -38,7 +38,7 @@ export default function AboutPage() {
               alt="Ranchie Taxi"
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <h1 className="text-xl font-bold font-serif flex-1">About Ranchie Taxi</h1>
+            <h1 className="text-xl font-bold font-serif flex-1 text-gray-900">About Ranchie Taxi</h1>
           </div>
         </header>
 
