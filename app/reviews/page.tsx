@@ -71,7 +71,7 @@ export default function ReviewsPage() {
               alt="Ranchie Taxi"
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <h1 className="text-xl font-bold font-serif flex-1">Customer Reviews</h1>
+            <h1 className="text-xl font-bold font-serif flex-1 text-gray-900">Customer Reviews</h1>
           </div>
         </header>
 
@@ -79,7 +79,7 @@ export default function ReviewsPage() {
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* Rating Summary */}
           <div className="bg-white rounded-2xl p-8 text-center shadow-sm mb-6">
-            <div className="text-5xl font-bold mb-2">{averageRating}</div>
+            <div className="text-5xl font-bold mb-2 text-gray-900">{averageRating}</div>
             <div className="flex justify-center gap-1 mb-3">
               {[1,2,3,4,5].map((star) => (
                 <Star key={star} className="w-8 h-8 fill-yellow-400 text-yellow-400" />
@@ -151,7 +151,7 @@ export default function ReviewsPage() {
                 <div key={index} className="bg-white rounded-2xl p-6 shadow-sm">
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-semibold">{review.name}</h3>
+                      <h3 className="font-semibold text-gray-900">{review.name}</h3>
                       <p className="text-sm text-gray-500">{review.date}</p>
                     </div>
                     <div className="flex gap-0.5">

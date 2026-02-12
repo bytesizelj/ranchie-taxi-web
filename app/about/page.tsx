@@ -94,7 +94,7 @@ export default function AboutPage() {
               return (
                 <div key={index} className="bg-white border-2 border-gray-200 rounded-2xl p-5 text-center hover:border-green-500 hover:bg-green-50 transition-all">
                   <Icon className="w-8 h-8 mx-auto mb-3 text-orange-500" />
-                  <h3 className="font-semibold text-sm mb-1">{feature.title}</h3>
+                  <h3 className="font-semibold text-sm mb-1 text-gray-900">{feature.title}</h3>
                   <p className="text-xs text-gray-600">{feature.description}</p>
                 </div>
               );
@@ -109,7 +109,7 @@ export default function AboutPage() {
 
           {/* Contact Information */}
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <h2 className="text-xl font-semibold mb-5">Get in Touch</h2>
+            <h2 className="text-xl font-semibold mb-5 text-gray-900">Get in Touch</h2>
             <div className="space-y-4">
               <a 
                 href="tel:1784-493-2354"
@@ -120,7 +120,7 @@ export default function AboutPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Phone</p>
-                  <p className="font-semibold">1784-493-2354</p>
+                  <p className="font-semibold text-gray-900">1784-493-2354</p>
                 </div>
               </a>
 
@@ -133,7 +133,7 @@ export default function AboutPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">WhatsApp</p>
-                  <p className="font-semibold">Message Us</p>
+                  <p className="font-semibold text-gray-900">Message Us</p>
                 </div>
               </a>
 
@@ -146,7 +146,7 @@ export default function AboutPage() {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-600 mb-1">Email</p>
-                  <p className="font-semibold">ranch8622@hotmail.com</p>
+                  <p className="font-semibold text-gray-900">ranchietax@gmail.com</p>
                 </div>
               </a>
             </div>
@@ -155,7 +155,7 @@ export default function AboutPage() {
           {/* Service Area */}
           <div className="bg-white rounded-2xl overflow-hidden shadow-sm mb-6">
             <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold mb-1">Service Area</h3>
+              <h3 className="text-lg font-semibold mb-1 text-gray-900">Service Area</h3>
               <p className="text-sm text-gray-600">We cover all of Saint Vincent & the Grenadines</p>
             </div>
             <div className="h-64">
