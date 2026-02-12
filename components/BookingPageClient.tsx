@@ -349,6 +349,22 @@ Sent via Ranchie Taxi App`;
                   ))}
                 </div>
               </div>
+            {/* Pricing Info */}
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white shadow-lg">
+                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                  💰 Airport Transfer Rates
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
+                    <span className="text-sm font-medium">AIA → Sandals (1-2 persons)</span>
+                    <span className="font-bold text-lg">US$65</span>
+                  </div>
+                  <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
+                    <span className="text-sm font-medium">AIA → Sandals (3+ persons)</span>
+                    <span className="font-bold text-lg">US$30<span className="text-xs font-normal">/person</span></span>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 {currentStep === 3 && (

@@ -158,6 +158,19 @@ export default function HomePage() {
             </Link>
           </div>
 
+          {/* Airport Transfer Promo */}
+          <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 mb-6">
+            <p className="text-white text-center text-sm font-bold mb-2">✈️ Airport Transfer Special</p>
+            <div className="flex justify-between items-center bg-white/20 rounded-xl p-3 mb-2">
+              <span className="text-white text-sm">AIA → Sandals (1-2 persons)</span>
+              <span className="text-white font-bold">US$65</span>
+            </div>
+            <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
+              <span className="text-white text-sm">AIA → Sandals (3+ persons)</span>
+              <span className="text-white font-bold">US$30<span className="text-xs font-normal">/pp</span></span>
+            </div>
+          </div>
+
           {/* Contact Section */}
           <div className="text-center pt-6 border-t border-gray-200">
             <a
