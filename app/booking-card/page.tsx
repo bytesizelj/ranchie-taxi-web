@@ -38,7 +38,7 @@ export default function BookingCardPage() {
               <div className="p-3 bg-white border-2 border-gray-200 rounded-xl">
                 {/* QR Code - we'll generate this */}
                 <img 
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ranchietaxi.com/booking`}
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://ranchie-taxi-web.vercel.app/booking`}
                   alt="Scan to Book" 
                   className="w-40 h-40"
                 />
@@ -56,7 +56,7 @@ export default function BookingCardPage() {
             </div>
 
             <p className="text-sm font-semibold text-teal-600">
-              ranchietaxi.com
+                ranchie-taxi-web.vercel.app
             </p>
           </div>
 
