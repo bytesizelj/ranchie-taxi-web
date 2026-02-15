@@ -164,6 +164,17 @@ Sent via Ranchie Taxi App`;
 
   const today = new Date().toISOString().split('T')[0];
   return (
+    <><style>{`
+      @keyframes booking-bg-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      @keyframes booking-pulse {
+        0%, 100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+        50% { transform: scale(1.08); text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4); }
+      }
+    `}</style>
     <div 
       className="min-h-screen pb-24"
       style={{
@@ -213,7 +224,7 @@ Sent via Ranchie Taxi App`;
               </div>
               {step < 4 && (
                 <div
-                  className={`w-12 sm:w-20 h-1 mx-1 rounded transition-all duration-500 ${
+                  className={`w-8 sm:w-20 h-1 mx-0.5 sm:mx-1 rounded transition-all duration-500 ${
                     step < currentStep ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gray-200'
                   }`}
                 />
@@ -298,18 +309,28 @@ Sent via Ranchie Taxi App`;
                 </div>
               )}
             {/* Pricing Info */}
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white shadow-lg">
-                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+              <div 
+                className="rounded-2xl p-5 text-white shadow-lg relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(270deg, #f97316, #ef4444, #f59e0b, #ef4444)',
+                  backgroundSize: '300% 300%',
+                  animation: 'booking-bg-shift 6s ease infinite'
+                }}
+              >
+                <h3 
+                  className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
+                  style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
+                >
                   💰 Airport Transfer Rates
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
                     <span className="text-sm font-medium">AIA → Sandals (1-2 persons)</span>
-                    <span className="font-bold text-lg">US$65</span>
+                    <span className="font-bold text-base sm:text-lg">US$65</span>
                   </div>
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
                     <span className="text-sm font-medium">AIA → Sandals (3+ persons)</span>
-                    <span className="font-bold text-lg">US$30<span className="text-xs font-normal">/person</span></span>
+                    <span className="font-bold text-base sm:text-lg">US$30<span className="text-xs font-normal">/person</span></span>
                   </div>
                 </div>
               </div>
@@ -366,8 +387,18 @@ Sent via Ranchie Taxi App`;
                 </div>
               </div>
             {/* Pricing Info */}
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white shadow-lg">
-                <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+              <div 
+                className="rounded-2xl p-5 text-white shadow-lg relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(270deg, #f97316, #ef4444, #f59e0b, #ef4444)',
+                  backgroundSize: '300% 300%',
+                  animation: 'booking-bg-shift 6s ease infinite'
+                }}
+              >
+                <h3 
+                  className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
+                  style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
+                >
                   💰 Airport Transfer Rates
                 </h3>
                 <div className="space-y-2">
@@ -555,14 +586,14 @@ Sent via Ranchie Taxi App`;
 </div>
       </div>
 
-      <div className="fixed bottom-20 left-0 right-0 bg-white/95 backdrop-blur border-t border-gray-200 p-4 z-30">
-        <div className="max-w-3xl mx-auto flex gap-3">
+      <div className="fixed bottom-20 right-4 z-30 left-4 sm:left-auto">
+        <div className="flex gap-3 justify-end">
           {currentStep > 1 && (
             <button
               onClick={prevStep}
-              className="flex-1 py-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all flex items-center justify-center gap-2"
+              className="py-3 px-6 rounded-xl font-semibold bg-white text-gray-700 hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
               Back
             </button>
           )}
@@ -571,22 +602,22 @@ Sent via Ranchie Taxi App`;
             <button
               onClick={nextStep}
               disabled={!isStepValid()}
-              className={`flex-1 py-4 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+              className={`py-3 px-8 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
                 isStepValid()
                   ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white hover:shadow-lg'
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               Continue
-              <ArrowRight size={20} />
+              <ArrowRight size={18} />
             </button>
           ) : (
             <button
               onClick={handleSubmit}
-              className="flex-1 py-4 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              className="py-3 px-8 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
-              <Check size={20} />
-              Send Booking via WhatsApp
+              <Check size={18} />
+              Send via WhatsApp
             </button>
           )}
         </div>
@@ -594,5 +625,6 @@ Sent via Ranchie Taxi App`;
 
       <BottomNav />
     </div>
+    </>
   );
-}                                    
+}                               

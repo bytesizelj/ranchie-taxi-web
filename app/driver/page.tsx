@@ -262,7 +262,7 @@ export default function DriverDashboard() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-500 to-teal-600 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-2xl max-w-sm w-full">
           <div className="text-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <Lock className="text-white" size={32} />
@@ -314,9 +314,9 @@ export default function DriverDashboard() {
             <h1 className="text-xl font-bold">Driver Dashboard</h1>
             <p className="text-sm opacity-80">Manage your bookings</p>
           </div>
-          <div className="text-right mr-2">
-            <p className="text-2xl font-bold">{bookings.length}</p>
-            <p className="text-xs opacity-80">Total Bookings</p>
+          <div className="text-right mr-1 sm:mr-2">
+            <p className="text-xl sm:text-2xl font-bold">{bookings.length}</p>
+            <p className="text-xs opacity-80 hidden sm:block">Total Bookings</p>
           </div>
           {/* Notification Toggle */}
           <button
@@ -460,7 +460,7 @@ export default function DriverDashboard() {
                       <p className="text-sm font-medium">{booking.destination}</p>
                     </div>
                   </div>
-                  <div className="flex gap-6">
+                  <div className="flex flex-wrap gap-4 sm:gap-6">
                     <div className="flex items-center gap-2">
                       <Calendar size={16} className="text-gray-400" />
                       <span className="text-sm">{booking.date}</span>

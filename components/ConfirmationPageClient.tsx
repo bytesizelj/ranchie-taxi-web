@@ -176,7 +176,7 @@ export default function ConfirmationPageClient() {
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* Success Animation Card */}
-          <div className={`bg-white rounded-3xl p-8 text-center shadow-2xl mb-6 transform transition-all duration-1000 ${
+          <div className={`bg-white rounded-3xl p-5 sm:p-8 text-center shadow-2xl mb-6 transform transition-all duration-1000 ${
             animationStep >= 1 ? 'scale-100 opacity-100' : 'scale-90 opacity-0'
           }`}>
             <div className="relative">
@@ -192,7 +192,7 @@ export default function ConfirmationPageClient() {
               </div>
             </div>
             
-            <h2 className={`text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent transform transition-all duration-700 ${
+            <h2 className={`text-2xl sm:text-3xl font-bold mb-3 bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent transform transition-all duration-700 ${
               animationStep >= 2 ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
             }`}>
               Booking Request Sent!
@@ -301,8 +301,8 @@ export default function ConfirmationPageClient() {
               href="https://wa.me/17844932354"
               className="bg-green-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-600 transition-all transform hover:scale-105 hover:shadow-xl"
             >
-              <MessageCircle size={20} />
-              <span>WhatsApp Driver</span>
+              <MessageCircle size={18} />
+              <span className="text-sm sm:text-base">WhatsApp Driver</span>
             </a>
             <a
               href="tel:1784-493-2354"

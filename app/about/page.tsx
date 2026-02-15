@@ -55,13 +55,13 @@ export default function AboutPage() {
         {/* Main Content */}
         <div className="max-w-3xl mx-auto px-4 py-6">
           {/* Hero Section */}
-          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-8 text-white text-center mb-8 shadow-lg">
+          <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 sm:p-8 text-white text-center mb-8 shadow-lg">
             <img 
               src="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
               alt="Ranchie Taxi Logo"
               className="w-24 h-24 mx-auto mb-5 rounded-2xl shadow-xl"
             />
-            <h1 className="text-4xl font-bold mb-2 font-serif">Ranchie Taxi</h1>
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 font-serif">Ranchie Taxi</h1>
             <p className="text-lg italic opacity-95">Your Trusted Ride in Paradise</p>
           </div>
 
@@ -69,7 +69,7 @@ export default function AboutPage() {
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Ranchie Taxi</h2>
             <p className="text-gray-700 mb-4 leading-relaxed">
-              Serving Saint Vincent and the Grenadines with pride, Ranchie Taxi is your reliable transportation 
+              Serving Saint Vincent and the Grenadines with pride over 20 years, Ranchie Taxi is your reliable transportation 
               partner throughout our beautiful islands. With years of experience navigating every corner of SVG, 
               we ensure safe, comfortable, and timely rides for locals and visitors alike.
             </p>

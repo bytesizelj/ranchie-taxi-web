@@ -96,6 +96,56 @@ export default function HomePage() {
           0% { opacity: 0; transform: translateX(30px); }
           100% { opacity: 1; transform: translateX(0); }
         }
+        
+        @keyframes pulse-glow {
+          0%, 100% { text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+          50% { text-shadow: 0 0 15px rgba(255,255,255,0.7), 0 0 30px rgba(255,255,255,0.3); }
+        }
+        @keyframes bg-shift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        
+        .promo-bg {
+          background: linear-gradient(270deg, #10b981, #0d9488, #14b8a6, #059669);
+          background-size: 300% 300%;
+          animation: bg-shift 6s ease infinite;
+        }
+        .promo-text {
+          animation: promo-pulse 2s ease-in-out infinite;
+        }
+        @keyframes promo-pulse {
+          0%, 100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
+          50% { transform: scale(1.12); text-shadow: 0 0 25px rgba(255,255,255,0.9), 0 0 50px rgba(255,255,255,0.5); }
+        }
+        .promo-shimmer {
+          position: relative;
+          overflow: hidden;
+        }
+        .promo-shimmer::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: -100%;
+          width: 60%;
+          height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+          animation: shimmer-sweep 3s ease-in-out infinite;
+        }
+        @keyframes shimmer-sweep {
+          0% { left: -100%; }
+          100% { left: 200%; }
+        }
+        .promo-border {
+          border: 1px solid rgba(255,255,255,0.3);
+          box-shadow: 0 0 15px rgba(16, 185, 129, 0.4), inset 0 0 15px rgba(255,255,255,0.05);
+          animation: border-glow 3s ease-in-out infinite alternate;
+        }
+        @keyframes border-glow {
+          0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(255,255,255,0.03); }
+          100% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(255,255,255,0.08); }
+        }
       `}</style>
 
       {/* Hero Section with Background */}
@@ -127,7 +177,7 @@ export default function HomePage() {
         </button>
         {/* Main Card */}
         <div 
-          className={`bg-white rounded-3xl p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
+          className={`bg-white rounded-3xl p-5 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
             showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
@@ -138,7 +188,7 @@ export default function HomePage() {
               alt="Ranchie Taxi Logo"
               className="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg"
             />
-            <h1 className="text-4xl font-extrabold text-gray-900 mb-2 font-serif tracking-wide">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 font-serif tracking-wide">
               Ranchie Taxi
             </h1>
             <p className="text-gray-600 italic font-serif tracking-wide">
@@ -148,7 +198,7 @@ export default function HomePage() {
 
           {/* Welcome Text */}
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-2">Your ride is here.</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-2 italic font-serif">Your ride is here.</h2>
             <p className="text-gray-600 text-lg font-light">
               Reliable taxi service across paradise
             </p>
@@ -175,9 +225,12 @@ export default function HomePage() {
             </Link>
           </div>
 
+          
           {/* Airport Transfer Promo */}
-          <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 mb-6">
-            <p className="text-white text-center text-sm font-bold mb-2">✈️ Airport Transfer Special</p>
+          <div className="promo-bg promo-shimmer promo-border bg-emerald-600 rounded-2xl p-4 mb-6 relative overflow-hidden">
+            <p className="promo-text text-yellow-300 text-center text-sm font-bold mb-2">
+              ✈️ Airport Transfer
+            </p>
             <div className="flex justify-between items-center bg-white/20 rounded-xl p-3 mb-2">
               <span className="text-white text-sm">AIA → Sandals (1-2 persons)</span>
               <span className="text-white font-bold">US$65</span>
@@ -192,7 +245,7 @@ export default function HomePage() {
           <div className="text-center pt-6 border-t border-gray-200">
             <a
               href="tel:1784-493-2354"
-              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
             >
               <Phone size={20} />
               <span>Call Now: 1784-493-2354</span>
@@ -216,7 +269,7 @@ export default function HomePage() {
           }}
         >
           <div 
-            className="bg-white rounded-3xl p-8 max-w-md w-full relative"
+            className="bg-white rounded-3xl p-5 sm:p-8 max-w-md w-full relative"
             style={{
               animation: 'scaleIn 0.3s ease'
             }}

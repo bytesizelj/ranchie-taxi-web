@@ -51,7 +51,7 @@ export default function ReviewsPage() {
       <div 
         className="min-h-screen pb-20"
         style={{
-          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.45)), url('/images/reviews.png')`,
+          backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.65)), url('/images/reviews.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundAttachment: 'fixed'

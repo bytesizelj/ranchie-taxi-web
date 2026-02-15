@@ -81,7 +81,7 @@ export default function DestinationsPage() {
               alt="Ranchie Taxi"
               className="w-10 h-10 rounded-lg object-cover"
             />
-            <h1 className="text-xl font-bold font-serif flex-1">Popular Destinations</h1>
+            <h1 className="text-xl font-bold font-serif flex-1 text-gray-900">Popular Destinations</h1>
           </div>
         </header>
 
@@ -100,7 +100,7 @@ export default function DestinationsPage() {
                 <img 
                   src={dest.image}
                   alt={dest.name}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-48 sm:h-64 md:h-72 object-cover"
                 />
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">
