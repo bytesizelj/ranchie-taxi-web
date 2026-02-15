@@ -9,7 +9,15 @@ export default function HomePage() {
   const [showModal, setShowModal] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [showCard, setShowCard] = useState(false);
+  const [showCard, setShowCard] = useState(true);
+  const [currentVideo, setCurrentVideo] = useState(0);
+  const [videoEffect, setVideoEffect] = useState('fade');
+  const videos = [
+    '/videos/ranchie-taxi-award.mp4',
+    '/videos/ranchie-taxi-award0.mp4',
+    '/videos/ranchie-taxi-award1.mp4'
+  ];
+  const effects = ['fade', 'zoom', 'slide'];
 
   const handleRideNow = () => {
     setShowModal(true);
@@ -25,32 +33,13 @@ export default function HomePage() {
     }
   };
   useEffect(() => {
-    // Show at 3 seconds
-    const timer1 = setTimeout(() => setShowCard(true), 3000);
-    
-    // Start the cycle at 6 seconds
-    const timer2 = setTimeout(() => {
-      setShowCard(false);
-      
-      // Repeat: show for 3s, hide for 4s
-      const interval = setInterval(() => {
-        setShowCard(true);
-        setTimeout(() => setShowCard(false), 3000);
-      }, 7000); // 3s visible + 4s hidden = 7s cycle
-      
-      // Store interval for cleanup
-      (window as any).cardInterval = interval;
-    }, 6000);
-    
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      if ((window as any).cardInterval) {
-        clearInterval((window as any).cardInterval);
-      }
-    };
+    const interval = setInterval(() => {
+      setVideoEffect(effects[Math.floor(Math.random() * effects.length)]);
+      setCurrentVideo((prev) => (prev + 1) % videos.length);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
-
+ 
   return (
     <>
       <style jsx global>{`
@@ -84,23 +73,51 @@ export default function HomePage() {
             opacity: 1;
           }
         }
+        
+        .video-fade {
+          animation: videoFade 1.2s ease-in-out;
+        }
+        .video-zoom {
+          animation: videoZoom 1.2s ease-in-out;
+        }
+        .video-slide {
+          animation: videoSlide 1.2s ease-in-out;
+        }
+        
+        @keyframes videoFade {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes videoZoom {
+          0% { opacity: 0; transform: scale(1.15); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes videoSlide {
+          0% { opacity: 0; transform: translateX(30px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
       `}</style>
 
       {/* Hero Section with Background */}
       <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden">
-        {/* Background Video */}
-        <video
-          ref={videoRef}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover z-0"
-        >
-          <source src="/videos/ranchie-taxi-award.mp4" type="video/mp4" />
-        </video>
+        {/* Background Videos */}
+        {videos.map((src, index) => (
+          <video
+            key={src}
+            ref={index === 0 ? videoRef : undefined}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ${
+              currentVideo === index ? `opacity-100 video-${videoEffect}` : 'opacity-0'
+            }`}
+          >
+            <source src={src} type="video/mp4" />
+          </video>
+        ))}
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        <div className="absolute inset-0 bg-black/10 z-10"></div>
         {/* Mute/Unmute Button */}
         <button
           onClick={toggleMute}

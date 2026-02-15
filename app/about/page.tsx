@@ -1,11 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Phone, Mail, MessageCircle, Star, Shield, Car, DollarSign, MapPin, Clock, Check, Instagram, Facebook } from 'lucide-react';
+import { ArrowLeft, Phone, Mail, MessageCircle, Star, Shield, Car, DollarSign, MapPin, Clock, Check, Instagram, Facebook, Volume2, VolumeX } from 'lucide-react';
+import { useRef, useState } from 'react';
 import BottomNav from '@/components/BottomNav';
 import GoogleMap from '@/components/GoogleMap';
 
 export default function AboutPage() {
+  const [isMuted, setIsMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(!isMuted);
+    }
+  };
   const features = [
     { icon: Star, title: 'Licensed & Insured', description: 'Fully certified drivers' },
     { icon: Car, title: 'Clean Vehicles', description: 'Well-maintained fleet' },
@@ -69,10 +79,42 @@ export default function AboutPage() {
               to experiencing the best of Saint Vincent and the Grenadines.
             </p>
           </div>
-          {/* Meet Your Driver */}
+          {/* Meet Ranchie */}
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center">
-            <h2 className="text-xl font-bold text-gray-900 mb-5">Get in Touch</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <h2 className="text-xl font-bold text-gray-900 mb-5">Meet Ranchie</h2>
+            <div className="relative mb-4">
+              <video
+                ref={videoRef}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full rounded-2xl shadow-lg"
+              >
+                <source src="/videos/about-ranchie.mp4" type="video/mp4" />
+              </video>
+              {isMuted && (
+                <button
+                  onClick={toggleMute}
+                  className="absolute inset-0 flex items-center justify-center bg-black/30 rounded-2xl transition-all hover:bg-black/40"
+                >
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full px-5 py-3 flex items-center gap-2 shadow-lg">
+                    <VolumeX size={20} className="text-gray-700" />
+                    <span className="text-gray-800 font-semibold text-sm">Tap to unmute</span>
+                  </div>
+                </button>
+              )}
+              {!isMuted && (
+                <button
+                  onClick={toggleMute}
+                  className="absolute bottom-3 right-3 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"
+                >
+                  <Volume2 size={18} className="text-green-600" />
+                </button>
+              )}
+            </div>
+            <p className="text-gray-600 italic mb-4">Award-winning service across SVG</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <img 
                 src="/images/about-ranchie-taxi.png"
                 alt="Ranchie with happy customers"
@@ -84,7 +126,17 @@ export default function AboutPage() {
                 className="w-full rounded-2xl shadow-lg"
               />
             </div>
-            <p className="text-gray-600 italic">Ranchie with happy visitors exploring SVG</p>
+          </div>
+
+          {/* Solo Ranchie Photo */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm mb-6 text-center">
+            <img 
+              src="/images/meet-ranchie.png"
+              alt="Ranchie - Your trusted driver"
+              className="w-full rounded-2xl shadow-lg mb-4"
+            />
+            <h3 className="text-lg font-bold text-gray-900 mb-1">Your Trusted Driver</h3>
+            <p className="text-gray-600 text-sm">Professional, friendly & always on time</p>
           </div>
 
           {/* Features Grid */}
