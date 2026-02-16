@@ -67,7 +67,7 @@ export default function AboutPage() {
 
           {/* About Section */}
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to Ranchie Taxi</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 italic font-serif">Welcome to Ranchie Taxi</h2>
             <p className="text-gray-700 mb-4 leading-relaxed">
               Serving Saint Vincent and the Grenadines with pride over 20 years, Ranchie Taxi is your reliable transportation 
               partner throughout our beautiful islands. With years of experience navigating every corner of SVG, 

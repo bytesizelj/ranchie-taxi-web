@@ -10,12 +10,13 @@ export default function HomePage() {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showCard, setShowCard] = useState(true);
-  const [currentVideo, setCurrentVideo] = useState(0);
-  const [videoEffect, setVideoEffect] = useState('fade');
-  const videos = [
-    '/videos/ranchie-taxi-award.mp4',
-    '/videos/ranchie-taxi-award0.mp4',
-    '/videos/ranchie-taxi-award1.mp4'
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slideEffect, setSlideEffect] = useState('fade');
+  const slides = [
+    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 15000 },
+    { type: 'video', src: '/videos/hero.mp4', duration: 25000 },
+    { type: 'image', src: '/images/pirates-rock.png', duration: 6000 },
+    { type: 'image', src: '/images/trinity-falls.png', duration: 10000 },
   ];
   const effects = ['fade', 'zoom', 'slide'];
 
@@ -32,13 +33,24 @@ export default function HomePage() {
       setIsMuted(!isMuted);
     }
   };
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVideoEffect(effects[Math.floor(Math.random() * effects.length)]);
-      setCurrentVideo((prev) => (prev + 1) % videos.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
+
+ useEffect(() => {
+    if (currentSlide === 0 && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+    if (currentSlide === 1 && heroVideoRef.current) {
+      heroVideoRef.current.currentTime = 0;
+      heroVideoRef.current.play().catch(() => {});
+    }
+    setShowCard(currentSlide === 0 || currentSlide === 2);
+    const timeout = setTimeout(() => {
+      setSlideEffect(effects[Math.floor(Math.random() * effects.length)]);
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, slides[currentSlide].duration);
+    return () => clearTimeout(timeout);
+  }, [currentSlide]);
  
   return (
     <>
@@ -75,26 +87,35 @@ export default function HomePage() {
         }
         
         .video-fade {
-          animation: videoFade 1.2s ease-in-out;
+          animation: videoFade 0.6s ease-out;
         }
         .video-zoom {
-          animation: videoZoom 1.2s ease-in-out;
+          animation: videoZoom 0.8s ease-out;
         }
         .video-slide {
-          animation: videoSlide 1.2s ease-in-out;
+          animation: videoSlide 0.6s ease-out;
         }
         
         @keyframes videoFade {
-          0% { opacity: 0; }
-          100% { opacity: 1; }
+          0% { opacity: 0; transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
         }
         @keyframes videoZoom {
-          0% { opacity: 0; transform: scale(1.15); }
+          0% { opacity: 0; transform: scale(1.3); }
+          50% { opacity: 1; }
           100% { opacity: 1; transform: scale(1); }
         }
         @keyframes videoSlide {
-          0% { opacity: 0; transform: translateX(30px); }
-          100% { opacity: 1; transform: translateX(0); }
+          0% { opacity: 0; transform: translateX(60px) scale(1.05); }
+          100% { opacity: 1; transform: translateX(0) scale(1); }
+        }
+        @keyframes kenBurns {
+          0% { transform: scale(1); }
+          100% { transform: scale(1.2); }
+        }
+        @keyframes kenBurnsAlt {
+          0% { transform: scale(1.2) translateX(0); }
+          100% { transform: scale(1) translateX(-3%); }
         }
         
         @keyframes pulse-glow {
@@ -151,23 +172,54 @@ export default function HomePage() {
       {/* Hero Section with Background */}
       <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden">
         {/* Background Videos */}
-        {videos.map((src, index) => (
-          <video
-            key={src}
-            ref={index === 0 ? videoRef : undefined}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className={`absolute inset-0 w-full h-full object-cover z-0 transition-opacity duration-1000 ${
-              currentVideo === index ? `opacity-100 video-${videoEffect}` : 'opacity-0'
-            }`}
-          >
-            <source src={src} type="video/mp4" />
-          </video>
-        ))}
+        {slides.map((slide, index) => {
+          const isActive = currentSlide === index;
+          const zIndex = isActive ? 2 : 1;
+          return slide.type === 'video' ? (
+            <video
+              key={slide.src}
+              ref={index === 0 ? videoRef : index === 1 ? heroVideoRef : undefined}
+              autoPlay
+              loop
+              muted={isMuted}
+              playsInline
+              className={`absolute inset-0 w-full h-full object-cover ${
+                isActive ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ 
+                transition: 'opacity 0.8s ease-in-out',
+                zIndex,
+                transform: 'scale(1)'
+              }}
+            >
+              <source src={slide.src} type="video/mp4" />
+            </video>
+          ) : (
+            <div
+              key={slide.src}
+              className={`absolute inset-0 w-full h-full ${
+                isActive ? 'opacity-100' : 'opacity-0'
+              }`}
+              style={{ 
+                transition: 'opacity 0.8s ease-in-out',
+                zIndex
+              }}
+            >
+              <img
+                src={slide.src}
+                alt=""
+                className="w-full h-full object-cover"
+                style={{
+                  animation: isActive 
+                    ? `${index === 2 ? 'kenBurns' : 'kenBurnsAlt'} ${slide.duration / 1000}s ease-in-out forwards` 
+                    : 'none'
+                }}
+              />
+            </div>
+          );
+        })}
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/10 z-10"></div>
+        <div className="absolute inset-0 bg-black/15 z-10"></div>
         {/* Mute/Unmute Button */}
         <button
           onClick={toggleMute}

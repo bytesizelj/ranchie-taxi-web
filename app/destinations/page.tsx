@@ -14,15 +14,15 @@ const destinations = [
     price: 'Call for rates'
   },
   {
-    name: 'Kingstown',
-    icon: '🏙️',
-    image: 'https://i.postimg.cc/G2DmkhB9/07c8dc35cfcf4274b3dddf132ab8a95f-20250725-130535-0000.jpg',
-    description: 'The vibrant capital city. Shop at the market, explore historic sites, or conduct business in the city center.',
-    duration: '~15 min',
+    name: 'Rock Villa - Bequia',
+    icon: '🏝️',
+    image: '/images/bequia-beach-hotel-rock-villa.png',
+    description: 'You could be here, at, Rock Villa in Bequia! The most exceptional new architect-styled villa in the Grenadines. Overlooking Friendship Bay with over 10,000 SqFt of internal living area. Ranchie Taxi takes you to the Kingstown Ferry Terminal - then hop on the ferry to Bequia!',
+    duration: '🚕 Taxi + ⛴️ Ferry',
     price: 'Call for rates'
   },
   {
-    name: 'Young Island',
+    name: 'Young Island Resort',
     icon: '🏝️',
     image: '/images/young-island.png',
     description: 'A private island resort just 200 yards off Villa Beach. A tropical paradise perfect for day trips and unforgettable experiences.',
@@ -30,7 +30,7 @@ const destinations = [
     price: 'Call for rates'
   },
   {
-    name: 'Cruise Terminal',
+    name: 'Cruise Ship Terminal',
     icon: '⛴️',
     image: 'https://i.postimg.cc/YSb1JR8Q/5a038a87b0cb4ace92099b4dbe2cd006-20250725-130555-0000.jpg',
     description: 'Gateway to the Grenadines. Catch ferries to Bequia, Mustique, and other beautiful islands.',
@@ -46,11 +46,11 @@ const destinations = [
     price: 'Call for rates'
   },
   {
-    name: 'Fort Charlotte',
-    icon: '🏰',
-    image: 'https://i.postimg.cc/26VqwbHF/20250726-223248.jpg',
-    description: 'Historic fortress with panoramic views of Kingstown and the Grenadines. Rich in colonial history.',
-    duration: '~12 min',
+    name: 'Grenadines House',
+    icon: '🏛️',
+    image: '/images/grenadines-house.png',
+    description: 'A landmark destination located in the heart of Kingstown, the capital city. A must-visit spot for visitors and locals alike.',
+    duration: '~15 min',
     price: 'Call for rates'
   }
 ];
@@ -100,7 +100,7 @@ export default function DestinationsPage() {
                 <img 
                   src={dest.image}
                   alt={dest.name}
-                  className="w-full h-48 sm:h-64 md:h-72 object-cover"
+                  className="w-full h-64 sm:h-72 md:h-96 object-cover"
                 />
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-3">
@@ -124,6 +124,36 @@ export default function DestinationsPage() {
                   >
                     Book This Ride
                   </Link>
+                  {dest.name === 'Rock Villa - Bequia' && (
+                    <a
+                      href="https://bequiabeachhotel.com/rock-villa"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center text-teal-600 text-sm font-medium mt-2 hover:underline"
+                    >
+                      Visit Rock Villa, Bequia →
+                    </a>
+                  )}
+                  {dest.name === 'Young Island Resort' && (
+                    <a
+                      href="https://www.youngisland.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center text-teal-600 text-sm font-medium mt-2 hover:underline"
+                    >
+                      Visit Young Island Resort →
+                    </a>
+                  )}
+                  {dest.name === 'Grenadines House' && (
+                    <a
+                      href="https://www.grenadinehouse.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full text-center text-teal-600 text-sm font-medium mt-2 hover:underline"
+                    >
+                      Visit Grenadines House →
+                    </a>
+                  )}
                 </div>
               </div>
             ))}
