@@ -158,6 +158,7 @@ export default function AboutPage() {
             <h3 className="text-lg font-semibold text-green-800 mb-2">Operating Hours</h3>
             <p className="text-2xl font-bold text-green-900">24/7 Service Available</p>
           </div>
+          
 
           {/* Contact Information */}
           <div className="bg-white rounded-2xl p-6 shadow-sm mb-6">

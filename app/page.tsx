@@ -10,6 +10,7 @@ export default function HomePage() {
   const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [showCard, setShowCard] = useState(true);
+  const [viewImage, setViewImage] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideEffect, setSlideEffect] = useState('fade');
   const slides = [
@@ -312,8 +313,85 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* What's Happening in SVG */}
+      {(() => {
+        const events = [
+          {
+            name: "Heroes Day 🇻🇨",
+            image: "/images/heroes-day.png",
+            description: "National Heroes Day — Honoring the heroes of Saint Vincent and the Grenadines.",
+            date: "March 14, 2026",
+            endDate: new Date('2026-03-15'),
+          },
+          {
+            name: "Vincy Mas Carnival 🎭",
+            image: "/images/carnival-2026.png",
+            description: "The hottest carnival in the Caribbean! A full month of music, mas, calypso, and soca vibes across SVG.",
+            date: "June 26th - July 7th, 2026",
+            endDate: new Date('2026-07-31'),
+          },
+        ];
+        const activeEvents = events.filter(e => new Date() < e.endDate);
+        if (activeEvents.length === 0) return null;
+        return (
+          <div className="max-w-lg mx-auto px-5 py-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2 font-serif">
+              🎉 What's Happening in SVG
+            </h2>
+            <p className="text-sm text-gray-500 mb-5">Upcoming events & celebrations</p>
+            <div className="space-y-5">
+              {activeEvents.map((event, index) => (
+                <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
+                  <div className="relative cursor-pointer" onClick={() => setViewImage(event.image)}>
+                    <img
+                      src={event.image}
+                      alt={event.name}
+                      className="w-full h-64 sm:h-80 object-cover"
+                    />
+                    <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
+                      Tap to view flyer
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">{event.name}</h3>
+                    <p className="text-sm text-orange-600 font-semibold mb-2">📅 {event.date}</p>
+                    <p className="text-sm text-gray-600 mb-3">{event.description}</p>
+                    <Link
+                      href="/booking"
+                      className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
+                    >
+                      🚕 Book a Ride There
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bottom Navigation */}
       <BottomNav />
+
+      {/* Flyer Viewer Modal */}
+      {viewImage && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setViewImage(null)}
+        >
+          <img
+            src={viewImage}
+            alt="Event flyer"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
+          />
+          <button
+            className="absolute top-4 right-4 w-10 h-10 bg-white/90 rounded-full flex items-center justify-center"
+            onClick={() => setViewImage(null)}
+          >
+            <X size={20} />
+          </button>
+        </div>
+      )}
 
       {/* Ride Now Modal */}
       {showModal && (
