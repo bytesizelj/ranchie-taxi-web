@@ -13,10 +13,10 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideEffect, setSlideEffect] = useState('fade');
   const slides = [
-    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 15000 },
-    { type: 'video', src: '/videos/hero.mp4', duration: 25000 },
+    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 10000 },
+    { type: 'video', src: '/videos/hero.mp4', duration: 5000 },
     { type: 'image', src: '/images/pirates-rock.png', duration: 6000 },
-    { type: 'image', src: '/images/trinity-falls.png', duration: 10000 },
+    { type: 'image', src: '/images/trinity-falls.png', duration: 5000 },
   ];
   const effects = ['fade', 'zoom', 'slide'];
 
@@ -44,7 +44,7 @@ export default function HomePage() {
       heroVideoRef.current.currentTime = 0;
       heroVideoRef.current.play().catch(() => {});
     }
-    setShowCard(currentSlide === 0 || currentSlide === 2);
+    setShowCard(currentSlide === 0 || currentSlide === 1);
     const timeout = setTimeout(() => {
       setSlideEffect(effects[Math.floor(Math.random() * effects.length)]);
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -167,10 +167,16 @@ export default function HomePage() {
           0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(255,255,255,0.03); }
           100% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(255,255,255,0.08); }
         }
+          @media (max-width: 640px) {
+          video {
+            object-position: center;
+            transform: scale(1.3) !important;
+          }
+        }
       `}</style>
 
       {/* Hero Section with Background */}
-      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden">
+      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden" style={{ minHeight: '100dvh' }}>
         {/* Background Videos */}
         {slides.map((slide, index) => {
           const isActive = currentSlide === index;
@@ -219,7 +225,7 @@ export default function HomePage() {
           );
         })}
         {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/15 z-10"></div>
+        <div className="absolute inset-0 bg-black/5 z-10"></div>
         {/* Mute/Unmute Button */}
         <button
           onClick={toggleMute}
@@ -250,7 +256,7 @@ export default function HomePage() {
 
           {/* Welcome Text */}
           <div className="text-center mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-2 italic font-serif">Your ride is here.</h2>
+            <h3 className="text-lg font-semibold mb-1 text-gray-900">Ride Now</h3>
             <p className="text-gray-600 text-lg font-light">
               Reliable taxi service across paradise
             </p>
@@ -272,7 +278,7 @@ export default function HomePage() {
               className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
               <div className="text-3xl mb-3">📅</div>
-              <h3 className="text-lg font-semibold mb-1">Schedule</h3>
+              <h3 className="text-lg font-semibold mb-1 text-gray-900">Schedule</h3>
               <p className="text-sm text-gray-600">Book in advance</p>
             </Link>
           </div>

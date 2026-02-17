@@ -39,7 +39,7 @@ export default function AboutPage() {
           <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
             <Link 
               href="/" 
-              className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+              className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
             >
               <ArrowLeft size={20} />
             </Link>

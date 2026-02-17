@@ -191,7 +191,7 @@ Sent via Ranchie Taxi App`;
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center gap-4">
           <button
             onClick={() => currentStep > 1 ? prevStep() : router.push('/')}
-            className="w-10 h-10 bg-gradient-to-r from-gray-100 to-gray-200 rounded-full flex items-center justify-center hover:from-gray-200 hover:to-gray-300 transition-all"
+            className="w-10 h-10 bg-gradient-to-r from-gray-300 to-gray-400 rounded-full flex items-center justify-center hover:from-gray-400 hover:to-gray-500 transition-all"
           >
             <ArrowLeft size={20} />
           </button>
