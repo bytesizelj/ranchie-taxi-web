@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+export const viewport = {
+  themeColor: '#ffffff',
+};
 export const metadata: Metadata = {
   title: "Ranchie Taxi SVG - Airport Transfers & Island Tours | St Vincent",
   description: "Award-winning taxi service in Saint Vincent and the Grenadines. Airport transfers from Argyle, Bequia ferry connections, island tours, and 24/7 transportation. Book your reliable SVG taxi today!",
@@ -45,6 +48,9 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Ranchie Taxi" />
         <meta name="geo.region" content="VC" />
         <meta name="geo.placename" content="Saint Vincent and the Grenadines" />
+        {/* Preload critical assets */}
+        <link rel="preload" href="/videos/ranchie-taxi-award.mp4" as="video" />
+        <link rel="preload" href="/images/pirates-rock.png" as="image" />
         {/* Google Analytics */}
         <script
           async

@@ -190,6 +190,8 @@ export default function HomePage() {
               loop
               muted={isMuted}
               playsInline
+              preload="auto"
+              poster={index === 0 ? '/images/pirates-rock.png' : undefined}
               className={`absolute inset-0 w-full h-full object-cover ${
                 isActive ? 'opacity-100' : 'opacity-0'
               }`}
@@ -270,7 +272,7 @@ export default function HomePage() {
               className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
               <div className="text-3xl mb-3">🚗</div>
-              <h3 className="text-lg font-semibold mb-1">Ride Now</h3>
+              <h3 className="text-lg font-semibold mb-1 text-gray-900">Ride Now</h3>
               <p className="text-sm text-gray-600">Instant pickup</p>
             </button>
 
@@ -313,6 +315,33 @@ export default function HomePage() {
         </div>
       </div>
 
+      <style jsx global>{`
+      @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-33.33%); }
+        }
+        @keyframes swirl1 {
+          0% { transform: translate(0, 0) scale(1); }
+          25% { transform: translate(60px, -40px) scale(1.4); }
+          50% { transform: translate(20px, -70px) scale(1.1); }
+          75% { transform: translate(-30px, -20px) scale(1.5); }
+          100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes swirl2 {
+          0% { transform: translate(0, 0) scale(1.2); }
+          25% { transform: translate(-70px, 50px) scale(0.7); }
+          50% { transform: translate(-40px, 80px) scale(1.3); }
+          75% { transform: translate(30px, 30px) scale(0.9); }
+          100% { transform: translate(0, 0) scale(1.2); }
+        }
+        @keyframes swirl3 {
+          0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+          33% { transform: translate(50px, 60px) rotate(120deg) scale(1.3); }
+          66% { transform: translate(-40px, 30px) rotate(240deg) scale(0.8); }
+          100% { transform: translate(0, 0) rotate(360deg) scale(1); }
+        }
+      `}</style>
+
       {/* What's Happening in SVG */}
       {(() => {
         const events = [
@@ -334,11 +363,57 @@ export default function HomePage() {
         const activeEvents = events.filter(e => new Date() < e.endDate);
         if (activeEvents.length === 0) return null;
         return (
-          <div className="max-w-lg mx-auto px-5 py-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2 font-serif">
-              🎉 What's Happening in SVG
-            </h2>
-            <p className="text-sm text-gray-500 mb-5">Upcoming events & celebrations</p>
+          <div className="relative overflow-hidden py-10 px-5">
+            {/* Animated circles and swirls */}
+            <div className="absolute inset-0 bg-black overflow-hidden">
+              {/* Floating golden diamonds */}
+              <div className="absolute top-12 left-[15%] w-3 h-3 bg-amber-400/50 rotate-45" style={{ animation: 'swirl1 7s ease-in-out infinite' }}></div>
+              <div className="absolute top-[60%] right-[20%] w-5 h-5 bg-yellow-500/40 rotate-45" style={{ animation: 'swirl2 9s ease-in-out infinite' }}></div>
+              <div className="absolute bottom-24 left-[40%] w-2 h-2 bg-amber-300/60 rotate-45" style={{ animation: 'swirl3 6s ease-in-out infinite' }}></div>
+
+              {/* Thin rotating geometric lines */}
+              <div className="absolute top-[20%] left-[10%] w-32 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,191,0,0.5), transparent)', animation: 'swirl3 10s linear infinite', transformOrigin: 'center' }}></div>
+              <div className="absolute top-[70%] right-[15%] w-40 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(218,165,32,0.4), transparent)', animation: 'swirl3 12s linear infinite reverse', transformOrigin: 'center' }}></div>
+              <div className="absolute top-[45%] left-[50%] w-28 h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.35), transparent)', animation: 'swirl3 8s linear infinite', transformOrigin: 'center' }}></div>
+
+              {/* Constellation dots */}
+              <div className="absolute top-16 left-[25%] w-2 h-2 rounded-full bg-yellow-300/70" style={{ animation: 'swirl2 3s ease-in-out infinite' }}></div>
+              <div className="absolute top-20 left-[30%] w-1.5 h-1.5 rounded-full bg-amber-300/60" style={{ animation: 'swirl1 4s ease-in-out infinite' }}></div>
+              <div className="absolute top-12 left-[35%] w-1 h-1 rounded-full bg-yellow-200/80" style={{ animation: 'swirl3 3.5s ease-in-out infinite' }}></div>
+              <div className="absolute bottom-32 right-[25%] w-2 h-2 rounded-full bg-amber-400/70" style={{ animation: 'swirl1 2.5s ease-in-out infinite reverse' }}></div>
+              <div className="absolute bottom-40 right-[30%] w-1.5 h-1.5 rounded-full bg-yellow-300/50" style={{ animation: 'swirl2 4.5s ease-in-out infinite reverse' }}></div>
+              <div className="absolute top-[55%] left-[12%] w-1.5 h-1.5 rounded-full bg-yellow-400/60" style={{ animation: 'swirl3 3s ease-in-out infinite reverse' }}></div>
+
+              {/* Hexagon outlines */}
+              <svg className="absolute top-[30%] right-[10%] w-8 h-8" viewBox="0 0 100 100" style={{ animation: 'swirl3 15s linear infinite' }}>
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="rgba(255,191,0,0.25)" stroke="rgba(255,191,0,0.4)" strokeWidth="1" />
+              </svg>
+              <svg className="absolute bottom-[25%] left-[8%] w-6 h-6" viewBox="0 0 100 100" style={{ animation: 'swirl3 12s linear infinite reverse' }}>
+                <polygon points="50,5 95,27.5 95,72.5 50,95 5,72.5 5,27.5" fill="rgba(218,165,32,0.3)" stroke="rgba(218,165,32,0.45)" strokeWidth="1" />
+              </svg>
+
+              {/* Triangle accents */}
+              <svg className="absolute top-[15%] right-[35%] w-8 h-8" viewBox="0 0 100 100" style={{ animation: 'swirl1 8s ease-in-out infinite' }}>
+                <polygon points="50,10 90,90 10,90" fill="none" stroke="rgba(255,215,0,0.3)" strokeWidth="1.5" />
+              </svg>
+              <svg className="absolute bottom-[15%] left-[55%] w-6 h-6" viewBox="0 0 100 100" style={{ animation: 'swirl2 10s ease-in-out infinite reverse' }}>
+                <polygon points="50,10 90,90 10,90" fill="none" stroke="rgba(255,191,0,0.25)" strokeWidth="1.5" />
+              </svg>
+
+              {/* Top glow lighting */}
+              <div className="absolute top-0 left-0 right-0 h-[60px] blur-xl" style={{ background: 'radial-gradient(ellipse 70% 80%, rgba(255,191,0,0.25), transparent 70%)' }}></div>
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[60%] h-[1px]" style={{ background: 'linear-gradient(90deg, transparent, rgba(255,215,0,0.5), transparent)' }}></div>
+              <div className="absolute top-0 left-0 right-0 h-[20px] blur-md" style={{ background: 'linear-gradient(180deg, rgba(255,191,0,0.2), transparent)' }}></div>
+              {/* Subtle golden glow behind content */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] rounded-full blur-3xl" style={{ background: 'radial-gradient(circle, rgba(255,191,0,0.08), transparent 70%)' }}></div>
+            </div>
+            <div className="max-w-lg mx-auto relative z-10">
+            <div className="overflow-hidden mb-1">
+              <h2 className="text-2xl font-bold text-white font-serif whitespace-nowrap" style={{ animation: 'marquee 12s linear infinite' }}>
+                🎉 What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🎉 What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🎉 What's Happening in SVG!
+              </h2>
+            </div>
+            <p className="text-sm text-gray-400 mb-5">Upcoming events & celebrations</p>
             <div className="space-y-5">
               {activeEvents.map((event, index) => (
                 <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
@@ -365,6 +440,7 @@ export default function HomePage() {
                   </div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         );
