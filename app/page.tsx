@@ -112,11 +112,11 @@ export default function HomePage() {
         }
         @keyframes kenBurns {
           0% { transform: scale(1); }
-          100% { transform: scale(1.2); }
+          100% { transform: scale(1.08); }
         }
         @keyframes kenBurnsAlt {
-          0% { transform: scale(1.2) translateX(0); }
-          100% { transform: scale(1) translateX(-3%); }
+          0% { transform: scale(1.08) translateX(0); }
+          100% { transform: scale(1) translateX(-2%); }
         }
         
         @keyframes pulse-glow {
@@ -168,12 +168,7 @@ export default function HomePage() {
           0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(255,255,255,0.03); }
           100% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(255,255,255,0.08); }
         }
-          @media (max-width: 640px) {
-          video {
-            object-position: center;
-            transform: scale(1.3) !important;
-          }
-        }
+          
       `}</style>
 
       {/* Hero Section with Background */}
