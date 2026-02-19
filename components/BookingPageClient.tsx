@@ -22,11 +22,11 @@ import BottomNav from '@/components/BottomNav';
 
 const popularDestinations = [
   { id: 1, name: 'Argyle International Airport', icon: Plane, color: 'from-blue-500 to-cyan-500' },
-  { id: 2, name: 'Kingstown', icon: Building2, color: 'from-green-500 to-teal-500' },
+  { id: 2, name: 'Montreal Gardens', icon: Palmtree, color: 'from-green-600 to-emerald-500' },
   { id: 3, name: 'Villa Beach', icon: Palmtree, color: 'from-orange-500 to-yellow-500' },
-  { id: 4, name: 'Port Elizabeth, Bequia', icon: Ship, color: 'from-purple-500 to-pink-500' },
-  { id: 5, name: 'Mesopotamia', icon: Palmtree, color: 'from-green-600 to-emerald-500' },
-  { id: 6, name: 'Layou', icon: Building2, color: 'from-red-500 to-orange-500' },
+  { id: 4, name: 'Cruise Ship Terminal', icon: Ship, color: 'from-purple-500 to-pink-500' },
+  { id: 5, name: 'Montreal Gardens', icon: Building2, color: 'from-green-500 to-teal-500' },
+  { id: 6, name: 'Layou beach front', icon: Building2, color: 'from-red-500 to-orange-500' },
 ];
 
 const quickTimes = [
