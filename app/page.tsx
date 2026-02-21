@@ -231,7 +231,7 @@ export default function HomePage() {
         </button>
         {/* Main Card */}
         <div 
-          className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-5 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
+          className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-4 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
             showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
@@ -257,7 +257,7 @@ export default function HomePage() {
           </div>
 
           {/* Welcome Text */}
-          <div className="text-center mb-8">
+          <div className="text-center mb-4 sm:mb-8">
             <h3 className="text-lg font-semibold mb-1 text-gray-900">Ride Now</h3>
             <p className="text-gray-600 text-lg font-light">
               Reliable taxi service across paradise
@@ -265,21 +265,21 @@ export default function HomePage() {
           </div>
 
           {/* Booking Options */}
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <button
               onClick={handleRideNow}
-              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
+             className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4 sm:p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
-              <div className="text-3xl mb-3">🚗</div>
+              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">🚗</div>
               <h3 className="text-lg font-semibold mb-1 text-gray-900">Ride Now</h3>
               <p className="text-sm text-gray-600">Instant pickup</p>
             </button>
 
             <Link
               href="/booking"
-              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
+              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4 sm:p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
-              <div className="text-3xl mb-3">📅</div>
+              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">📅</div>
               <h3 className="text-lg font-semibold mb-1 text-gray-900">Schedule</h3>
               <p className="text-sm text-gray-600">Book in advance</p>
             </Link>
