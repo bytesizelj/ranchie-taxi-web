@@ -177,7 +177,7 @@ export default function HomePage() {
       `}</style>
 
       {/* Hero Section with Background */}
-      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden" style={{ minHeight: '100dvh' }}>
+      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden bg-black" style={{ minHeight: '100dvh' }}>
         {/* Background Videos */}
         {slides.map((slide, index) => {
           const isActive = currentSlide === index;
