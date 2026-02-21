@@ -191,7 +191,6 @@ export default function HomePage() {
               muted={isMuted}
               playsInline
               preload="auto"
-              poster={index === 0 ? '/images/pirates-rock.png' : undefined}
               className={`absolute inset-0 w-full h-full object-cover ${
                 isActive ? 'opacity-100' : 'opacity-0'
               }`}
