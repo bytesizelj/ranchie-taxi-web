@@ -15,9 +15,8 @@ export default function HomePage() {
   const [slideEffect, setSlideEffect] = useState('fade');
   const slides = [
     
-    { type: 'video', src: '/videos/hero2.mp4', duration: 5000 },
-    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 5000 },
-    { type: 'video', src: '/videos/hero3.mp4', duration: 5000 },
+    { type: 'video', src: '/videos/hero2.mp4', duration:8000 },
+    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 8000 },
     ];
   const effects = ['fade', 'zoom', 'slide'];
 
@@ -35,7 +34,6 @@ export default function HomePage() {
     }
   };
   const heroVideoRef = useRef<HTMLVideoElement>(null);
-  const hero3VideoRef = useRef<HTMLVideoElement>(null);
 
  useEffect(() => {
     if (currentSlide === 0 && videoRef.current) {
@@ -45,10 +43,6 @@ export default function HomePage() {
     if (currentSlide === 1 && heroVideoRef.current) {
       heroVideoRef.current.currentTime = 0;
       heroVideoRef.current.play().catch(() => {});
-    }
-    if (currentSlide === 2 && hero3VideoRef.current) {
-      hero3VideoRef.current.currentTime = 0;
-      hero3VideoRef.current.play().catch(() => {});
     }
     setShowCard(true);
     const timeout = setTimeout(() => {
@@ -177,7 +171,7 @@ export default function HomePage() {
       `}</style>
 
       {/* Hero Section with Background */}
-      <div className="min-h-screen flex items-center justify-center p-5 pb-20 relative overflow-hidden bg-black" style={{ minHeight: '100dvh' }}>
+      <div className="min-h-screen flex items-end sm:items-center justify-center p-5 pb-24 sm:pb-20 relative overflow-hidden bg-black" style={{ minHeight: '100dvh' }}>
         {/* Background Videos */}
         {slides.map((slide, index) => {
           const isActive = currentSlide === index;
@@ -185,7 +179,7 @@ export default function HomePage() {
           return slide.type === 'video' ? (
             <video
               key={slide.src}
-              ref={index === 0 ? videoRef : index === 1 ? heroVideoRef : index === 2 ? hero3VideoRef : undefined}
+              ref={index === 0 ? videoRef : index === 1 ? heroVideoRef : undefined}
               autoPlay
               loop
               muted={isMuted}
@@ -237,17 +231,23 @@ export default function HomePage() {
         </button>
         {/* Main Card */}
         <div 
-          className={`bg-white rounded-3xl p-5 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
+          className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-5 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
             showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
           {/* Logo Section */}
           <div className="text-center mb-8">
-            <img 
-              src="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
-              alt="Ranchie Taxi Logo"
-              className="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg"
-            />
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              poster="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
+              className="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg object-cover"
+            >
+              <source src="/videos/hero-logo.mp4" type="video/mp4" />
+            </video>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 font-serif tracking-wide">
               Ranchie Taxi
             </h1>

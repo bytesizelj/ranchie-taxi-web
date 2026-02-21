@@ -258,12 +258,12 @@ export default function AboutPage() {
             <p className="mt-2">
               Website by{' '}
               <a 
-                href="https://designs-by-lj.netlify.app/" 
+                href="https://highmark-business-systems.com/" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-orange-500 hover:underline"
               >
-                Designs by LJ
+                Highmark Business Systems
               </a>
             </p>
           </div>
