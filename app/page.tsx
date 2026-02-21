@@ -14,11 +14,11 @@ export default function HomePage() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slideEffect, setSlideEffect] = useState('fade');
   const slides = [
-    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 10000 },
-    { type: 'video', src: '/videos/hero.mp4', duration: 5000 },
-    { type: 'image', src: '/images/pirates-rock.png', duration: 6000 },
-    { type: 'image', src: '/images/trinity-falls.png', duration: 5000 },
-  ];
+    
+    { type: 'video', src: '/videos/hero2.mp4', duration: 5000 },
+    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 5000 },
+    { type: 'video', src: '/videos/hero3.mp4', duration: 5000 },
+    ];
   const effects = ['fade', 'zoom', 'slide'];
 
   const handleRideNow = () => {
@@ -35,6 +35,7 @@ export default function HomePage() {
     }
   };
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const hero3VideoRef = useRef<HTMLVideoElement>(null);
 
  useEffect(() => {
     if (currentSlide === 0 && videoRef.current) {
@@ -45,7 +46,11 @@ export default function HomePage() {
       heroVideoRef.current.currentTime = 0;
       heroVideoRef.current.play().catch(() => {});
     }
-    setShowCard(currentSlide === 0 || currentSlide === 1);
+    if (currentSlide === 2 && hero3VideoRef.current) {
+      hero3VideoRef.current.currentTime = 0;
+      hero3VideoRef.current.play().catch(() => {});
+    }
+    setShowCard(true);
     const timeout = setTimeout(() => {
       setSlideEffect(effects[Math.floor(Math.random() * effects.length)]);
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -180,7 +185,7 @@ export default function HomePage() {
           return slide.type === 'video' ? (
             <video
               key={slide.src}
-              ref={index === 0 ? videoRef : index === 1 ? heroVideoRef : undefined}
+              ref={index === 0 ? videoRef : index === 1 ? heroVideoRef : index === 2 ? hero3VideoRef : undefined}
               autoPlay
               loop
               muted={isMuted}
