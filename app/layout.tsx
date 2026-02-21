@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Ranchie Taxi - #1 Taxi Service in St Vincent & the Grenadines",
     description: "Award-winning taxi service with 24+ years experience. Airport transfers, island tours, Bequia connections. Book now!",
-    url: "https://ranchie-taxi-web.vercel.app",
+    url: "https://ranchietaxisvg.com",
     siteName: "Ranchie Taxi SVG",
     locale: "en_US",
     type: "website",
@@ -41,7 +41,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <link rel="canonical" href="https://ranchie-taxi-web.vercel.app" />
+        <link rel="canonical" href="https://ranchietaxisvg.com" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />

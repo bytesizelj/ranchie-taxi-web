@@ -92,7 +92,7 @@ export default function BookingCardPage() {
                   <div className="flex justify-center mb-4">
                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl shadow-inner">
                       <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchie-taxi-web.vercel.app/booking&color=1a1a1a"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchietaxisvg.com/booking&color=1a1a1a"
                         alt="Scan to Book"
                         className="w-36 h-36"
                       />
@@ -111,7 +111,7 @@ export default function BookingCardPage() {
                   <div className="h-px w-10 bg-yellow-400/30"></div>
                 </div>
                 <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-xl py-3 px-5 inline-block mb-5">
-                  <p className="text-yellow-400 font-bold text-base tracking-wide">ranchie-taxi-web.vercel.app</p>
+                  <p className="text-yellow-400 font-bold text-base tracking-wide">ranchietaxisvg.com</p>
                 </div>
                 <div className="flex items-center justify-center gap-4 text-gray-400 text-xs">
                   <span>+1 784-493-2354</span>
@@ -168,7 +168,7 @@ export default function BookingCardPage() {
                   <div className="flex justify-center mb-4">
                     <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-2xl shadow-inner">
                       <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchie-taxi-web.vercel.app/booking&color=1a1a1a"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchietaxisvg.com/booking&color=1a1a1a"
                         alt="Scan to Book"
                         className="w-44 h-44"
                       />
@@ -187,7 +187,7 @@ export default function BookingCardPage() {
                   <div className="h-px w-10 bg-yellow-400/30"></div>
                 </div>
                 <div className="bg-yellow-400/10 border border-yellow-400/30 rounded-xl py-3 px-5 inline-block mb-5">
-                  <p className="text-yellow-400 font-bold text-base tracking-wide">ranchie-taxi-web.vercel.app</p>
+                  <p className="text-yellow-400 font-bold text-base tracking-wide">ranchietaxisvg.com</p>
                 </div>
                 <div className="flex items-center justify-center gap-4 text-gray-400 text-xs">
                   <span>+1 784-493-2354</span>
@@ -227,7 +227,7 @@ export default function BookingCardPage() {
                   <div className="relative flex justify-center mb-4">
                     <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-4 rounded-2xl shadow-inner border border-emerald-100">
                       <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchie-taxi-web.vercel.app/booking&color=0d9488"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://ranchietaxisvg.com/booking&color=0d9488"
                         alt="Scan to Book"
                         className="w-44 h-44"
                       />
@@ -245,7 +245,7 @@ export default function BookingCardPage() {
                   <div className="h-px w-10 bg-white/30"></div>
                 </div>
                 <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl py-3 px-5 inline-block mb-5 shadow-lg">
-                  <p className="text-white font-bold text-base tracking-wide drop-shadow">ranchie-taxi-web.vercel.app</p>
+                  <p className="text-white font-bold text-base tracking-wide drop-shadow">ranchietaxisvg.com</p>
                 </div>
                 <div className="flex items-center justify-center gap-6 text-white/90 text-sm">
                   <span>+1 784-493-2354</span>
@@ -281,7 +281,7 @@ export default function BookingCardPage() {
                   <div className="relative flex justify-center mb-4">
                     <div className="bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-4 rounded-2xl shadow-inner border border-emerald-100">
                       <img
-                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://ranchie-taxi-web.vercel.app/booking&color=0d9488"
+                        src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://ranchietaxisvg.com/booking&color=0d9488"
                         alt="Scan to Book"
                         className="w-36 h-36"
                       />
@@ -299,7 +299,7 @@ export default function BookingCardPage() {
                   <div className="h-px w-10 bg-white/30"></div>
                 </div>
                 <div className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl py-3 px-5 inline-block mb-5 shadow-lg">
-                  <p className="text-white font-bold text-base tracking-wide drop-shadow">ranchie-taxi-web.vercel.app</p>
+                  <p className="text-white font-bold text-base tracking-wide drop-shadow">ranchietaxisvg.com</p>
                 </div>
                 <div className="flex items-center justify-center gap-6 text-white/90 text-sm">
                   <span>+1 784-528-3843</span>
