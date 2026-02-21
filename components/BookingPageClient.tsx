@@ -517,12 +517,12 @@ Sent via Ranchie Taxi App`;
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-gray-900">Review Your Booking</h2>
-                    <p className="text-sm text-gray-500">Confirm details before sending</p>
+                    <p className="text-sm text-gray-700">Confirm details before sending</p>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-3">Your Contact Info:</p>
+                  <p className="text-sm text-gray-800 font-medium mb-3">Your Contact Info:</p>
                   <div className="space-y-3">
                     <input
                       type="text"
@@ -543,26 +543,26 @@ Sent via Ranchie Taxi App`;
 
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-600">Pickup</span>
-                    <span className="text-sm font-medium text-right max-w-[60%]">{formData.pickup}</span>
+                    <span className="text-sm text-gray-800 font-medium">Pickup</span>
+                    <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">{formData.pickup}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-600">Destination</span>
-                    <span className="text-sm font-medium text-right max-w-[60%]">{formData.destination}</span>
+                    <span className="text-sm text-gray-800 font-medium">Destination</span>
+                    <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">{formData.destination}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-600">Date</span>
-                    <span className="text-sm font-medium">{formData.date || 'Today'}</span>
+                    <span className="text-sm text-gray-800 font-medium">Date</span>
+                    <span className="text-sm font-semibold text-gray-900">{formData.date || 'Today'}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-600">Time</span>
-                    <span className="text-sm font-medium">
+                    <span className="text-sm text-gray-800 font-medium">Time</span>
+                    <span className="text-sm font-semibold text-gray-900">
                       {formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-600">Passengers</span>
-                    <span className="text-sm font-medium">{formData.passengers}</span>
+                    <span className="text-sm text-gray-800 font-medium">Passengers</span>
+                    <span className="text-sm font-semibold text-gray-900">{formData.passengers}</span>
                   </div>
                 </div>
 

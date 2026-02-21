@@ -222,7 +222,7 @@ export default function AboutPage() {
 
           {/* Social Media */}
           <div className="bg-white rounded-2xl p-6 shadow-sm text-center mb-6">
-            <h3 className="text-lg font-semibold mb-5">Follow Us</h3>
+            <h3 className="text-lg font-semibold mb-5 text-gray-900">Follow Us</h3>
             <div className="flex justify-center gap-4">
               <a 
                 href="https://www.instagram.com/ranchietaxisvg"
