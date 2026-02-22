@@ -171,7 +171,7 @@ export default function HomePage() {
       `}</style>
 
       {/* Hero Section with Background */}
-      <div className="min-h-screen flex items-end sm:items-center justify-center p-5 pb-24 sm:pb-20 relative overflow-hidden bg-black" style={{ minHeight: '100dvh' }}>
+      <div className="min-h-screen flex items-center justify-center p-5 pb-24 sm:pb-20 relative overflow-hidden bg-black" style={{ minHeight: '100dvh' }}>
         {/* Background Videos */}
         {slides.map((slide, index) => {
           const isActive = currentSlide === index;
@@ -231,7 +231,7 @@ export default function HomePage() {
         </button>
         {/* Main Card */}
         <div 
-          className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-4 sm:p-8 shadow-2xl max-w-lg w-full relative z-20 transition-all duration-700 ${
+          className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-3 sm:p-8 shadow-2xl max-w-md sm:max-w-lg w-full relative z-20 transition-all duration-700 ${
             showCard ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}
         >
@@ -281,7 +281,7 @@ export default function HomePage() {
 
           
           {/* Airport Transfer Promo */}
-          <div className="promo-bg promo-shimmer promo-border bg-emerald-600 rounded-2xl p-4 mb-6 relative overflow-hidden">
+          <div className="promo-bg promo-shimmer promo-border bg-emerald-600 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 relative overflow-hidden">
             <p className="promo-text text-yellow-300 text-center text-sm font-bold mb-2">
               ✈️ Airport Transfer
             </p>
@@ -296,7 +296,7 @@ export default function HomePage() {
           </div>
 
           {/* Contact Section */}
-          <div className="text-center pt-6 border-t border-gray-200">
+          <div className="text-center pt-3 sm:pt-6 border-t border-gray-200">
             <a
               href="tel:1784-493-2354"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-600 to-red-600 text-white px-5 sm:px-8 py-3 sm:py-4 rounded-xl text-base sm:text-lg font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
