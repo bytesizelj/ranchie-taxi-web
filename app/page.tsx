@@ -15,8 +15,8 @@ export default function HomePage() {
   const [slideEffect, setSlideEffect] = useState('fade');
   const slides = [
     
-    { type: 'video', src: '/videos/hero2.mp4', duration:8000 },
-    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 8000 },
+    { type: 'video', src: '/videos/hero2.mp4', duration:5000 },
+    { type: 'video', src: '/videos/ranchie-taxi-award.mp4', duration: 4000 },
     ];
   const effects = ['fade', 'zoom', 'slide'];
 

@@ -130,9 +130,6 @@ Sent via Ranchie Taxi App`;
 
     const encoded = encodeURIComponent(message);
     window.open(`https://wa.me/17844932354?text=${encoded}`, '_blank');
-    setTimeout(() => {
-      window.open(`https://wa.me/17844977245?text=${encoded}`, '_blank');
-    }, 1500);
 
     // Delay redirect to allow WhatsApp to open
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -620,7 +617,7 @@ Sent via Ranchie Taxi App`;
               className="py-3 px-8 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
             >
               <Check size={18} />
-              Send via WhatsApp
+              Submit Booking
             </button>
           )}
         </div>
