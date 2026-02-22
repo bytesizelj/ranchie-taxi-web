@@ -222,13 +222,7 @@ export default function HomePage() {
         })}
         {/* Dark Overlay */}
         <div className="absolute inset-0 bg-black/5 z-10"></div>
-        {/* Mute/Unmute Button */}
-        <button
-          onClick={toggleMute}
-          className="absolute bottom-24 right-4 z-30 w-12 h-12 bg-white/90 backdrop-blur rounded-full flex items-center justify-center shadow-lg hover:bg-white transition-all"
-        >
-          {isMuted ? <VolumeX size={24} className="text-gray-700" /> : <Volume2 size={24} className="text-green-600" />}
-        </button>
+        
         {/* Main Card */}
         <div 
           className={`bg-white/90 sm:bg-white backdrop-blur-sm sm:backdrop-blur-none rounded-3xl p-3 sm:p-8 shadow-2xl max-w-md sm:max-w-lg w-full relative z-20 transition-all duration-700 ${
