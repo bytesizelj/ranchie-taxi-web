@@ -236,18 +236,12 @@ export default function HomePage() {
           }`}
         >
           {/* Logo Section */}
-          <div className="text-center mb-8">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              poster="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
-              className="w-32 h-32 mx-auto mb-4 rounded-2xl shadow-lg object-cover"
-            >
-              <source src="/videos/hero-logo.mp4" type="video/mp4" />
-            </video>
+          <div className="text-center mb-4 sm:mb-8">
+            <img
+              src="https://i.postimg.cc/N0tzBQTm/Screenshot-20250725-221145-Canva.jpg"
+              alt="Ranchie Taxi Logo"
+              className="w-20 h-20 sm:w-32 sm:h-32 mx-auto mb-2 sm:mb-4 rounded-2xl shadow-lg"
+            />
             <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-2 font-serif tracking-wide">
               Ranchie Taxi
             </h1>
