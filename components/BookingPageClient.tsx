@@ -93,8 +93,9 @@ export default function BookingPageClient() {
     saveToRecent(formData.destination);
 
     // Save booking to Firebase
+    let bookingId = '';
     try {
-      await addDoc(collection(db, 'bookings'), {
+      const docRef = await addDoc(collection(db, 'bookings'), {
         name: formData.name,
         phone: formData.phone || 'Not provided',
         pickup: formData.pickup,
@@ -106,6 +107,7 @@ export default function BookingPageClient() {
         status: 'pending',
         createdAt: serverTimestamp()
       });
+      bookingId = docRef.id;
     } catch (error) {
       console.error('Error saving booking:', error);
     }
@@ -134,16 +136,8 @@ Sent via Ranchie Taxi App`;
     // Delay redirect to allow WhatsApp to open
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    const params = new URLSearchParams({
-      name: formData.name || 'Guest',
-      pickup: formData.pickup,
-      destination: formData.destination,
-      date: formData.date || 'Today',
-      time: formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType,
-      passengers: `${formData.passengers} passenger${formData.passengers !== '1' ? 's' : ''}`
-    });
-    
-    router.push(`/confirmation?${params.toString()}`);
+       
+    router.push(`/booking-status/${bookingId}`);
   };
 
      

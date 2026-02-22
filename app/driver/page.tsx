@@ -41,7 +41,7 @@ export default function DriverDashboard() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'confirmed' | 'completed'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'completed'>('all');
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -241,6 +241,7 @@ export default function DriverDashboard() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'accepted': return 'bg-green-100 text-green-800';
       case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
@@ -251,6 +252,7 @@ export default function DriverDashboard() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <AlertCircle size={16} />;
+      case 'accepted': return <CheckCircle size={16} />;
       case 'confirmed': return <Car size={16} />;
       case 'completed': return <CheckCircle size={16} />;
       case 'cancelled': return <XCircle size={16} />;
@@ -397,7 +399,7 @@ export default function DriverDashboard() {
 
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {['all', 'pending', 'confirmed', 'completed'].map((status) => (
+          {['all', 'pending', 'accepted', 'completed'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status as any)}
@@ -492,20 +494,20 @@ export default function DriverDashboard() {
                   {booking.status === 'pending' && (
                     <>
                       <button
-                        onClick={() => updateStatus(booking.id, 'confirmed')}
-                        className="flex-1 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
+                        onClick={() => updateStatus(booking.id, 'accepted')}
+                        className="flex-1 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
                       >
-                        Confirm
+                        ✅ Accept
                       </button>
                       <button
-                        onClick={() => updateStatus(booking.id, 'cancelled')}
-                        className="px-4 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-all"
+                        onClick={() => updateStatus(booking.id, 'declined')}
+                        className="px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all"
                       >
-                        Cancel
+                        ❌ Decline
                       </button>
                     </>
                   )}
-                  {booking.status === 'confirmed' && (
+                  {(booking.status === 'accepted' || booking.status === 'confirmed') && (
                     <button
                       onClick={() => updateStatus(booking.id, 'completed')}
                       className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
