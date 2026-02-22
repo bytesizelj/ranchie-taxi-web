@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -15,6 +15,25 @@ export default function AboutPage() {
   const [videoMuted, setVideoMuted] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+
+  const testimonials = [
+    {
+      name: 'Michael Hall',
+      text: 'Excellent experience. He turned up in good time, greeted us pleasantly and loaded our luggage into the vehicle for us. He drove carefully to the ferry terminal and assisted us in finding the right ferry. The vehicle was clean and comfortable. Would definitely use again.',
+      rating: 5,
+    },
+    {
+      name: 'Maggie Bahraini',
+      text: 'Ranchie has been my driver for a while now. He is trustworthy, efficient, always on time, and a very kind caring man. Considering other drivers I have had, he is truly one of the best. Thank you Ranchie!',
+      rating: 5,
+    },
+    {
+      name: 'Ghasi Phillips-Bell',
+      text: 'Ranchie has provided exceptional taxi services to my family for years. He is reliable, trustworthy, and responsible. If he is not available, he will try to connect you with another trustworthy driver. And my kids love him!',
+      rating: 5,
+    },
+  ];
 
   const vehiclePhotos = [
     { src: '/images/vehicle-1.png', alt: 'Ranchie Taxi - Nissan NV350 Front View' },
@@ -31,7 +50,14 @@ export default function AboutPage() {
     { q: 'What are your rates?', a: 'Our rates are transparent and competitive. Airport transfers and island tours have set pricing. Contact us for a quote on your specific route.' },
     { q: 'Do you offer airport transfers?', a: 'Yes! Airport transfers to and from Argyle International Airport (AIA) are one of our most popular services. We track flight arrivals so we\'re always on time.' },
   ];
-
+  
+ // Auto-rotate testimonials
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [testimonials.length]);
   return (
     <>
       <div className="min-h-screen pb-24 relative bg-black" style={{ background: "linear-gradient(rgba(30,30,30,0.75), rgba(30,30,30,0.75)), url('/images/ranchie-background-use.png') center/cover fixed" }}>
@@ -173,6 +199,59 @@ export default function AboutPage() {
             </a>
           </section>
 
+          {/* ===== TESTIMONIALS ===== */}
+          <section className="px-4 py-3">
+            <div className="bg-gradient-to-br from-orange-600 to-red-600 rounded-3xl shadow-sm overflow-hidden p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Star size={20} className="text-yellow-300 fill-yellow-300" />
+                <h3 className="text-lg font-bold text-white">What Passengers Say</h3>
+              </div>
+
+              <div className="relative min-h-[180px]">
+                {testimonials.map((t, i) => (
+                  <div
+                    key={i}
+                    className={`transition-all duration-500 ${
+                      i === activeTestimonial
+                        ? 'opacity-100 translate-y-0'
+                        : 'opacity-0 translate-y-4 absolute inset-0'
+                    }`}
+                  >
+                    <div className="flex gap-0.5 mb-3">
+                      {[...Array(t.rating)].map((_, s) => (
+                        <Star key={s} size={14} className="text-yellow-300 fill-yellow-300" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-white/90 leading-relaxed italic mb-4">
+                      &ldquo;{t.text}&rdquo;
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">{t.name.charAt(0)}</span>
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{t.name}</div>
+                        <div className="text-xs text-white/70">Google Review</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Dots */}
+              <div className="flex justify-center gap-2 mt-4">
+                {testimonials.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveTestimonial(i)}
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      i === activeTestimonial ? 'bg-white w-5' : 'bg-white/40'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </section>
           {/* ===== VEHICLE SECTION ===== */}
           <section className="px-4 py-3">
             <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
