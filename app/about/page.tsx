@@ -34,7 +34,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <div className="min-h-screen pb-24 relative" style={{ background: "linear-gradient(rgba(30,30,30,0.75), rgba(30,30,30,0.75)), url('/images/ranchie-background-use.png') center/cover fixed" }}>
+      <div className="min-h-screen pb-24 relative bg-black" style={{ background: "linear-gradient(rgba(30,30,30,0.75), rgba(30,30,30,0.75)), url('/images/ranchie-background-use.png') center/cover fixed" }}>
         {/* Header */}
         <header className="bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-30">
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -44,7 +44,7 @@ export default function AboutPage() {
             >
               <ArrowLeft size={20} />
             </Link>
-            <h1 className="text-xl font-extrabold flex-1">About <span className="text-orange-600">Ranchie Taxi</span></h1>
+            <h1 className="text-xl font-extrabold flex-1" style={{ color: '#000000' }}>About <span style={{ color: '#ea580c' }}>Ranchie Taxi</span></h1>
             <a 
               href="tel:17844932354"
               className="w-10 h-10 bg-orange-50 rounded-full flex items-center justify-center text-orange-600 hover:bg-orange-100 transition-colors"
