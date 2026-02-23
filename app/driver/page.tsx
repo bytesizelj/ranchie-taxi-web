@@ -229,7 +229,11 @@ export default function DriverDashboard() {
 
   const getTodayBookings = () => {
     const today = new Date().toISOString().split('T')[0];
-    return bookings.filter(b => b.date === today || b.date === 'Today');
+    return bookings.filter(b => {
+      const isToday = b.date === today || b.date === 'Today' || b.time === 'ASAP';
+      const isPending = b.status === 'pending';
+      return isToday && isPending;
+    });
   };
 
   const filteredBookings = filter === 'all' 
@@ -449,31 +453,31 @@ export default function DriverDashboard() {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex items-start gap-2">
-                    <MapPin size={16} className="text-green-500 mt-0.5" />
+                    <MapPin size={16} className="text-green-600 mt-0.5" />
                     <div>
-                      <p className="text-xs text-gray-500">Pickup</p>
-                      <p className="text-sm font-medium">{booking.pickup}</p>
+                      <p className="text-xs font-semibold text-gray-700">Pickup</p>
+                      <p className="text-sm font-bold text-gray-900">{booking.pickup}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
-                    <MapPin size={16} className="text-red-500 mt-0.5" />
+                    <MapPin size={16} className="text-red-600 mt-0.5" />
                     <div>
-                      <p className="text-xs text-gray-500">Destination</p>
-                      <p className="text-sm font-medium">{booking.destination}</p>
+                      <p className="text-xs font-semibold text-gray-700">Destination</p>
+                      <p className="text-sm font-bold text-gray-900">{booking.destination}</p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-4 sm:gap-6">
                     <div className="flex items-center gap-2">
-                      <Calendar size={16} className="text-gray-400" />
-                      <span className="text-sm">{booking.date}</span>
+                      <Calendar size={16} className="text-gray-600" />
+                      <span className="text-sm font-semibold text-gray-800">{booking.date}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock size={16} className="text-gray-400" />
-                      <span className="text-sm">{booking.time}</span>
+                      <Clock size={16} className="text-gray-600" />
+                      <span className="text-sm font-semibold text-gray-800">{booking.time}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Users size={16} className="text-gray-400" />
-                      <span className="text-sm">{booking.passengers}</span>
+                      <Users size={16} className="text-gray-600" />
+                      <span className="text-sm font-semibold text-gray-800">{booking.passengers}</span>
                     </div>
                   </div>
                   {booking.phone !== 'Not provided' && (
