@@ -147,7 +147,7 @@ export default function DriverDashboard() {
     }
   };
 
-  // Toggle notifications
+ // Toggle notifications
   const toggleNotifications = async () => {
     if (!notificationsEnabled) {
       await requestNotificationPermission();
@@ -440,8 +440,8 @@ export default function DriverDashboard() {
               <div key={booking.id} className="bg-white rounded-2xl p-5 shadow-sm">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-bold text-lg">{booking.name}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-bold text-lg text-black">{booking.name}</h3>
+                    <p className="text-sm text-gray-700">
                       {booking.createdAt?.toDate?.()?.toLocaleDateString() || 'Recently'}
                     </p>
                   </div>
