@@ -1,5 +1,5 @@
-importScripts('https://www.gstatic.com/firebasejs/12.9.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/12.9.0/firebase-messaging-compat.js');
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
 
 firebase.initializeApp({
   apiKey: "AIzaSyC49BbFJhjpHajencr1W6VlpiFwpWTeD8U",
@@ -7,31 +7,40 @@ firebase.initializeApp({
   projectId: "ranchie-taxi-1e166",
   storageBucket: "ranchie-taxi-1e166.firebasestorage.app",
   messagingSenderId: "878235673378",
-  appId: "1:878235673378:web:27c56cd1c6b91207827b7b"
+  appId: "1:878235673378:web:27c56cd1c6b91207827b7b",
 });
 
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('Background message received:', payload);
-  
-  const notificationTitle = payload.notification?.title || '🚕 New Booking!';
-  const notificationOptions = {
-    body: payload.notification?.body || 'You have a new taxi booking',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-192x192.png',
-    vibrate: [200, 100, 200],
-    tag: 'booking-notification',
+  console.log("Background message received:", payload);
+
+  const title = payload.notification?.title || "🚕 New Booking!";
+  const options = {
+    body: payload.notification?.body || "You have a new booking request",
+    icon: "/icons/icon-192x192.png",
+    badge: "/icons/icon-192x192.png",
+    vibrate: [300, 100, 300, 100, 300],
     requireInteraction: true,
-    data: payload.data
+    data: payload.data,
+    actions: [
+      { action: "open_dashboard", title: "Open Dashboard" },
+    ],
   };
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(title, options);
 });
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(
-    clients.openWindow('/driver')
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes("/driver") && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow("/driver");
+    })
   );
 });

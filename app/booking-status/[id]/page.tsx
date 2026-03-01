@@ -157,6 +157,29 @@ export default function BookingStatusPage() {
             )}
           </div>
 
+          {/* Urgent Help - only show when pending */}
+          {booking.status === 'pending' && (
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-4 mb-6 text-center">
+              <p className="text-sm text-yellow-800 font-medium mb-3">Need it urgently? Contact Ranchie directly:</p>
+              <div className="grid grid-cols-2 gap-3">
+                <a
+                  href="https://wa.me/17844932354?text=Hi%20Ranchie%2C%20I%20just%20submitted%20a%20booking%20and%20need%20urgent%20confirmation!"
+                  className="bg-green-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-sm hover:bg-green-600 transition-all"
+                >
+                  <MessageCircle size={16} />
+                  WhatsApp
+                </a>
+                <a
+                  href="tel:17844932354"
+                  className="bg-blue-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-sm hover:bg-blue-600 transition-all"
+                >
+                  <Phone size={16} />
+                  Call Now
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Booking Details */}
           <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -197,24 +220,25 @@ export default function BookingStatusPage() {
             </div>
           </div>
 
-          {/* Contact Driver */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <a href="https://wa.me/17844932354" className="bg-green-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-lg">
-              <MessageCircle size={18} />
-              <span>WhatsApp</span>
-            </a>
-            <a href="tel:1784-493-2354" className="bg-blue-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg">
-              <Phone size={20} />
-              <span>Call</span>
-            </a>
-          </div>
+          {/* Contact Driver - show when not pending */}
+          {booking.status !== 'pending' && (
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <a href="https://wa.me/17844932354" className="bg-green-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-600 transition-all shadow-lg">
+                <MessageCircle size={18} />
+                <span>WhatsApp</span>
+              </a>
+              <a href="tel:17844932354" className="bg-blue-500 text-white py-4 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg">
+                <Phone size={20} />
+                <span>Call</span>
+              </a>
+            </div>
+          )}
 
           {/* Leave a Review */}
           {(booking.status === 'completed' || booking.status === 'confirmed' || booking.status === 'accepted') && (
             <div className="bg-white rounded-2xl p-6 shadow-lg mb-6">
               <h3 className="text-lg font-semibold mb-3 text-center">Enjoyed Your Ride?</h3>
-              
-            <a
+              <a
                 href="https://g.page/r/CWuUlZeIXcgNEAE/review"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -241,7 +265,15 @@ export default function BookingStatusPage() {
             </ul>
           </div>
 
-          <div className="text-center">
+          <div className="text-center space-y-3">
+            <Link
+              href="/booking"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+            >
+              <Car size={20} />
+              Book Another Ride
+            </Link>
+            <br />
             <Link href="/" className="inline-flex items-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-semibold hover:shadow-lg transition-all">
               <ArrowLeft size={20} />
               Return to Home

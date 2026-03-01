@@ -66,17 +66,21 @@ export default function DriverDashboard() {
       oscillator.frequency.value = frequency;
       oscillator.type = 'sine';
       
-      gainNode.gain.setValueAtTime(0.3, startTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      gainNode.gain.setValueAtTime(1.0, startTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.05, startTime + duration);
       
       oscillator.start(startTime);
       oscillator.stop(startTime + duration);
     };
     
-    const now = audioContext.currentTime;
-    playTone(880, now, 0.2);        // A5
-    playTone(1108, now + 0.2, 0.3); // C#6
-    playTone(1320, now + 0.4, 0.4); // E6
+     const now = audioContext.currentTime;
+    playTone(880, now, 0.3);        // A5
+    playTone(1108, now + 0.3, 0.3); // C#6
+    playTone(1320, now + 0.6, 0.5); // E6
+    // Repeat for emphasis
+    playTone(880, now + 1.2, 0.3);
+    playTone(1108, now + 1.5, 0.3);
+    playTone(1320, now + 1.8, 0.5);
   };
 
   // Show browser notification
@@ -167,6 +171,8 @@ export default function DriverDashboard() {
       setNotificationPermission(Notification.permission);
       if (Notification.permission === 'granted') {
         setNotificationsEnabled(true);
+        // Auto-register FCM token if permission already granted
+        requestNotificationPermission();
       }
     }
   }, []);
@@ -498,13 +504,37 @@ export default function DriverDashboard() {
                   {booking.status === 'pending' && (
                     <>
                       <button
-                        onClick={() => updateStatus(booking.id, 'accepted')}
+                        onClick={() => {
+                          updateStatus(booking.id, 'accepted');
+                          const msg = encodeURIComponent(
+                            `Hi ${booking.name}! 🚕 Great news — your booking is *confirmed*!\n\n` +
+                            `📍 *Pickup:* ${booking.pickup}\n` +
+                            `📍 *Destination:* ${booking.destination}\n` +
+                            `📅 *Date:* ${booking.date}\n` +
+                            `🕐 *Time:* ${booking.time}\n\n` +
+                            `Ranchie will be there. See you soon!\n— Ranchie Taxi`
+                          );
+                          if (booking.phone && booking.phone !== 'Not provided') {
+                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
+                          }
+                        }}
                         className="flex-1 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
                       >
                         ✅ Accept
                       </button>
                       <button
-                        onClick={() => updateStatus(booking.id, 'declined')}
+                        onClick={() => {
+                          updateStatus(booking.id, 'declined');
+                          const msg = encodeURIComponent(
+                            `Hi ${booking.name}, thank you for booking with Ranchie Taxi.\n\n` +
+                            `Unfortunately, we are unable to accommodate your request at this time. ` +
+                            `We sincerely apologize for the inconvenience.\n\n` +
+                            `Please feel free to reach out for alternative arrangements.\n— Ranchie Taxi`
+                          );
+                          if (booking.phone && booking.phone !== 'Not provided') {
+                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
+                          }
+                        }}
                         className="px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all"
                       >
                         ❌ Decline
@@ -512,12 +542,24 @@ export default function DriverDashboard() {
                     </>
                   )}
                   {(booking.status === 'accepted' || booking.status === 'confirmed') && (
-                    <button
-                      onClick={() => updateStatus(booking.id, 'completed')}
-                      className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
-                    >
-                      Mark Complete
-                    </button>
+                    <>
+                      <button
+                        onClick={() => updateStatus(booking.id, 'completed')}
+                        className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                      >
+                        Mark Complete
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (booking.phone && booking.phone !== 'Not provided') {
+                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
+                      >
+                        💬 Message
+                      </button>
+                    </>
                   )}
                   {(booking.status === 'completed' || booking.status === 'cancelled') && (
                     <button

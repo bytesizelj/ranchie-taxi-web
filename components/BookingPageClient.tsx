@@ -16,7 +16,8 @@ import {
   Palmtree,
   Ship,
   Car,
-  Sparkles
+   Sparkles,
+  Loader2
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
@@ -88,16 +89,19 @@ export default function BookingPageClient() {
   };
   
   // Handle Submit
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     saveToRecent(formData.pickup);
     saveToRecent(formData.destination);
 
-    // Save booking to Firebase
-    let bookingId = '';
     try {
       const docRef = await addDoc(collection(db, 'bookings'), {
         name: formData.name,
-        phone: formData.phone || 'Not provided',
+        phone: formData.phone,
         pickup: formData.pickup,
         destination: formData.destination,
         date: formData.date || 'Today',
@@ -107,37 +111,11 @@ export default function BookingPageClient() {
         status: 'pending',
         createdAt: serverTimestamp()
       });
-      bookingId = docRef.id;
+      router.push(`/booking-status/${docRef.id}`);
     } catch (error) {
       console.error('Error saving booking:', error);
+      setIsSubmitting(false);
     }
-
-    const message = `*RANCHIE TAXI BOOKING REQUEST*
-----------------------------------------
-
-*Passenger:* ${formData.name}
-*Phone:* ${formData.phone || 'Not provided'}
-
-*Pickup:* ${formData.pickup}
-*Destination:* ${formData.destination}
-
-*Date:* ${formData.date || 'Today'}
-*Time:* ${formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
-*Passengers:* ${formData.passengers}
-
-*Notes:* ${formData.notes || 'None'}
-
-----------------------------------------
-Sent via Ranchie Taxi App`;
-
-    const encoded = encodeURIComponent(message);
-    window.open(`https://wa.me/17844932354?text=${encoded}`, '_blank');
-
-    // Delay redirect to allow WhatsApp to open
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-       
-    router.push(`/booking-status/${bookingId}`);
   };
 
      
@@ -150,7 +128,7 @@ Sent via Ranchie Taxi App`;
       case 3:
         return true;
       case 4:
-        return formData.name.length > 0;
+        return formData.name.length > 0 && formData.phone.length > 5;
       default:
         return false;
     }
@@ -522,9 +500,9 @@ Sent via Ranchie Taxi App`;
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
-                    <input
+                 <input
                       type="tel"
-                      placeholder="Phone Number"
+                      placeholder="Phone Number *"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
@@ -572,7 +550,7 @@ Sent via Ranchie Taxi App`;
               <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
                 <p className="text-sm flex items-center gap-2">
                   <Car size={16} />
-                  Your booking will be sent to Ranchie via WhatsApp for fast confirmation!
+                  Your booking will be sent directly to Ranchie for fast confirmation. You&apos;ll see real-time status updates!
                 </p>
               </div>
             </div>
@@ -606,12 +584,26 @@ Sent via Ranchie Taxi App`;
               <ArrowRight size={18} />
             </button>
           ) : (
-            <button
+           <button
               onClick={handleSubmit}
-              className="py-3 px-8 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className={`py-3 px-8 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
+                isSubmitting
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg'
+              }`}
             >
-              <Check size={18} />
-              Submit Booking
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Check size={18} />
+                  Submit Booking
+                </>
+              )}
             </button>
           )}
         </div>
