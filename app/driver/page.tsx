@@ -209,7 +209,6 @@ export default function DriverDashboard() {
         
         if (notificationsEnabled) {
           playNotificationSound();
-          showNotification(newBooking);
         }
       }
       
