@@ -36,6 +36,10 @@ exports.sendBookingNotification = onDocumentCreated("bookings/{bookingId}", asyn
       click_action: "/driver",
     },
     webpush: {
+      headers: {
+        Urgency: "high",
+        TTL: "86400",
+      },
       fcmOptions: {
         link: "/driver",
       },
@@ -44,6 +48,8 @@ exports.sendBookingNotification = onDocumentCreated("bookings/{bookingId}", asyn
         badge: "/icons/icon-192x192.png",
         vibrate: [300, 100, 300, 100, 300],
         requireInteraction: true,
+        tag: "new-booking-" + event.params.bookingId,
+        renotify: true,
         actions: [
           { action: "open_dashboard", title: "Open Dashboard" },
         ],

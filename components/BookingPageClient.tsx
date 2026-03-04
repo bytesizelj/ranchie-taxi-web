@@ -128,7 +128,7 @@ export default function BookingPageClient() {
       case 3:
         return true;
       case 4:
-        return formData.name.length > 0 && formData.phone.length > 5;
+        return formData.name.length > 0 && formData.phone.replace(/[^0-9]/g, '').length >= 7;
       default:
         return false;
     }
@@ -586,9 +586,9 @@ export default function BookingPageClient() {
           ) : (
            <button
               onClick={handleSubmit}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !isStepValid()}
               className={`py-3 px-8 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 ${
-                isSubmitting
+                isSubmitting || !isStepValid()
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-green-500 to-teal-500 text-white hover:shadow-lg'
               }`}
