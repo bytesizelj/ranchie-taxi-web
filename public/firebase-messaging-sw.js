@@ -36,11 +36,11 @@ self.addEventListener("notificationclick", (event) => {
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url.includes("/driver") && "focus" in client) {
+        if (client.url.includes("ranchietaxisvg.com/driver") && "focus" in client) {
           return client.focus();
         }
       }
-      return clients.openWindow("/driver");
+      return clients.openWindow("https://ranchietaxisvg.com/driver");
     })
   );
 });

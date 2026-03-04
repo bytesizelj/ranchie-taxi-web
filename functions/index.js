@@ -33,7 +33,7 @@ exports.sendBookingNotification = onDocumentCreated("bookings/{bookingId}", asyn
       time: booking.time || "",
       phone: booking.phone || "",
       passengers: booking.passengers || "",
-      click_action: "/driver",
+      click_action: "https://ranchietaxisvg.com/driver",
     },
     webpush: {
       headers: {
@@ -41,7 +41,7 @@ exports.sendBookingNotification = onDocumentCreated("bookings/{bookingId}", asyn
         TTL: "86400",
       },
       fcmOptions: {
-        link: "/driver",
+        link: "https://ranchietaxisvg.com/driver",
       },
       notification: {
         icon: "/icons/icon-192x192.png",
