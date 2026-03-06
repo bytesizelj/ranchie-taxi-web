@@ -541,8 +541,8 @@ export default function DriverDashboard() {
 
                   {/* Flight Tracker */}
                   {booking.flightNumber && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                      <div className="flex items-center justify-between mb-1">
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
+                      <div className="flex items-center justify-between mb-3">
                         <span className="text-sm font-bold text-blue-800">✈️ Flight {booking.flightNumber}</span>
                         {flightStatuses[booking.flightNumber] ? (
                           <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
@@ -569,17 +569,60 @@ export default function DriverDashboard() {
                           </button>
                         )}
                       </div>
+
+                      {/* Visual Flight Progress Bar */}
                       {flightStatuses[booking.flightNumber] && (
-                        <div className="text-xs text-blue-700 space-y-1 mt-2">
-                          <p>🛫 {flightStatuses[booking.flightNumber].airline} — {flightStatuses[booking.flightNumber].departure.airport} ({flightStatuses[booking.flightNumber].departure.iata})</p>
-                          <p>🛬 {flightStatuses[booking.flightNumber].arrival.airport} ({flightStatuses[booking.flightNumber].arrival.iata})</p>
-                          {flightStatuses[booking.flightNumber].arrival.estimated && (
-                            <p>⏰ ETA: {new Date(flightStatuses[booking.flightNumber].arrival.estimated!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                          )}
-                          {flightStatuses[booking.flightNumber].arrival.scheduled && !flightStatuses[booking.flightNumber].arrival.estimated && (
-                            <p>📅 Scheduled: {new Date(flightStatuses[booking.flightNumber].arrival.scheduled!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                          )}
-                        </div>
+                        <>
+                          <div className="relative mb-4">
+                            <div className="flex items-center justify-between text-xs font-bold text-blue-800 mb-1">
+                              <span>{flightStatuses[booking.flightNumber].departure.iata}</span>
+                              <span>{flightStatuses[booking.flightNumber].arrival.iata}</span>
+                            </div>
+                            <div className="relative h-2 bg-blue-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-1000 ${
+                                  flightStatuses[booking.flightNumber].status === 'landed' ? 'bg-green-500 w-full' :
+                                  flightStatuses[booking.flightNumber].status === 'active' ? 'bg-blue-500 w-3/5' :
+                                  flightStatuses[booking.flightNumber].status === 'scheduled' ? 'bg-yellow-500 w-0' :
+                                  'bg-gray-400 w-0'
+                                }`}
+                                style={flightStatuses[booking.flightNumber].status === 'scheduled' ? { width: '5%' } : {}}
+                              />
+                            </div>
+                            {/* Plane icon on progress bar */}
+                            <div 
+                              className="absolute transition-all duration-1000"
+                              style={{
+                                top: '18px',
+                                left: flightStatuses[booking.flightNumber].status === 'landed' ? 'calc(100% - 16px)' :
+                                      flightStatuses[booking.flightNumber].status === 'active' ? '55%' :
+                                      '0%',
+                              }}
+                            >
+                              <span className="text-lg" style={{ 
+                                display: 'inline-block',
+                                transform: flightStatuses[booking.flightNumber].status === 'landed' ? 'rotate(90deg)' : 'rotate(0deg)',
+                                transition: 'transform 0.5s ease'
+                              }}>✈️</span>
+                            </div>
+                            <div className="flex items-center justify-between mt-4 text-[10px] text-blue-600">
+                              <span>Departed</span>
+                              <span>In Air</span>
+                              <span>Arrived</span>
+                            </div>
+                          </div>
+
+                          <div className="text-xs text-blue-700 space-y-1 bg-white/60 rounded-lg p-2">
+                            <p>🛫 {flightStatuses[booking.flightNumber].airline} — {flightStatuses[booking.flightNumber].departure.airport}</p>
+                            <p>🛬 {flightStatuses[booking.flightNumber].arrival.airport}</p>
+                            {flightStatuses[booking.flightNumber].arrival.estimated && (
+                              <p className="font-bold text-green-700">⏰ ETA: {new Date(flightStatuses[booking.flightNumber].arrival.estimated!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                            )}
+                            {flightStatuses[booking.flightNumber].arrival.scheduled && !flightStatuses[booking.flightNumber].arrival.estimated && (
+                              <p className="font-bold">📅 Scheduled: {new Date(flightStatuses[booking.flightNumber].arrival.scheduled!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                            )}
+                          </div>
+                        </>
                       )}
                     </div>
                   )}

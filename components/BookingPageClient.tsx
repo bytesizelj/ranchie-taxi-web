@@ -390,6 +390,38 @@ export default function BookingPageClient() {
           )}
 {currentStep === 3 && (
             <div className="space-y-4">
+              {/* Flight Number - show at top if airport related */}
+              {(formData.pickup.toLowerCase().includes('airport') || 
+                formData.destination.toLowerCase().includes('airport') ||
+                formData.pickup.toLowerCase().includes('aia') ||
+                formData.destination.toLowerCase().includes('aia') ||
+                formData.pickup.toLowerCase().includes('argyle') ||
+                formData.destination.toLowerCase().includes('argyle')) && (
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-600 rounded-2xl p-5 text-white shadow-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Plane className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold">Arriving by flight? ✈️</h3>
+                      <p className="text-sm opacity-90">Ranchie will track your flight and be ready when you land!</p>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter flight number (e.g. AA1234, BW600)"
+                    value={formData.flightNumber}
+                    onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
+                    className="w-full p-4 border-2 border-white/30 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
+                  />
+                  {formData.flightNumber && (
+                    <p className="text-sm mt-2 bg-white/20 rounded-lg px-3 py-2">
+                      ✅ Flight <span className="font-bold">{formData.flightNumber}</span> will be tracked — Ranchie will know exactly when you land!
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
@@ -465,35 +497,7 @@ export default function BookingPageClient() {
                 </div>
              </div>
 
-              {/* Flight Number - show if pickup or destination mentions airport */}
-              {(formData.pickup.toLowerCase().includes('airport') || 
-                formData.destination.toLowerCase().includes('airport') ||
-                formData.pickup.toLowerCase().includes('aia') ||
-                formData.destination.toLowerCase().includes('aia') ||
-                formData.pickup.toLowerCase().includes('argyle') ||
-                formData.destination.toLowerCase().includes('argyle')) && (
-                <div className="bg-white rounded-2xl p-6 shadow-lg">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                      <Plane className="text-white" size={24} />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">Flight Number (Optional)</h3>
-                      <p className="text-sm text-gray-500">Help Ranchie track your flight</p>
-                    </div>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="e.g. AA1234, BW600, JB2506"
-                    value={formData.flightNumber}
-                    onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
-                  />
-                  <p className="text-xs text-gray-400 mt-2">Enter airline code + number. Ranchie will track your flight and be ready when you land!</p>
-                </div>
-              )}
-
-              <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
+                <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin size={16} />
                   <span className="text-sm opacity-80">From:</span>
