@@ -22,10 +22,31 @@ import {
   BellOff
 } from 'lucide-react';
 
+interface FlightStatus {
+  airline: string;
+  flightNumber: string;
+  status: string;
+  departure: {
+    airport: string;
+    iata: string;
+    scheduled: string | null;
+    estimated: string | null;
+    actual: string | null;
+  };
+  arrival: {
+    airport: string;
+    iata: string;
+    scheduled: string | null;
+    estimated: string | null;
+    actual: string | null;
+  };
+}
+
 interface Booking {
   id: string;
   name: string;
   phone: string;
+  flightNumber?: string;
   pickup: string;
   destination: string;
   date: string;
@@ -48,6 +69,20 @@ export default function DriverDashboard() {
   
   const previousBookingCount = useRef<number>(0);
   const isFirstLoad = useRef<boolean>(true);
+  const [flightStatuses, setFlightStatuses] = useState<Record<string, FlightStatus>>({});
+
+  const fetchFlightStatus = async (flightNumber: string) => {
+    if (!flightNumber || flightStatuses[flightNumber]) return;
+    try {
+      const res = await fetch(`/api/flight-status?flight=${flightNumber}`);
+      if (res.ok) {
+        const data = await res.json();
+        setFlightStatuses(prev => ({ ...prev, [flightNumber]: data }));
+      }
+    } catch (err) {
+      console.error('Flight status error:', err);
+    }
+  };
 
   const DRIVER_PIN = 'ufuhreal?';
 
@@ -217,6 +252,13 @@ export default function DriverDashboard() {
       
       setBookings(bookingsData);
       setLoading(false);
+      
+      // Fetch flight status for bookings with flight numbers
+      bookingsData.forEach(b => {
+        if (b.flightNumber && b.status === 'pending') {
+          fetchFlightStatus(b.flightNumber);
+        }
+      });
     });
 
     return () => unsubscribe();
@@ -496,10 +538,71 @@ export default function DriverDashboard() {
                       📝 {booking.notes}
                     </p>
                   )}
+
+                  {/* Flight Tracker */}
+                  {booking.flightNumber && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-bold text-blue-800">✈️ Flight {booking.flightNumber}</span>
+                        {flightStatuses[booking.flightNumber] ? (
+                          <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                            flightStatuses[booking.flightNumber].status === 'landed' ? 'bg-green-100 text-green-800' :
+                            flightStatuses[booking.flightNumber].status === 'active' ? 'bg-blue-100 text-blue-800' :
+                            flightStatuses[booking.flightNumber].status === 'scheduled' ? 'bg-yellow-100 text-yellow-800' :
+                            flightStatuses[booking.flightNumber].status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                            flightStatuses[booking.flightNumber].status === 'diverted' ? 'bg-orange-100 text-orange-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {flightStatuses[booking.flightNumber].status === 'active' ? '🟢 In Air' :
+                             flightStatuses[booking.flightNumber].status === 'landed' ? '✅ Landed' :
+                             flightStatuses[booking.flightNumber].status === 'scheduled' ? '🕐 Scheduled' :
+                             flightStatuses[booking.flightNumber].status === 'cancelled' ? '❌ Cancelled' :
+                             flightStatuses[booking.flightNumber].status === 'diverted' ? '⚠️ Diverted' :
+                             flightStatuses[booking.flightNumber].status}
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => fetchFlightStatus(booking.flightNumber!)}
+                            className="text-xs px-2 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                          >
+                            Check Status
+                          </button>
+                        )}
+                      </div>
+                      {flightStatuses[booking.flightNumber] && (
+                        <div className="text-xs text-blue-700 space-y-1 mt-2">
+                          <p>🛫 {flightStatuses[booking.flightNumber].airline} — {flightStatuses[booking.flightNumber].departure.airport} ({flightStatuses[booking.flightNumber].departure.iata})</p>
+                          <p>🛬 {flightStatuses[booking.flightNumber].arrival.airport} ({flightStatuses[booking.flightNumber].arrival.iata})</p>
+                          {flightStatuses[booking.flightNumber].arrival.estimated && (
+                            <p>⏰ ETA: {new Date(flightStatuses[booking.flightNumber].arrival.estimated!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                          )}
+                          {flightStatuses[booking.flightNumber].arrival.scheduled && !flightStatuses[booking.flightNumber].arrival.estimated && (
+                            <p>📅 Scheduled: {new Date(flightStatuses[booking.flightNumber].arrival.scheduled!).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                <div className="flex flex-col gap-2 pt-3 border-t border-gray-100">
+                  {booking.flightNumber && flightStatuses[booking.flightNumber] && (
+                    <button
+                      onClick={() => {
+                        setFlightStatuses(prev => {
+                          const updated = { ...prev };
+                          delete updated[booking.flightNumber!];
+                          return updated;
+                        });
+                        fetchFlightStatus(booking.flightNumber!);
+                      }}
+                      className="w-full py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-semibold hover:bg-blue-200 transition-all"
+                    >
+                      🔄 Refresh Flight Status
+                    </button>
+                  )}
+                  <div className="flex gap-2">
                   {booking.status === 'pending' && (
                     <>
                       <button
@@ -568,6 +671,7 @@ export default function DriverDashboard() {
                       Reset to Pending
                     </button>
                   )}
+                  </div>
                 </div>
               </div>
             ))}

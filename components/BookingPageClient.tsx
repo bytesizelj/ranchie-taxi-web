@@ -51,7 +51,8 @@ export default function BookingPageClient() {
     time: '',
     timeType: 'ASAP',
     passengers: '1',
-    notes: ''
+    notes: '',
+    flightNumber: ''
   });
 
   useEffect(() => {
@@ -108,6 +109,7 @@ export default function BookingPageClient() {
         time: formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType,
         passengers: formData.passengers,
         notes: formData.notes || 'None',
+        flightNumber: formData.flightNumber || '',
         status: 'pending',
         createdAt: serverTimestamp()
       });
@@ -461,7 +463,35 @@ export default function BookingPageClient() {
                     ))}
                   </div>
                 </div>
-              </div>
+             </div>
+
+              {/* Flight Number - show if pickup or destination mentions airport */}
+              {(formData.pickup.toLowerCase().includes('airport') || 
+                formData.destination.toLowerCase().includes('airport') ||
+                formData.pickup.toLowerCase().includes('aia') ||
+                formData.destination.toLowerCase().includes('aia') ||
+                formData.pickup.toLowerCase().includes('argyle') ||
+                formData.destination.toLowerCase().includes('argyle')) && (
+                <div className="bg-white rounded-2xl p-6 shadow-lg">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
+                      <Plane className="text-white" size={24} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">Flight Number (Optional)</h3>
+                      <p className="text-sm text-gray-500">Help Ranchie track your flight</p>
+                    </div>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="e.g. AA1234, BW600, JB2506"
+                    value={formData.flightNumber}
+                    onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
+                  />
+                  <p className="text-xs text-gray-400 mt-2">Enter airline code + number. Ranchie will track your flight and be ready when you land!</p>
+                </div>
+              )}
 
               <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
                 <div className="flex items-center gap-2 mb-2">
@@ -533,6 +563,12 @@ export default function BookingPageClient() {
                     <span className="text-sm text-gray-800 font-medium">Passengers</span>
                     <span className="text-sm font-semibold text-gray-900">{formData.passengers}</span>
                   </div>
+                  {formData.flightNumber && (
+                    <div className="flex justify-between items-center py-2 border-t border-gray-200">
+                      <span className="text-sm text-gray-800 font-medium">Flight</span>
+                      <span className="text-sm font-semibold text-blue-600">✈️ {formData.flightNumber}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4">
