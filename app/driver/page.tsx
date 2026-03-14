@@ -70,20 +70,30 @@ export default function DriverDashboard() {
   const previousBookingCount = useRef<number>(0);
   const isFirstLoad = useRef<boolean>(true);
   const [flightStatuses, setFlightStatuses] = useState<Record<string, FlightStatus>>({});
-  const [translatedNotes, setTranslatedNotes] = useState<Record<string, string>>({});
+  const [translatedBookings, setTranslatedBookings] = useState<Record<string, { pickup: string; destination: string; notes: string }>>({});
+  const [translatingId, setTranslatingId] = useState<string | null>(null);
 
-  const translateNote = async (bookingId: string, text: string) => {
+  const translateText = async (text: string): Promise<string> => {
+    const res = await fetch(
+      `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`
+    );
+    const data = await res.json();
+    return data[0].map((s: any) => s[0]).join('');
+  };
+
+  const translateBooking = async (booking: Booking) => {
+    setTranslatingId(booking.id);
     try {
-      const res = await fetch(
-        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`
-      );
-      const data = await res.json();
-      const translated = data[0].map((s: any) => s[0]).join('');
-      setTranslatedNotes(prev => ({ ...prev, [bookingId]: translated }));
+      const [pickup, destination, notes] = await Promise.all([
+        translateText(booking.pickup),
+        translateText(booking.destination),
+        booking.notes !== 'None' ? translateText(booking.notes) : Promise.resolve('None'),
+      ]);
+      setTranslatedBookings(prev => ({ ...prev, [booking.id]: { pickup, destination, notes } }));
     } catch (err) {
       console.error('Translation error:', err);
-      setTranslatedNotes(prev => ({ ...prev, [bookingId]: '⚠️ Translation failed' }));
     }
+    setTranslatingId(null);
   };
 
   const fetchFlightStatus = async (flightNumber: string) => {
@@ -519,6 +529,9 @@ export default function DriverDashboard() {
                     <div>
                       <p className="text-xs font-semibold text-gray-700">Pickup</p>
                       <p className="text-sm font-bold text-gray-900">{booking.pickup}</p>
+                      {translatedBookings[booking.id] && translatedBookings[booking.id].pickup !== booking.pickup && (
+                        <p className="text-xs text-green-600 mt-0.5">🇬🇧 {translatedBookings[booking.id].pickup}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-start gap-2">
@@ -526,6 +539,9 @@ export default function DriverDashboard() {
                     <div>
                       <p className="text-xs font-semibold text-gray-700">Destination</p>
                       <p className="text-sm font-bold text-gray-900">{booking.destination}</p>
+                      {translatedBookings[booking.id] && translatedBookings[booking.id].destination !== booking.destination && (
+                        <p className="text-xs text-green-600 mt-0.5">🇬🇧 {translatedBookings[booking.id].destination}</p>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-4 sm:gap-6">
@@ -550,19 +566,9 @@ export default function DriverDashboard() {
                   )}
                   {booking.notes !== 'None' && (
                     <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-sm text-gray-600">📝 {booking.notes}</p>
-                        <button
-                          onClick={() => translateNote(booking.id, booking.notes)}
-                          className="shrink-0 px-2 py-1 bg-blue-500 text-white text-xs font-semibold rounded-lg hover:bg-blue-600 transition-all"
-                        >
-                          🌐 Translate
-                        </button>
-                      </div>
-                      {translatedNotes[booking.id] && (
-                        <div className="mt-2 pt-2 border-t border-gray-200">
-                          <p className="text-sm text-green-700 font-medium">🇬🇧 {translatedNotes[booking.id]}</p>
-                        </div>
+                      <p className="text-sm text-gray-600">📝 {booking.notes}</p>
+                      {translatedBookings[booking.id] && translatedBookings[booking.id].notes !== 'None' && translatedBookings[booking.id].notes !== booking.notes && (
+                        <p className="text-xs text-green-600 mt-1">🇬🇧 {translatedBookings[booking.id].notes}</p>
                       )}
                     </div>
                   )}
@@ -658,6 +664,22 @@ export default function DriverDashboard() {
 
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2 pt-3 border-t border-gray-100">
+                  {!translatedBookings[booking.id] && (
+                    <button
+                      onClick={() => translateBooking(booking)}
+                      disabled={translatingId === booking.id}
+                      className="w-full py-2 bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                    >
+                      {translatingId === booking.id ? (
+                        <>
+                          <RefreshCw size={14} className="animate-spin" />
+                          Translating...
+                        </>
+                      ) : (
+                        <>🌐 Translate Booking</>
+                      )}
+                    </button>
+                  )}
                   {booking.flightNumber && flightStatuses[booking.flightNumber] && (
                     <button
                       onClick={() => {
