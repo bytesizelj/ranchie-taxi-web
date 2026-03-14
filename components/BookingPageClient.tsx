@@ -249,42 +249,24 @@ export default function BookingPageClient() {
                 const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
                 if (select) { select.value = ''; select.dispatchEvent(new Event('change')); }
               }}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
                 language === lang.code
                   ? `bg-gradient-to-r ${lang.color} text-white shadow-lg ${lang.glow} scale-110 ring-2 ring-white`
                   : 'bg-white/80 text-gray-700 hover:scale-105 hover:shadow-md border border-gray-200'
               }`}
             >
-              <span className="text-lg">{lang.flag}</span>
+              <span className="text-sm">{lang.flag}</span>
               <span>{lang.label}</span>
             </button>
           ))}
           <button
             onClick={() => {
-              const el = document.getElementById('google_translate_element');
-              if (el) {
-                const isVisible = el.style.position !== 'absolute';
-                if (isVisible) {
-                  el.style.position = 'absolute';
-                  el.style.top = '-9999px';
-                  el.style.left = '-9999px';
-                } else {
-                  el.style.position = 'fixed';
-                  el.style.top = '0';
-                  el.style.left = '0';
-                  el.style.right = '0';
-                  el.style.zIndex = '9999';
-                  el.style.background = 'white';
-                  el.style.padding = '12px';
-                  el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                  el.style.display = 'flex';
-                  el.style.justifyContent = 'center';
-                  const select = el.querySelector('.goog-te-combo') as HTMLSelectElement;
-                  if (select) select.focus();
-                }
+              const wrapper = document.getElementById('google_translate_wrapper');
+              if (wrapper) {
+                wrapper.style.display = 'flex';
               }
             }}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"
           >
             <Globe size={16} />
             <span>More</span>
