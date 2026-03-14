@@ -29,12 +29,12 @@ import BottomNav from '@/components/BottomNav';
 import { useLanguage } from '@/lib/LanguageContext';
 
 const popularDestinations = [
-  { id: 1, name: 'Argyle International Airport', icon: Plane, color: 'from-blue-500 to-cyan-500' },
-  { id: 2, name: 'Montreal Gardens', icon: Palmtree, color: 'from-green-600 to-emerald-500' },
-  { id: 3, name: 'Villa Beach', icon: Palmtree, color: 'from-orange-500 to-yellow-500' },
-  { id: 4, name: 'Cruise Ship Terminal', icon: Ship, color: 'from-purple-500 to-pink-500' },
-  { id: 5, name: 'Montreal Gardens', icon: Building2, color: 'from-green-500 to-teal-500' },
-  { id: 6, name: 'Layou beach front', icon: Building2, color: 'from-red-500 to-orange-500' },
+  { id: 1, key: 'argyleAirport' as const, icon: Plane, color: 'from-blue-500 to-cyan-500' },
+  { id: 2, key: 'montrealGardens' as const, icon: Palmtree, color: 'from-green-600 to-emerald-500' },
+  { id: 3, key: 'villaBeach' as const, icon: Palmtree, color: 'from-orange-500 to-yellow-500' },
+  { id: 4, key: 'cruiseTerminal' as const, icon: Ship, color: 'from-purple-500 to-pink-500' },
+  { id: 5, key: 'montrealGardens' as const, icon: Building2, color: 'from-green-500 to-teal-500' },
+  { id: 6, key: 'layouBeach' as const, icon: Building2, color: 'from-red-500 to-orange-500' },
 ];
 
 export default function BookingPageClient() {
@@ -223,36 +223,28 @@ export default function BookingPageClient() {
             </h1>
             <p className="text-xs text-gray-500">Step {currentStep} {t.stepOf} 4</p>
           </div>
-          <div className="relative">
+          <Sparkles className="text-yellow-500 animate-pulse" size={20} />
+        </div>
+        <div className="max-w-3xl mx-auto px-4 py-2 flex justify-center gap-2">
+          {[
+            { code: 'en', flag: '🇬🇧', label: 'EN' },
+            { code: 'fr', flag: '🇫🇷', label: 'FR' },
+            { code: 'es', flag: '🇪🇸', label: 'ES' },
+            { code: 'pt', flag: '🇧🇷', label: 'PT' },
+          ].map((lang) => (
             <button
-              onClick={() => setShowLangMenu(!showLangMenu)}
-              className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center hover:shadow-lg transition-all"
+              key={lang.code}
+              onClick={() => setLanguage(lang.code)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
+                language === lang.code
+                  ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              <Globe className="text-white" size={20} />
+              <span>{lang.flag}</span>
+              <span>{lang.label}</span>
             </button>
-            {showLangMenu && (
-              <div className="absolute right-0 top-12 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50 min-w-[140px]">
-                {[
-                  { code: 'en', label: '🇬🇧 English' },
-                  { code: 'fr', label: '🇫🇷 Français' },
-                  { code: 'es', label: '🇪🇸 Español' },
-                  { code: 'pt', label: '🇧🇷 Português' },
-                ].map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => { setLanguage(lang.code); setShowLangMenu(false); }}
-                    className={`w-full px-4 py-3 text-left text-sm font-medium transition-all ${
-                      language === lang.code
-                        ? 'bg-green-50 text-green-700'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    {lang.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          ))}
         </div>
       </header>
 
@@ -345,9 +337,9 @@ export default function BookingPageClient() {
                   {popularDestinations.slice(0, 4).map((dest) => (
                     <button
                       key={dest.id}
-                      onClick={() => setFormData({ ...formData, pickup: dest.name })}
+                      onClick={() => setFormData({ ...formData, pickup: t[dest.key] })}
                       className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        formData.pickup === dest.name
+                        formData.pickup === t[dest.key]
                           ? 'border-green-500 bg-green-50'
                           : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
                       }`}
@@ -355,7 +347,7 @@ export default function BookingPageClient() {
                       <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
                         <dest.icon className="text-white" size={16} />
                       </div>
-                     <span className="text-sm font-medium text-gray-900">{dest.name}</span>
+                     <span className="text-sm font-medium text-gray-900">{t[dest.key]}</span>
                     </button>
                   ))}
                 </div>
@@ -468,9 +460,9 @@ export default function BookingPageClient() {
                   {popularDestinations.map((dest) => (
                     <button
                       key={dest.id}
-                      onClick={() => setFormData({ ...formData, destination: dest.name })}
+                      onClick={() => setFormData({ ...formData, destination: t[dest.key] })}
                       className={`p-4 rounded-xl border-2 transition-all text-left ${
-                        formData.destination === dest.name
+                        formData.destination === t[dest.key]
                           ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-200 hover:border-orange-300 hover:bg-gray-50'
                       }`}
@@ -478,7 +470,7 @@ export default function BookingPageClient() {
                       <div className={`w-8 h-8 bg-gradient-to-r ${dest.color} rounded-lg flex items-center justify-center mb-2`}>
                         <dest.icon className="text-white" size={16} />
                       </div>
-                      <span className="text-sm font-medium text-gray-900">{dest.name}</span>
+                      <span className="text-sm font-medium text-gray-900">{t[dest.key]}</span>
                     </button>
                   ))}
                 </div>
