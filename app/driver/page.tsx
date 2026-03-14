@@ -70,6 +70,21 @@ export default function DriverDashboard() {
   const previousBookingCount = useRef<number>(0);
   const isFirstLoad = useRef<boolean>(true);
   const [flightStatuses, setFlightStatuses] = useState<Record<string, FlightStatus>>({});
+  const [translatedNotes, setTranslatedNotes] = useState<Record<string, string>>({});
+
+  const translateNote = async (bookingId: string, text: string) => {
+    try {
+      const res = await fetch(
+        `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`
+      );
+      const data = await res.json();
+      const translated = data[0].map((s: any) => s[0]).join('');
+      setTranslatedNotes(prev => ({ ...prev, [bookingId]: translated }));
+    } catch (err) {
+      console.error('Translation error:', err);
+      setTranslatedNotes(prev => ({ ...prev, [bookingId]: '⚠️ Translation failed' }));
+    }
+  };
 
   const fetchFlightStatus = async (flightNumber: string) => {
     if (!flightNumber || flightStatuses[flightNumber]) return;
@@ -534,9 +549,22 @@ export default function DriverDashboard() {
                     </a>
                   )}
                   {booking.notes !== 'None' && (
-                    <p className="text-sm text-gray-600 bg-gray-50 p-2 rounded-lg">
-                      📝 {booking.notes}
-                    </p>
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm text-gray-600">📝 {booking.notes}</p>
+                        <button
+                          onClick={() => translateNote(booking.id, booking.notes)}
+                          className="shrink-0 px-2 py-1 bg-blue-500 text-white text-xs font-semibold rounded-lg hover:bg-blue-600 transition-all"
+                        >
+                          🌐 Translate
+                        </button>
+                      </div>
+                      {translatedNotes[booking.id] && (
+                        <div className="mt-2 pt-2 border-t border-gray-200">
+                          <p className="text-sm text-green-700 font-medium">🇬🇧 {translatedNotes[booking.id]}</p>
+                        </div>
+                      )}
+                    </div>
                   )}
 
                   {/* Flight Tracker */}
