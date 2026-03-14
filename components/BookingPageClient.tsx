@@ -50,6 +50,51 @@ export default function BookingPageClient() {
   const [destinationSuggestions, setDestinationSuggestions] = useState<string[]>([]);
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
 
+const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
+
+  useEffect(() => {
+    // Create wrapper and element
+    if (document.getElementById('google_translate_wrapper')) return;
+    
+    const wrapper = document.createElement('div');
+    wrapper.id = 'google_translate_wrapper';
+    Object.assign(wrapper.style, {
+      display: 'none', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+      zIndex: '9999', background: 'rgba(0,0,0,0.5)',
+      padding: '24px 16px', alignItems: 'flex-start', justifyContent: 'center', gap: '12px'
+    });
+
+    const el = document.createElement('div');
+    el.id = 'google_translate_element';
+    wrapper.appendChild(el);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    Object.assign(closeBtn.style, {
+      background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%',
+      width: '36px', height: '36px', fontSize: '18px', cursor: 'pointer',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
+    });
+    closeBtn.onclick = () => { wrapper.style.display = 'none'; };
+    wrapper.appendChild(closeBtn);
+
+    document.body.appendChild(wrapper);
+
+    // Load Google Translate script
+    (window as any).googleTranslateInit = () => {
+      new (window as any).google.translate.TranslateElement({
+        pageLanguage: 'en',
+        autoDisplay: false,
+        layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE
+      }, 'google_translate_element');
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateInit';
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
   useEffect(() => {
     const initAutocomplete = () => {
       if (window.google?.maps?.places) {
@@ -196,7 +241,7 @@ export default function BookingPageClient() {
       }
         .goog-te-banner-frame { display: none !important; }
       body { top: 0 !important; }
-      .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; width: 200px; }
+      .goog-te-combo { padding: 12px 16px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; width: 250px; background: white; }
       .goog-te-gadget { font-family: inherit !important; }
       .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; }
     `}</style>
@@ -257,6 +302,7 @@ export default function BookingPageClient() {
             >
               <span className="text-sm">{lang.flag}</span>
               <span>{lang.label}</span>
+            
             </button>
           ))}
           <button
@@ -264,6 +310,8 @@ export default function BookingPageClient() {
               const wrapper = document.getElementById('google_translate_wrapper');
               if (wrapper) {
                 wrapper.style.display = 'flex';
+                const select = wrapper.querySelector('.goog-te-combo') as HTMLSelectElement;
+                if (select) select.focus();
               }
             }}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"
@@ -272,7 +320,7 @@ export default function BookingPageClient() {
             <span>More</span>
           </button>
         </div>
-      </header>
+        </header>
 
       <div className="max-w-3xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between mb-2">

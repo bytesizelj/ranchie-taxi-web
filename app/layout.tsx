@@ -79,45 +79,10 @@ export default function RootLayout({
             `,
           }}
         />
-        <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit" async />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              function googleTranslateInit() {
-                new google.translate.TranslateElement({
-                  pageLanguage: 'en',
-                  autoDisplay: false,
-                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-                }, 'google_translate_element');
-              }
-            `,
-          }}
-        />
+        
       </head>
       <body className="font-sans text-gray-900 bg-gray-50">
-        <div id="google_translate_wrapper" style={{ display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 9999, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', padding: '12px 16px', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
-          <div id="google_translate_element" />
-          <button
-            id="google_translate_close"
-            style={{ background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%', width: '28px', height: '28px', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-          >
-            ✕
-          </button>
-        </div>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              document.addEventListener('DOMContentLoaded', function() {
-                var closeBtn = document.getElementById('google_translate_close');
-                if (closeBtn) {
-                  closeBtn.addEventListener('click', function() {
-                    document.getElementById('google_translate_wrapper').style.display = 'none';
-                  });
-                }
-              });
-            `,
-          }}
-        />
+        
         <LanguageProvider>
           {children}
         </LanguageProvider>
