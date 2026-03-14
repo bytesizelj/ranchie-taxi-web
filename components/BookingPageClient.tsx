@@ -196,19 +196,7 @@ export default function BookingPageClient() {
       }
         .goog-te-banner-frame { display: none !important; }
       body { top: 0 !important; }
-      #google_translate_element.hidden { display: none; }
-      #google_translate_element:not(.hidden) { 
-        display: flex !important; 
-        justify-content: center;
-        padding: 8px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 9999;
-        background: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      }
+      .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; width: 200px; }
       .goog-te-gadget { font-family: inherit !important; }
       .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; }
     `}</style>
@@ -275,9 +263,25 @@ export default function BookingPageClient() {
             onClick={() => {
               const el = document.getElementById('google_translate_element');
               if (el) {
-                el.classList.toggle('hidden');
-                const select = el.querySelector('.goog-te-combo') as HTMLSelectElement;
-                if (select) select.focus();
+                const isVisible = el.style.position !== 'absolute';
+                if (isVisible) {
+                  el.style.position = 'absolute';
+                  el.style.top = '-9999px';
+                  el.style.left = '-9999px';
+                } else {
+                  el.style.position = 'fixed';
+                  el.style.top = '0';
+                  el.style.left = '0';
+                  el.style.right = '0';
+                  el.style.zIndex = '9999';
+                  el.style.background = 'white';
+                  el.style.padding = '12px';
+                  el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                  el.style.display = 'flex';
+                  el.style.justifyContent = 'center';
+                  const select = el.querySelector('.goog-te-combo') as HTMLSelectElement;
+                  if (select) select.focus();
+                }
               }
             }}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"

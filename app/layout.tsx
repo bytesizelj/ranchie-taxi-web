@@ -95,7 +95,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans text-gray-900 bg-gray-50">
-        <div id="google_translate_element" className="hidden" />
+        <div id="google_translate_element" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }} />
         <LanguageProvider>
           {children}
         </LanguageProvider>
