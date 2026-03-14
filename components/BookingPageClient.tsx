@@ -1,7 +1,12 @@
 'use client';
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   ArrowLeft, 
@@ -35,7 +40,50 @@ export default function BookingPageClient() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const [recentDestinations, setRecentDestinations] = useState<string[]>([]);
-  
+  const pickupInputRef = useRef<HTMLInputElement>(null);
+  const destinationInputRef = useRef<HTMLInputElement>(null);
+  const [pickupSuggestions, setPickupSuggestions] = useState<string[]>([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState<string[]>([]);
+  const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
+
+  useEffect(() => {
+    const initAutocomplete = () => {
+      if (window.google?.maps?.places) {
+        autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+      }
+    };
+    if (window.google?.maps?.places) {
+      initAutocomplete();
+    } else {
+      const interval = setInterval(() => {
+        if (window.google?.maps?.places) {
+          initAutocomplete();
+          clearInterval(interval);
+        }
+      }, 500);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  const getSuggestions = (input: string, callback: (results: string[]) => void) => {
+    if (!autocompleteServiceRef.current || input.length < 2) {
+      callback([]);
+      return;
+    }
+    autocompleteServiceRef.current.getPlacePredictions(
+      {
+        input,
+        componentRestrictions: { country: 'vc' },
+      },
+      (predictions, status) => {
+        if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+          callback(predictions.map((p) => p.description));
+        } else {
+          callback([]);
+        }
+      }
+    );
+  };  
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -222,13 +270,37 @@ export default function BookingPageClient() {
                     <p className="text-sm text-gray-500">Enter your pickup location</p>
                   </div>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Enter pickup address..."
-                  value={formData.pickup}
-                  onChange={(e) => setFormData({ ...formData, pickup: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
-                />
+                <div className="relative">
+                  <input
+                    ref={pickupInputRef}
+                    type="text"
+                    placeholder="Enter pickup address..."
+                    value={formData.pickup}
+                    onChange={(e) => {
+                      setFormData({ ...formData, pickup: e.target.value });
+                      getSuggestions(e.target.value, setPickupSuggestions);
+                    }}
+                    onBlur={() => setTimeout(() => setPickupSuggestions([]), 200)}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
+                  />
+                  {pickupSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
+                      {pickupSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onMouseDown={() => {
+                            setFormData({ ...formData, pickup: suggestion });
+                            setPickupSuggestions([]);
+                          }}
+                          className="w-full p-3 text-left text-sm text-gray-900 hover:bg-green-50 flex items-center gap-2 border-b border-gray-100 last:border-0"
+                        >
+                          <MapPin size={14} className="text-green-500 shrink-0" />
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
@@ -316,13 +388,37 @@ export default function BookingPageClient() {
                     <p className="text-sm text-gray-500">Enter your destination</p>
                   </div>
                 </div>
-                <input
-                  type="text"
-                  placeholder="Enter destination..."
-                  value={formData.destination}
-                  onChange={(e) => setFormData({ ...formData, destination: e.target.value })}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
-                />
+                <div className="relative">
+                  <input
+                    ref={destinationInputRef}
+                    type="text"
+                    placeholder="Enter destination..."
+                    value={formData.destination}
+                    onChange={(e) => {
+                      setFormData({ ...formData, destination: e.target.value });
+                      getSuggestions(e.target.value, setDestinationSuggestions);
+                    }}
+                    onBlur={() => setTimeout(() => setDestinationSuggestions([]), 200)}
+                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-orange-500 focus:outline-none text-lg transition-all text-gray-900 bg-white placeholder:text-gray-500"
+                  />
+                  {destinationSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-white rounded-xl shadow-lg border border-gray-200 max-h-48 overflow-y-auto">
+                      {destinationSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onMouseDown={() => {
+                            setFormData({ ...formData, destination: suggestion });
+                            setDestinationSuggestions([]);
+                          }}
+                          className="w-full p-3 text-left text-sm text-gray-900 hover:bg-orange-50 flex items-center gap-2 border-b border-gray-100 last:border-0"
+                        >
+                          <MapPin size={14} className="text-orange-500 shrink-0" />
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">

@@ -81,6 +81,11 @@ export default function RootLayout({
       </head>
       <body className="font-sans text-gray-900 bg-gray-50">
         {children}
+        <script
+          src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyBwGQlYvLODysT5Lgd0k-VRp0jzp2_-ix8&libraries=places`}
+          async
+          defer
+        />
       </body>
     </html>
   );
