@@ -227,21 +227,21 @@ export default function BookingPageClient() {
         </div>
         <div className="max-w-3xl mx-auto px-4 py-2 flex justify-center gap-2">
           {[
-            { code: 'en', flag: '🇬🇧', label: 'EN' },
-            { code: 'fr', flag: '🇫🇷', label: 'FR' },
-            { code: 'es', flag: '🇪🇸', label: 'ES' },
-            { code: 'pt', flag: '🇧🇷', label: 'PT' },
+            { code: 'en', flag: '🇬🇧', label: 'EN', color: 'from-blue-500 to-indigo-600', glow: 'shadow-blue-500/50' },
+            { code: 'fr', flag: '🇫🇷', label: 'FR', color: 'from-red-500 to-pink-600', glow: 'shadow-red-500/50' },
+            { code: 'es', flag: '🇪🇸', label: 'ES', color: 'from-yellow-500 to-orange-500', glow: 'shadow-yellow-500/50' },
+            { code: 'pt', flag: '🇧🇷', label: 'PT', color: 'from-green-500 to-emerald-600', glow: 'shadow-green-500/50' },
           ].map((lang) => (
             <button
               key={lang.code}
               onClick={() => setLanguage(lang.code)}
-              className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold transition-all ${
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
                 language === lang.code
-                  ? 'bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  ? `bg-gradient-to-r ${lang.color} text-white shadow-lg ${lang.glow} scale-110 ring-2 ring-white`
+                  : 'bg-white/80 text-gray-700 hover:scale-105 hover:shadow-md border border-gray-200'
               }`}
             >
-              <span>{lang.flag}</span>
+              <span className="text-lg">{lang.flag}</span>
               <span>{lang.label}</span>
             </button>
           ))}
