@@ -21,10 +21,12 @@ import {
   Palmtree,
   Ship,
   Car,
-   Sparkles,
-  Loader2
+  Sparkles,
+  Loader2,
+  Globe
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
+import { useLanguage } from '@/lib/LanguageContext';
 
 const popularDestinations = [
   { id: 1, name: 'Argyle International Airport', icon: Plane, color: 'from-blue-500 to-cyan-500' },
@@ -37,6 +39,8 @@ const popularDestinations = [
 
 export default function BookingPageClient() {
   const router = useRouter();
+  const { t, language, setLanguage } = useLanguage();
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const [recentDestinations, setRecentDestinations] = useState<string[]>([]);
@@ -215,11 +219,40 @@ export default function BookingPageClient() {
           />
           <div className="flex-1">
             <h1 className="text-2xl font-bold font-serif bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent">
-              Book Your Ride
+              {t.bookYourRide}
             </h1>
-            <p className="text-xs text-gray-500">Step {currentStep} of 4</p>
+            <p className="text-xs text-gray-500">Step {currentStep} {t.stepOf} 4</p>
           </div>
-          <Sparkles className="text-yellow-500 animate-pulse" size={20} />
+          <div className="relative">
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="w-10 h-10 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center hover:shadow-lg transition-all"
+            >
+              <Globe className="text-white" size={20} />
+            </button>
+            {showLangMenu && (
+              <div className="absolute right-0 top-12 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50 min-w-[140px]">
+                {[
+                  { code: 'en', label: '🇬🇧 English' },
+                  { code: 'fr', label: '🇫🇷 Français' },
+                  { code: 'es', label: '🇪🇸 Español' },
+                  { code: 'pt', label: '🇧🇷 Português' },
+                ].map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => { setLanguage(lang.code); setShowLangMenu(false); }}
+                    className={`w-full px-4 py-3 text-left text-sm font-medium transition-all ${
+                      language === lang.code
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {lang.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -249,10 +282,10 @@ export default function BookingPageClient() {
           ))}
         </div>
         <div className="flex justify-between text-xs text-gray-500 px-1">
-          <span>Pickup</span>
-          <span>Destination</span>
-          <span>When</span>
-          <span>Review</span>
+          <span>{t.pickup}</span>
+          <span>{t.destination}</span>
+          <span>{t.when}</span>
+          <span>{t.review}</span>
         </div>
       </div>
 <div className="max-w-3xl mx-auto px-4">
@@ -266,15 +299,15 @@ export default function BookingPageClient() {
                     <MapPin className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Where to pick you up?</h2>
-                    <p className="text-sm text-gray-500">Enter your pickup location</p>
+                    <h2 className="text-xl font-bold text-gray-900">{t.wherePickup}</h2>
+                    <p className="text-sm text-gray-500">{t.enterPickup}</p>
                   </div>
                 </div>
                 <div className="relative">
                   <input
                     ref={pickupInputRef}
                     type="text"
-                    placeholder="Enter pickup address..."
+                    placeholder={t.enterPickupPlaceholder}
                     value={formData.pickup}
                     onChange={(e) => {
                       setFormData({ ...formData, pickup: e.target.value });
@@ -306,7 +339,7 @@ export default function BookingPageClient() {
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles size={16} className="text-yellow-500" />
-                  Popular Pickup Points
+                  {t.popularPickups}
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {popularDestinations.slice(0, 4).map((dest) => (
@@ -332,7 +365,7 @@ export default function BookingPageClient() {
                 <div className="bg-white rounded-2xl p-6 shadow-lg">
                   <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
                     <Clock size={16} className="text-gray-400" />
-                    Recent Locations
+                    {t.recentLocations}
                   </h3>
                   <div className="space-y-2">
                     {recentDestinations.map((dest, index) => (
@@ -361,15 +394,15 @@ export default function BookingPageClient() {
                   className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
                   style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
                 >
-                  💰 Airport Transfer Rates
+                  💰 {t.airportRates}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
-                    <span className="text-sm font-medium">AIA → Sandals (1-2 persons)</span>
+                    <span className="text-sm font-medium">AIA → Sandals ({t.persons12})</span>
                     <span className="font-bold text-base sm:text-lg">US$65</span>
                   </div>
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
-                    <span className="text-sm font-medium">AIA → Sandals (3+ persons)</span>
+                    <span className="text-sm font-medium">AIA → Sandals ({t.persons3plus})</span>
                     <span className="font-bold text-base sm:text-lg">US$30<span className="text-xs font-normal">/person</span></span>
                   </div>
                 </div>
@@ -384,15 +417,15 @@ export default function BookingPageClient() {
                     <MapPin className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Where are you going?</h2>
-                    <p className="text-sm text-gray-500">Enter your destination</p>
+                    <h2 className="text-xl font-bold text-gray-900">{t.whereGoing}</h2>
+                    <p className="text-sm text-gray-500">{t.enterDestination}</p>
                   </div>
                 </div>
                 <div className="relative">
                   <input
                     ref={destinationInputRef}
                     type="text"
-                    placeholder="Enter destination..."
+                    placeholder={t.enterDestinationPlaceholder}
                     value={formData.destination}
                     onChange={(e) => {
                       setFormData({ ...formData, destination: e.target.value });
@@ -422,14 +455,14 @@ export default function BookingPageClient() {
               </div>
 
               <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
-                <p className="text-sm opacity-80">Picking up from:</p>
+                <p className="text-sm opacity-80">{t.pickingUpFrom}</p>
                 <p className="font-semibold">{formData.pickup}</p>
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg">
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles size={16} className="text-yellow-500" />
-                  Popular Destinations
+                  {t.popularDestinations}
                 </h3>
                 <div className="grid grid-cols-2 gap-3">
                   {popularDestinations.map((dest) => (
@@ -463,15 +496,15 @@ export default function BookingPageClient() {
                   className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
                   style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
                 >
-                  💰 Airport Transfer Rates
+                  💰 {t.airportRates}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
-                    <span className="text-sm font-medium">AIA → Sandals (1-2 persons)</span>
+                    <span className="text-sm font-medium">AIA → Sandals ({t.persons12})</span>
                     <span className="font-bold text-lg">US$65</span>
                   </div>
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
-                    <span className="text-sm font-medium">AIA → Sandals (3+ persons)</span>
+                    <span className="text-sm font-medium">AIA → Sandals ({t.persons3plus})</span>
                     <span className="font-bold text-lg">US$30<span className="text-xs font-normal">/person</span></span>
                   </div>
                 </div>
@@ -493,20 +526,20 @@ export default function BookingPageClient() {
                       <Plane className="text-white" size={24} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold">Arriving by flight? ✈️</h3>
-                      <p className="text-sm opacity-90">Ranchie will track your flight and be ready when you land!</p>
+                      <h3 className="text-lg font-bold">{t.arrivingByFlight}</h3>
+                      <p className="text-sm opacity-90">{t.flightTrackMsg}</p>
                     </div>
                   </div>
                   <input
                     type="text"
-                    placeholder="Enter flight number (e.g. AA1234, BW600)"
+                    placeholder={t.flightPlaceholder}
                     value={formData.flightNumber}
                     onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
                     className="w-full p-4 border-2 border-white/30 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
                   />
                   {formData.flightNumber && (
                     <p className="text-sm mt-2 bg-white/20 rounded-lg px-3 py-2">
-                      ✅ Flight <span className="font-bold">{formData.flightNumber}</span> will be tracked — Ranchie will know exactly when you land!
+                      ✅ {t.flight} <span className="font-bold">{formData.flightNumber}</span> {t.flightTracked}
                     </p>
                   )}
                 </div>
@@ -518,15 +551,15 @@ export default function BookingPageClient() {
                     <Clock className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">When do you need the ride?</h2>
-                    <p className="text-sm text-gray-500">Select date and time</p>
+                    <h2 className="text-xl font-bold text-gray-900">{t.whenRide}</h2>
+                    <p className="text-sm text-gray-500">{t.selectDateTime}</p>
                   </div>
                 </div>
 
                 <div className="mt-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t.date}</label>
                       <input
                         type="date"
                         min={today}
@@ -536,7 +569,7 @@ export default function BookingPageClient() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">{t.time}</label>
                       <input
                         type="time"
                         value={formData.time}
@@ -548,7 +581,7 @@ export default function BookingPageClient() {
                 </div>
 
                 <div className="border-t border-gray-200 pt-4 mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Number of Passengers</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.passengers}</label>
                   <div className="flex gap-2">
                     {['1', '2', '3', '4', '5+'].map((num) => (
                       <button
@@ -570,12 +603,12 @@ export default function BookingPageClient() {
                 <div className="bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl p-4 text-white">
                 <div className="flex items-center gap-2 mb-2">
                   <MapPin size={16} />
-                  <span className="text-sm opacity-80">From:</span>
+                  <span className="text-sm opacity-80">{t.from}</span>
                   <span className="font-semibold">{formData.pickup}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin size={16} />
-                  <span className="text-sm opacity-80">To:</span>
+                  <span className="text-sm opacity-80">{t.to}</span>
                   <span className="font-semibold">{formData.destination}</span>
                 </div>
               </div>
@@ -589,24 +622,24 @@ export default function BookingPageClient() {
                     <Check className="text-white" size={24} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Review Your Booking</h2>
-                    <p className="text-sm text-gray-700">Confirm details before sending</p>
+                    <h2 className="text-xl font-bold text-gray-900">{t.reviewBooking}</h2>
+                    <p className="text-sm text-gray-700">{t.confirmDetails}</p>
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <p className="text-sm text-gray-800 font-medium mb-3">Your Contact Info:</p>
+                  <p className="text-sm text-gray-800 font-medium mb-3">{t.contactInfo}</p>
                   <div className="space-y-3">
                     <input
                       type="text"
-                      placeholder="Your Name *"
+                      placeholder={t.yourName}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
                  <input
                       type="tel"
-                      placeholder="Phone Number *"
+                      placeholder={t.phoneNumber}
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
@@ -616,11 +649,11 @@ export default function BookingPageClient() {
 
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-800 font-medium">Pickup</span>
+                    <span className="text-sm text-gray-800 font-medium">{t.pickup}</span>
                     <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">{formData.pickup}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-800 font-medium">Destination</span>
+                    <span className="text-sm text-gray-800 font-medium">{t.destination}</span>
                     <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">{formData.destination}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
@@ -634,21 +667,21 @@ export default function BookingPageClient() {
                     </span>
                   </div>
                   <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-gray-800 font-medium">Passengers</span>
+                    <span className="text-sm text-gray-800 font-medium">{t.passengers}</span>
                     <span className="text-sm font-semibold text-gray-900">{formData.passengers}</span>
                   </div>
                   {formData.flightNumber && (
                     <div className="flex justify-between items-center py-2 border-t border-gray-200">
-                      <span className="text-sm text-gray-800 font-medium">Flight</span>
+                      <span className="text-sm text-gray-800 font-medium">{t.flight}</span>
                       <span className="text-sm font-semibold text-blue-600">✈️ {formData.flightNumber}</span>
                     </div>
                   )}
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Special Notes (Optional)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">{t.specialNotes}</label>
                   <textarea
-                    placeholder="Any special requests? (luggage, child seat, etc.)"
+                    placeholder={t.notesPlaceholder}
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                     rows={3}
@@ -660,7 +693,7 @@ export default function BookingPageClient() {
               <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-2xl p-4 text-white">
                 <p className="text-sm flex items-center gap-2">
                   <Car size={16} />
-                  Your booking will be sent directly to Ranchie for fast confirmation. You&apos;ll see real-time status updates!
+                  {t.bookingMsg}
                 </p>
               </div>
             </div>
@@ -676,7 +709,7 @@ export default function BookingPageClient() {
               className="py-3 px-6 rounded-xl font-semibold bg-white text-gray-700 hover:bg-gray-100 transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               <ArrowLeft size={18} />
-              Back
+              {t.back}
             </button>
           )}
           
@@ -690,7 +723,7 @@ export default function BookingPageClient() {
                   : 'bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
-              Continue
+              {t.continue}
               <ArrowRight size={18} />
             </button>
           ) : (
@@ -706,12 +739,12 @@ export default function BookingPageClient() {
               {isSubmitting ? (
                 <>
                   <Loader2 size={18} className="animate-spin" />
-                  Sending...
+                  {t.sending}
                 </>
               ) : (
                 <>
                   <Check size={18} />
-                  Submit Booking
+                  {t.submitBooking}
                 </>
               )}
             </button>

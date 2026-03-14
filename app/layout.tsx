@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LanguageProvider } from '@/lib/LanguageContext';
 
 export const viewport = {
   themeColor: '#ffffff',
@@ -80,7 +81,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans text-gray-900 bg-gray-50">
-        {children}
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
         <script
           src={`https://maps.googleapis.com/maps/api/js?key=AIzaSyBwGQlYvLODysT5Lgd0k-VRp0jzp2_-ix8&libraries=places`}
           async
