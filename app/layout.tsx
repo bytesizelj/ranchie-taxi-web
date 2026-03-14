@@ -79,8 +79,23 @@ export default function RootLayout({
             `,
           }}
         />
+        <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateInit" async />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              function googleTranslateInit() {
+                new google.translate.TranslateElement({
+                  pageLanguage: 'en',
+                  autoDisplay: false,
+                  layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+                }, 'google_translate_element');
+              }
+            `,
+          }}
+        />
       </head>
       <body className="font-sans text-gray-900 bg-gray-50">
+        <div id="google_translate_element" className="hidden" />
         <LanguageProvider>
           {children}
         </LanguageProvider>

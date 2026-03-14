@@ -194,6 +194,23 @@ export default function BookingPageClient() {
         0%, 100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
         50% { transform: scale(1.08); text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4); }
       }
+        .goog-te-banner-frame { display: none !important; }
+      body { top: 0 !important; }
+      #google_translate_element.hidden { display: none; }
+      #google_translate_element:not(.hidden) { 
+        display: flex !important; 
+        justify-content: center;
+        padding: 8px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: white;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .goog-te-gadget { font-family: inherit !important; }
+      .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; }
     `}</style>
     <div 
       className="min-h-screen pb-24"
@@ -225,7 +242,7 @@ export default function BookingPageClient() {
           </div>
           <Sparkles className="text-yellow-500 animate-pulse" size={20} />
         </div>
-        <div className="max-w-3xl mx-auto px-4 py-2 flex justify-center gap-2">
+        <div className="max-w-3xl mx-auto px-4 py-2 flex justify-center gap-2 flex-wrap">
           {[
             { code: 'en', flag: '🇬🇧', label: 'EN', color: 'from-blue-500 to-indigo-600', glow: 'shadow-blue-500/50' },
             { code: 'fr', flag: '🇫🇷', label: 'FR', color: 'from-red-500 to-pink-600', glow: 'shadow-red-500/50' },
@@ -234,7 +251,16 @@ export default function BookingPageClient() {
           ].map((lang) => (
             <button
               key={lang.code}
-              onClick={() => setLanguage(lang.code)}
+              onClick={() => {
+                setLanguage(lang.code);
+                const frame = document.querySelector('.goog-te-banner-frame') as HTMLIFrameElement;
+                if (frame) frame.style.display = 'none';
+                document.body.style.top = '0px';
+                const el = document.getElementById('google_translate_element');
+                if (el) el.classList.add('hidden');
+                const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+                if (select) { select.value = ''; select.dispatchEvent(new Event('change')); }
+              }}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 ${
                 language === lang.code
                   ? `bg-gradient-to-r ${lang.color} text-white shadow-lg ${lang.glow} scale-110 ring-2 ring-white`
@@ -245,6 +271,20 @@ export default function BookingPageClient() {
               <span>{lang.label}</span>
             </button>
           ))}
+          <button
+            onClick={() => {
+              const el = document.getElementById('google_translate_element');
+              if (el) {
+                el.classList.toggle('hidden');
+                const select = el.querySelector('.goog-te-combo') as HTMLSelectElement;
+                if (select) select.focus();
+              }
+            }}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"
+          >
+            <Globe size={16} />
+            <span>More</span>
+          </button>
         </div>
       </header>
 
