@@ -30,12 +30,6 @@ const popularDestinations = [
   { id: 6, name: 'Layou beach front', icon: Building2, color: 'from-red-500 to-orange-500' },
 ];
 
-const quickTimes = [
-  { label: 'ASAP', value: 'ASAP' },
-  { label: '30 min', value: '30 minutes' },
-  { label: '1 hour', value: '1 hour' },
-  { label: '2 hours', value: '2 hours' },
-];
 export default function BookingPageClient() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -49,7 +43,7 @@ export default function BookingPageClient() {
     destination: '',
     date: '',
     time: '',
-    timeType: 'ASAP',
+    timeType: 'custom',
     passengers: '1',
     notes: '',
     flightNumber: ''
@@ -433,27 +427,7 @@ export default function BookingPageClient() {
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <p className="text-sm text-gray-600 mb-3">Quick Options:</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {quickTimes.map((time) => (
-                      <button
-                        key={time.value}
-                        onClick={() => setFormData({ ...formData, timeType: time.value, time: '' })}
-                        className={`py-3 px-2 rounded-xl text-sm font-semibold transition-all ${
-                          formData.timeType === time.value
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {time.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 pt-4">
-                  <p className="text-sm text-gray-600 mb-3">Or choose specific date & time:</p>
+                <div className="mt-2">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
