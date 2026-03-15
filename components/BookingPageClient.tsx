@@ -91,8 +91,16 @@ export default function BookingPageClient() {
     { code: 'yi', name: 'Yiddish' }, { code: 'yo', name: 'Yoruba' }, { code: 'zu', name: 'Zulu' },
   ];
 
+  const isGoogleTranslated = typeof window !== 'undefined' && window.location.hostname.includes('translate.goog');
+  const originalUrl = 'https://ranchietaxisvg.com/booking';
+
   const selectGoogleLanguage = (langCode: string) => {
-    const url = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(window.location.href)}`;
+    if (langCode === 'en') {
+      window.open(originalUrl, '_self');
+      return;
+    }
+    const baseUrl = isGoogleTranslated ? originalUrl : window.location.href;
+    const url = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(baseUrl)}`;
     window.open(url, '_self');
   };
 
@@ -283,9 +291,15 @@ export default function BookingPageClient() {
             <button
               key={lang.code}
               onClick={() => {
+                if (isGoogleTranslated) {
+                  if (lang.code === 'en') {
+                    window.open(originalUrl, '_self');
+                  } else {
+                    selectGoogleLanguage(lang.code);
+                  }
+                  return;
+                }
                 setLanguage(lang.code);
-                const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
-                if (select) { select.value = ''; select.dispatchEvent(new Event('change')); }
               }}
               className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 ${
                 language === lang.code
