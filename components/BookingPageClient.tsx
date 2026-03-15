@@ -50,50 +50,51 @@ export default function BookingPageClient() {
   const [destinationSuggestions, setDestinationSuggestions] = useState<string[]>([]);
   const autocompleteServiceRef = useRef<google.maps.places.AutocompleteService | null>(null);
 
-const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
-  useEffect(() => {
-    // Create wrapper and element
-    if (document.getElementById('google_translate_wrapper')) return;
-    
-    const wrapper = document.createElement('div');
-    wrapper.id = 'google_translate_wrapper';
-    Object.assign(wrapper.style, {
-      display: 'none', position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
-      zIndex: '9999', background: 'rgba(0,0,0,0.5)',
-      padding: '24px 16px', alignItems: 'flex-start', justifyContent: 'center', gap: '12px'
-    });
+  const allLanguages = [
+    { code: 'af', name: 'Afrikaans' }, { code: 'sq', name: 'Albanian' }, { code: 'am', name: 'Amharic' },
+    { code: 'ar', name: 'Arabic' }, { code: 'hy', name: 'Armenian' }, { code: 'az', name: 'Azerbaijani' },
+    { code: 'eu', name: 'Basque' }, { code: 'be', name: 'Belarusian' }, { code: 'bn', name: 'Bengali' },
+    { code: 'bs', name: 'Bosnian' }, { code: 'bg', name: 'Bulgarian' }, { code: 'ca', name: 'Catalan' },
+    { code: 'ceb', name: 'Cebuano' }, { code: 'zh-CN', name: 'Chinese (Simplified)' }, { code: 'zh-TW', name: 'Chinese (Traditional)' },
+    { code: 'co', name: 'Corsican' }, { code: 'hr', name: 'Croatian' }, { code: 'cs', name: 'Czech' },
+    { code: 'da', name: 'Danish' }, { code: 'nl', name: 'Dutch' }, { code: 'eo', name: 'Esperanto' },
+    { code: 'et', name: 'Estonian' }, { code: 'fi', name: 'Finnish' }, { code: 'fr', name: 'French' },
+    { code: 'fy', name: 'Frisian' }, { code: 'gl', name: 'Galician' }, { code: 'ka', name: 'Georgian' },
+    { code: 'de', name: 'German' }, { code: 'el', name: 'Greek' }, { code: 'gu', name: 'Gujarati' },
+    { code: 'ht', name: 'Haitian Creole' }, { code: 'ha', name: 'Hausa' }, { code: 'haw', name: 'Hawaiian' },
+    { code: 'he', name: 'Hebrew' }, { code: 'hi', name: 'Hindi' }, { code: 'hmn', name: 'Hmong' },
+    { code: 'hu', name: 'Hungarian' }, { code: 'is', name: 'Icelandic' }, { code: 'ig', name: 'Igbo' },
+    { code: 'id', name: 'Indonesian' }, { code: 'ga', name: 'Irish' }, { code: 'it', name: 'Italian' },
+    { code: 'ja', name: 'Japanese' }, { code: 'jv', name: 'Javanese' }, { code: 'kn', name: 'Kannada' },
+    { code: 'kk', name: 'Kazakh' }, { code: 'km', name: 'Khmer' }, { code: 'rw', name: 'Kinyarwanda' },
+    { code: 'ko', name: 'Korean' }, { code: 'ku', name: 'Kurdish' }, { code: 'ky', name: 'Kyrgyz' },
+    { code: 'lo', name: 'Lao' }, { code: 'la', name: 'Latin' }, { code: 'lv', name: 'Latvian' },
+    { code: 'lt', name: 'Lithuanian' }, { code: 'lb', name: 'Luxembourgish' }, { code: 'mk', name: 'Macedonian' },
+    { code: 'mg', name: 'Malagasy' }, { code: 'ms', name: 'Malay' }, { code: 'ml', name: 'Malayalam' },
+    { code: 'mt', name: 'Maltese' }, { code: 'mi', name: 'Maori' }, { code: 'mr', name: 'Marathi' },
+    { code: 'mn', name: 'Mongolian' }, { code: 'my', name: 'Myanmar' }, { code: 'ne', name: 'Nepali' },
+    { code: 'no', name: 'Norwegian' }, { code: 'ny', name: 'Nyanja' }, { code: 'or', name: 'Odia' },
+    { code: 'ps', name: 'Pashto' }, { code: 'fa', name: 'Persian' }, { code: 'pl', name: 'Polish' },
+    { code: 'pt', name: 'Portuguese' }, { code: 'pa', name: 'Punjabi' }, { code: 'ro', name: 'Romanian' },
+    { code: 'ru', name: 'Russian' }, { code: 'sm', name: 'Samoan' }, { code: 'gd', name: 'Scots Gaelic' },
+    { code: 'sr', name: 'Serbian' }, { code: 'st', name: 'Sesotho' }, { code: 'sn', name: 'Shona' },
+    { code: 'sd', name: 'Sindhi' }, { code: 'si', name: 'Sinhala' }, { code: 'sk', name: 'Slovak' },
+    { code: 'sl', name: 'Slovenian' }, { code: 'so', name: 'Somali' }, { code: 'es', name: 'Spanish' },
+    { code: 'su', name: 'Sundanese' }, { code: 'sw', name: 'Swahili' }, { code: 'sv', name: 'Swedish' },
+    { code: 'tl', name: 'Tagalog' }, { code: 'tg', name: 'Tajik' }, { code: 'ta', name: 'Tamil' },
+    { code: 'tt', name: 'Tatar' }, { code: 'te', name: 'Telugu' }, { code: 'th', name: 'Thai' },
+    { code: 'tr', name: 'Turkish' }, { code: 'tk', name: 'Turkmen' }, { code: 'uk', name: 'Ukrainian' },
+    { code: 'ur', name: 'Urdu' }, { code: 'ug', name: 'Uyghur' }, { code: 'uz', name: 'Uzbek' },
+    { code: 'vi', name: 'Vietnamese' }, { code: 'cy', name: 'Welsh' }, { code: 'xh', name: 'Xhosa' },
+    { code: 'yi', name: 'Yiddish' }, { code: 'yo', name: 'Yoruba' }, { code: 'zu', name: 'Zulu' },
+  ];
 
-    const el = document.createElement('div');
-    el.id = 'google_translate_element';
-    wrapper.appendChild(el);
-
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
-    Object.assign(closeBtn.style, {
-      background: '#ef4444', color: 'white', border: 'none', borderRadius: '50%',
-      width: '36px', height: '36px', fontSize: '18px', cursor: 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
-    });
-    closeBtn.onclick = () => { wrapper.style.display = 'none'; };
-    wrapper.appendChild(closeBtn);
-
-    document.body.appendChild(wrapper);
-
-    // Load Google Translate script
-    (window as any).googleTranslateInit = () => {
-      new (window as any).google.translate.TranslateElement({
-        pageLanguage: 'en',
-        autoDisplay: false,
-        layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE
-      }, 'google_translate_element');
-    };
-
-    const script = document.createElement('script');
-    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateInit';
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
+  const selectGoogleLanguage = (langCode: string) => {
+    const url = `https://translate.google.com/translate?sl=en&tl=${langCode}&u=${encodeURIComponent(window.location.href)}`;
+    window.open(url, '_self');
+  };
 
   useEffect(() => {
     const initAutocomplete = () => {
@@ -239,11 +240,8 @@ const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
         0%, 100% { transform: scale(1); text-shadow: 0 0 5px rgba(255,255,255,0.3); }
         50% { transform: scale(1.08); text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4); }
       }
-        .goog-te-banner-frame { display: none !important; }
+      .goog-te-banner-frame { display: none !important; }
       body { top: 0 !important; }
-      .goog-te-combo { padding: 12px 16px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 16px; width: 250px; background: white; }
-      .goog-te-gadget { font-family: inherit !important; }
-      .goog-te-combo { padding: 8px 12px; border-radius: 12px; border: 2px solid #e5e7eb; font-size: 14px; }
     `}</style>
     <div 
       className="min-h-screen pb-24"
@@ -286,11 +284,6 @@ const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
               key={lang.code}
               onClick={() => {
                 setLanguage(lang.code);
-                const frame = document.querySelector('.goog-te-banner-frame') as HTMLIFrameElement;
-                if (frame) frame.style.display = 'none';
-                document.body.style.top = '0px';
-                const el = document.getElementById('google_translate_element');
-                if (el) el.classList.add('hidden');
                 const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
                 if (select) { select.value = ''; select.dispatchEvent(new Event('change')); }
               }}
@@ -302,25 +295,17 @@ const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
             >
               <span className="text-sm">{lang.flag}</span>
               <span>{lang.label}</span>
-            
             </button>
           ))}
           <button
-            onClick={() => {
-              const wrapper = document.getElementById('google_translate_wrapper');
-              if (wrapper) {
-                wrapper.style.display = 'flex';
-                const select = wrapper.querySelector('.goog-te-combo') as HTMLSelectElement;
-                if (select) select.focus();
-              }
-            }}
+            onClick={() => setShowLanguageModal(true)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-300 bg-gradient-to-r from-purple-500 to-violet-600 text-white hover:scale-105 hover:shadow-lg shadow-purple-500/50 animate-pulse"
           >
             <Globe size={16} />
             <span>More</span>
           </button>
         </div>
-        </header>
+      </header>
 
       <div className="max-w-3xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between mb-2">
@@ -723,11 +708,11 @@ const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
                     <span className="text-sm font-semibold text-gray-900 text-right max-w-[60%]">{formData.destination}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-800 font-medium">Date</span>
+                    <span className="text-sm text-gray-800 font-medium">{t.date}</span>
                     <span className="text-sm font-semibold text-gray-900">{formData.date || 'Today'}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                    <span className="text-sm text-gray-800 font-medium">Time</span>
+                    <span className="text-sm text-gray-800 font-medium">{t.time}</span>
                     <span className="text-sm font-semibold text-gray-900">
                       {formData.timeType === 'ASAP' ? 'ASAP' : formData.time || formData.timeType}
                     </span>
@@ -818,8 +803,39 @@ const [showGoogleTranslate, setShowGoogleTranslate] = useState(false);
         </div>
       </div>
 
+      {/* Google Translate Language Modal */}
+      {showLanguageModal && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/60 flex items-start justify-center pt-16"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLanguageModal(false); }}
+        >
+          <div className="bg-white rounded-2xl w-[90%] max-w-[320px] max-h-[75vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 shrink-0">
+              <p className="font-bold text-gray-900">🌐 Select Language</p>
+              <button
+                onClick={() => setShowLanguageModal(false)}
+                className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 overscroll-contain">
+              {allLanguages.map((lang) => (
+                <button
+                  key={lang.code}
+                  onClick={() => selectGoogleLanguage(lang.code)}
+                  className="w-full px-4 py-3 text-left text-sm text-gray-900 border-b border-gray-100 hover:bg-green-50 active:bg-green-100 transition-colors"
+                >
+                  {lang.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <BottomNav />
     </div>
     </>
   );
-}                               
+}
