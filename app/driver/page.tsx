@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -67,7 +67,6 @@ export default function DriverDashboard() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   
-  const previousBookingCount = useRef<number>(0);
   const isFirstLoad = useRef<boolean>(true);
   const [flightStatuses, setFlightStatuses] = useState<Record<string, FlightStatus>>({});
   const [translatedBookings, setTranslatedBookings] = useState<Record<string, { pickup: string; destination: string; notes: string }>>({});
@@ -263,16 +262,15 @@ export default function DriverDashboard() {
         bookingsData.push({ id: doc.id, ...doc.data() } as Booking);
       });
       
-      // Check for new bookings (only after first load)
-      if (!isFirstLoad.current && bookingsData.length > previousBookingCount.current) {
-        const newBooking = bookingsData[0]; // Most recent booking
-        
-        if (notificationsEnabled) {
+      // Check for new bookings using docChanges (reliable detection)
+      if (!isFirstLoad.current) {
+        const newBookings = snapshot.docChanges().filter(change => change.type === 'added');
+        if (newBookings.length > 0 && notificationsEnabled) {
+          const newBooking = { id: newBookings[0].doc.id, ...newBookings[0].doc.data() } as Booking;
           playNotificationSound();
+          showNotification(newBooking);
         }
       }
-      
-      previousBookingCount.current = bookingsData.length;
       isFirstLoad.current = false;
       
       setBookings(bookingsData);
@@ -288,6 +286,15 @@ export default function DriverDashboard() {
 
     return () => unsubscribe();
   }, [isAuthenticated, notificationsEnabled]);
+
+  const deleteBooking = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to delete this booking? This cannot be undone.')) return;
+    try {
+      await deleteDoc(doc(db, 'bookings', bookingId));
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+    }
+  };
 
   const updateStatus = async (bookingId: string, newStatus: string) => {
     try {
@@ -451,7 +458,7 @@ export default function DriverDashboard() {
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white mb-6 shadow-lg">
             <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
               <AlertCircle size={20} />
-              Today's Pickups ({todayBookings.length})
+              Today&apos;s Pickups ({todayBookings.length})
             </h2>
             <div className="space-y-3">
               {todayBookings.map((booking) => (
@@ -559,10 +566,18 @@ export default function DriverDashboard() {
                     </div>
                   </div>
                   {booking.phone !== 'Not provided' && (
-                    <a href={`tel:${booking.phone}`} className="flex items-center gap-2 text-blue-600">
-                      <Phone size={16} />
-                      <span className="text-sm">{booking.phone}</span>
-                    </a>
+                    <div className="flex items-center gap-3">
+                      <a href={`tel:${booking.phone}`} className="flex items-center gap-1 text-blue-600">
+                        <Phone size={16} />
+                        <span className="text-sm">{booking.phone}</span>
+                      </a>
+                      <a
+                        href={`sms:${booking.phone.replace(/[^0-9]/g, '')}`}
+                        className="px-2 py-1 bg-green-100 text-green-700 rounded-lg text-xs font-semibold hover:bg-green-200"
+                      >
+                        📱 SMS
+                      </a>
+                    </div>
                   )}
                   {booking.notes !== 'None' && (
                     <div className="bg-gray-50 p-3 rounded-lg">
@@ -756,15 +771,33 @@ export default function DriverDashboard() {
                       </button>
                     </>
                   )}
-                  {(booking.status === 'completed' || booking.status === 'cancelled') && (
-                    <button
-                      onClick={() => updateStatus(booking.id, 'pending')}
-                      className="flex-1 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-all"
-                    >
-                      Reset to Pending
-                    </button>
+                  {(booking.status === 'completed' || booking.status === 'cancelled' || booking.status === 'declined') && (
+                    <>
+                      <button
+                        onClick={() => updateStatus(booking.id, 'pending')}
+                        className="flex-1 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-all"
+                      >
+                        Reset to Pending
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (booking.phone && booking.phone !== 'Not provided') {
+                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
+                      >
+                        💬 Message
+                      </button>
+                    </>
                   )}
                   </div>
+                  <button
+                    onClick={() => deleteBooking(booking.id)}
+                    className="w-full py-2 bg-red-50 text-red-500 rounded-xl text-xs font-semibold hover:bg-red-100 transition-all mt-2"
+                  >
+                    🗑️ Delete Booking
+                  </button>
                 </div>
               </div>
             ))}
