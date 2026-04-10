@@ -63,6 +63,7 @@ export default function DriverDashboard() {
   const [error, setError] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'completed'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -315,9 +316,17 @@ export default function DriverDashboard() {
     });
   };
 
-  const filteredBookings = filter === 'all' 
-    ? bookings 
-    : bookings.filter(b => b.status === filter);
+  const filteredBookings = bookings.filter(b => {
+    const matchesFilter = filter === 'all' || b.status === filter;
+    const query = searchQuery.toLowerCase().trim();
+    const matchesSearch = !query || 
+      b.name.toLowerCase().includes(query) ||
+      b.phone.includes(query) ||
+      b.pickup.toLowerCase().includes(query) ||
+      b.destination.toLowerCase().includes(query) ||
+      b.date.includes(query);
+    return matchesFilter && matchesSearch;
+  });
 
   const todayBookings = getTodayBookings();
 
@@ -479,6 +488,48 @@ export default function DriverDashboard() {
             </div>
           </div>
         )}
+
+{/* Search Bar */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search by name, phone, location, or date..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-sm text-gray-900 bg-white placeholder:text-gray-400"
+          />
+          {searchQuery && (
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-gray-500">{filteredBookings.length} result{filteredBookings.length !== 1 ? 's' : ''} found</p>
+              <button
+                onClick={() => setSearchQuery('')}
+                className="text-xs text-red-500 font-semibold hover:text-red-600"
+              >
+                Clear search
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Status Counts */}
+        <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="bg-yellow-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-yellow-700">{bookings.filter(b => b.status === 'pending').length}</p>
+            <p className="text-[10px] text-yellow-600 font-semibold">Pending</p>
+          </div>
+          <div className="bg-green-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-green-700">{bookings.filter(b => b.status === 'accepted' || b.status === 'confirmed').length}</p>
+            <p className="text-[10px] text-green-600 font-semibold">Accepted</p>
+          </div>
+          <div className="bg-blue-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-blue-700">{bookings.filter(b => b.status === 'completed').length}</p>
+            <p className="text-[10px] text-blue-600 font-semibold">Completed</p>
+          </div>
+          <div className="bg-red-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-red-700">{bookings.filter(b => b.status === 'declined' || b.status === 'cancelled').length}</p>
+            <p className="text-[10px] text-red-600 font-semibold">Declined</p>
+          </div>
+        </div>
 
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
