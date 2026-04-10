@@ -148,7 +148,7 @@ export default function DriverDashboard() {
       const notification = new Notification('🚕 New Booking!', {
         body: `${booking.name}\n${booking.pickup} → ${booking.destination}\n${booking.date} at ${booking.time}`,
         icon: '/icons/icon-192x192.png',
-        tag: 'new-booking',
+        tag: `new-booking-${booking.id}`,
         requireInteraction: true
       });
 
