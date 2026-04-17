@@ -324,7 +324,8 @@ export default function DriverDashboard() {
       b.phone.includes(query) ||
       b.pickup.toLowerCase().includes(query) ||
       b.destination.toLowerCase().includes(query) ||
-      b.date.includes(query);
+      b.date.includes(query) ||
+      (b.createdAt?.toDate?.() && b.createdAt.toDate().toLocaleDateString().toLowerCase().includes(query));
     return matchesFilter && matchesSearch;
   });
 

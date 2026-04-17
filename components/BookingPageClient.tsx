@@ -191,6 +191,25 @@ export default function BookingPageClient() {
   
   // Handle Submit
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [phoneValidation, setPhoneValidation] = useState<{ checked: boolean; valid: boolean; reason: string }>({ checked: false, valid: true, reason: '' });
+  const [isValidatingPhone, setIsValidatingPhone] = useState(false);
+
+  const validatePhone = async (phone: string) => {
+    const digits = phone.replace(/[^0-9]/g, '');
+    if (digits.length < 10) {
+      setPhoneValidation({ checked: true, valid: false, reason: 'Please enter a valid phone number with country code' });
+      return;
+    }
+    setIsValidatingPhone(true);
+    try {
+      const res = await fetch(`/api/validate-phone?phone=${digits}`);
+      const data = await res.json();
+      setPhoneValidation({ checked: true, valid: data.valid, reason: data.reason || '' });
+    } catch {
+      setPhoneValidation({ checked: true, valid: true, reason: '' });
+    }
+    setIsValidatingPhone(false);
+  };
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
@@ -220,7 +239,11 @@ export default function BookingPageClient() {
     }
   };
 
-     
+  const isAirportRelated = () => {
+    const text = `${formData.pickup} ${formData.destination}`.toLowerCase();
+    return text.includes('airport') || text.includes('aia') || text.includes('argyle');
+  };
+  
   const isStepValid = () => {
     switch (currentStep) {
       case 1:
@@ -228,9 +251,13 @@ export default function BookingPageClient() {
       case 2:
         return formData.destination.length > 0;
       case 3:
+        if (isAirportRelated()) {
+          return formData.flightNumber.length >= 3;
+        }
         return true;
       case 4:
-        return formData.name.length > 0 && formData.phone.replace(/[^0-9]/g, '').length >= 7;
+        const digits = formData.phone.replace(/[^0-9]/g, '');
+        return formData.name.length > 0 && digits.length >= 10 && digits.length <= 15 && phoneValidation.checked && phoneValidation.valid;
       default:
         return false;
     }
@@ -607,6 +634,19 @@ export default function BookingPageClient() {
                       ✅ {t.flight} <span className="font-bold">{formData.flightNumber}</span> {t.flightTracked}
                     </p>
                   )}
+                  {!formData.flightNumber && (
+                    <div className="mt-2 rounded-lg px-3 py-2 font-semibold text-sm text-white relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(270deg, #ef4444, #f59e0b, #ef4444, #f59e0b)',
+                        backgroundSize: '300% 300%',
+                        animation: 'booking-bg-shift 3s ease infinite'
+                      }}
+                    >
+                      <span className="inline-block" style={{ animation: 'booking-pulse 1.5s ease-in-out infinite' }}>
+                        ✈️ Please enter flight number — required for airport pickups
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -706,10 +746,32 @@ export default function BookingPageClient() {
                       type="tel"
                       placeholder={t.phoneNumber}
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => {
+                        setFormData({ ...formData, phone: e.target.value });
+                        setPhoneValidation({ checked: false, valid: true, reason: '' });
+                      }}
+                      onBlur={() => {
+                        if (formData.phone.replace(/[^0-9]/g, '').length >= 10) {
+                          validatePhone(formData.phone);
+                        }
+                      }}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
-                  </div>
+                    {isValidatingPhone && (
+                      <p className="text-xs text-blue-500 mt-1 flex items-center gap-1">
+                        <Loader2 size={12} className="animate-spin" /> Verifying phone number...
+                      </p>
+                    )}
+                    {formData.phone && formData.phone.replace(/[^0-9]/g, '').length < 10 && (
+                      <p className="text-xs text-red-500 mt-1">Please enter a valid phone number with country code (e.g. 17844932354)</p>
+                    )}
+                    {phoneValidation.checked && !phoneValidation.valid && (
+                      <p className="text-xs text-red-500 mt-1">⚠️ {phoneValidation.reason}</p>
+                    )}
+                    {phoneValidation.checked && phoneValidation.valid && formData.phone.replace(/[^0-9]/g, '').length >= 10 && (
+                      <p className="text-xs text-green-500 mt-1">✅ Phone number verified</p>
+                    )}
+                    </div>
                 </div>
 
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3">
