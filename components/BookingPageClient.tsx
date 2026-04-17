@@ -744,7 +744,7 @@ export default function BookingPageClient() {
                     />
                  <input
                       type="tel"
-                      placeholder={t.phoneNumber}
+                      placeholder="e.g. 17844932354 (include country code)"
                       value={formData.phone}
                       onChange={(e) => {
                         setFormData({ ...formData, phone: e.target.value });
@@ -762,8 +762,15 @@ export default function BookingPageClient() {
                         <Loader2 size={12} className="animate-spin" /> Verifying phone number...
                       </p>
                     )}
+                    {!formData.phone && (
+                      <p className="text-xs text-orange-500 mt-1 animate-pulse font-semibold">
+                        📱 Include your country code (e.g. +1 for US/Canada, +44 for UK, +1784 for SVG)
+                      </p>
+                    )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length < 10 && (
-                      <p className="text-xs text-red-500 mt-1">Please enter a valid phone number with country code (e.g. 17844932354)</p>
+                      <p className="text-xs text-red-500 mt-1 animate-pulse font-semibold">
+                        ⚠️ Include country code — e.g. 17844932354 (SVG), 447769974681 (UK), 13135551234 (US)
+                      </p>
                     )}
                     {phoneValidation.checked && !phoneValidation.valid && (
                       <p className="text-xs text-red-500 mt-1">⚠️ {phoneValidation.reason}</p>

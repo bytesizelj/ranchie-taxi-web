@@ -767,7 +767,6 @@ export default function DriverDashboard() {
                     <>
                       <button
                         onClick={() => {
-                          updateStatus(booking.id, 'accepted');
                           const msg = encodeURIComponent(
                             `Hi ${booking.name}! 🚕 Great news — your booking is *confirmed*!\n\n` +
                             `📍 *Pickup:* ${booking.pickup}\n` +
@@ -779,6 +778,7 @@ export default function DriverDashboard() {
                           if (booking.phone && booking.phone !== 'Not provided') {
                             window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
                           }
+                          updateStatus(booking.id, 'accepted');
                         }}
                         className="flex-1 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
                       >
@@ -786,7 +786,6 @@ export default function DriverDashboard() {
                       </button>
                       <button
                         onClick={() => {
-                          updateStatus(booking.id, 'declined');
                           const msg = encodeURIComponent(
                             `Hi ${booking.name}, thank you for booking with Ranchie Taxi.\n\n` +
                             `Unfortunately, we are unable to accommodate your request at this time. ` +
@@ -796,6 +795,7 @@ export default function DriverDashboard() {
                           if (booking.phone && booking.phone !== 'Not provided') {
                             window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
                           }
+                          updateStatus(booking.id, 'declined');
                         }}
                         className="px-4 py-3 bg-red-500 text-white rounded-xl text-sm font-bold hover:bg-red-600 transition-all"
                       >
