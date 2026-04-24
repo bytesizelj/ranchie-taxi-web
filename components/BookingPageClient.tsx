@@ -239,6 +239,38 @@ export default function BookingPageClient() {
     }
   };
 
+  // Airlines that serve Argyle International Airport (SVD)
+  const svdAirlines = ['AA', 'DL', 'B6', 'BW', 'AC', 'RV', 'VS', 'JY', '8R', 'WM', 'IJ', 'MN'];
+
+  const validateFlightNumber = (flight: string): { valid: boolean; message: string } => {
+    if (!flight) return { valid: false, message: '' };
+    const trimmed = flight.trim().toUpperCase();
+    
+    // Must be 4-8 characters
+    if (trimmed.length < 4 || trimmed.length > 8) {
+      return { valid: false, message: '⚠️ Flight number should be 4-8 characters (e.g. AA2302)' };
+    }
+    
+    // Extract airline code (first 2-3 characters that are letters/numbers)
+    const match = trimmed.match(/^([A-Z]{2}|[A-Z0-9]{2})(\d{1,5})$/) || trimmed.match(/^([A-Z0-9]{3})(\d{1,4})$/);
+    if (!match) {
+      return { valid: false, message: '⚠️ Invalid format — use airline code + number (e.g. AA2302, BW600)' };
+    }
+
+    const airlineCode = match[1];
+    const flightNum = match[2];
+
+    if (!flightNum || flightNum.length < 1) {
+      return { valid: false, message: '⚠️ Missing flight number after airline code' };
+    }
+
+    if (!svdAirlines.includes(airlineCode)) {
+      return { valid: false, message: `⚠️ ${airlineCode} does not fly to St. Vincent (SVD). Airlines: AA, DL, B6, BW, AC, VS, JY` };
+    }
+
+    return { valid: true, message: `✅ ${airlineCode} ${flightNum} — valid airline for St. Vincent` };
+  };
+
   const isAirportRelated = () => {
     const text = `${formData.pickup} ${formData.destination}`.toLowerCase();
     return text.includes('airport') || text.includes('aia') || text.includes('argyle');
@@ -252,7 +284,7 @@ export default function BookingPageClient() {
         return formData.destination.length > 0;
       case 3:
         if (isAirportRelated()) {
-          return formData.flightNumber.length >= 3;
+          return validateFlightNumber(formData.flightNumber).valid;
         }
         return true;
       case 4:
@@ -627,11 +659,16 @@ export default function BookingPageClient() {
                     placeholder={t.flightPlaceholder}
                     value={formData.flightNumber}
                     onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
-                    className="w-full p-4 border-2 border-white/30 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
+                    className="w-full p-4 border-2 border-white/3s0 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
                   />
-                  {formData.flightNumber && (
+                  {formData.flightNumber && validateFlightNumber(formData.flightNumber).valid && (
                     <p className="text-sm mt-2 bg-white/20 rounded-lg px-3 py-2">
-                      ✅ {t.flight} <span className="font-bold">{formData.flightNumber}</span> {t.flightTracked}
+                      {validateFlightNumber(formData.flightNumber).message} — {t.flightTracked}
+                    </p>
+                  )}
+                  {formData.flightNumber && !validateFlightNumber(formData.flightNumber).valid && (
+                    <p className="text-sm mt-2 bg-red-500/40 rounded-lg px-3 py-2 text-white font-semibold">
+                      {validateFlightNumber(formData.flightNumber).message}
                     </p>
                   )}
                   {!formData.flightNumber && (
@@ -758,13 +795,22 @@ export default function BookingPageClient() {
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
                     {isValidatingPhone && (
-                      <p className="text-xs text-blue-500 mt-1 flex items-center gap-1">
-                        <Loader2 size={12} className="animate-spin" /> Verifying phone number...
-                      </p>
+                      <div className="mt-2 p-3 bg-blue-50 border-2 border-blue-300 rounded-xl flex items-center gap-3 animate-pulse">
+                        <Loader2 size={20} className="animate-spin text-blue-600" />
+                        <div>
+                          <p className="text-sm font-semibold text-blue-700">Verifying phone number...</p>
+                          <p className="text-xs text-blue-500">Please wait — this only takes a moment</p>
+                        </div>
+                      </div>
                     )}
                     {!formData.phone && (
                       <p className="text-xs text-orange-500 mt-1 animate-pulse font-semibold">
                         📱 Include your country code (e.g. +1 for US/Canada, +44 for UK, +1784 for SVG)
+                      </p>
+                    )}
+                    {formData.phone && formData.phone.replace(/[^0-9]/g, '').length >= 10 && !phoneValidation.checked && !isValidatingPhone && (
+                      <p className="text-xs text-blue-500 mt-1 font-semibold animate-pulse">
+                        🔍 Your phone number will be verified — tap outside the field to continue
                       </p>
                     )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length < 10 && (
