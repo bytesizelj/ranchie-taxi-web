@@ -109,6 +109,24 @@ export default function DriverDashboard() {
     }
   };
 
+  const airlineNames: Record<string, string> = {
+    'AA': 'American Airlines', 'DL': 'Delta Air Lines', 'B6': 'JetBlue',
+    'BW': 'Caribbean Airlines', 'AC': 'Air Canada', 'RV': 'Air Canada Rouge',
+    'VS': 'Virgin Atlantic', 'JY': 'interCaribbean Airways', '8R': 'Sol Air',
+    'WM': 'Winair', 'IJ': 'Spring Airlines', 'MN': 'Kulula',
+    'UA': 'United Airlines', 'WS': 'WestJet', 'NK': 'Spirit Airlines',
+    'F9': 'Frontier Airlines', 'SY': 'Sun Country', 'AS': 'Alaska Airlines',
+    'BA': 'British Airways', 'LH': 'Lufthansa', 'AF': 'Air France',
+    'KL': 'KLM', 'IB': 'Iberia', 'TP': 'TAP Portugal',
+  };
+
+  const getAirlineName = (flightNumber: string): string => {
+    if (!flightNumber) return '';
+    const match = flightNumber.toUpperCase().match(/^([A-Z]{2}|[A-Z0-9]{2})/);
+    if (match && airlineNames[match[1]]) return airlineNames[match[1]];
+    return '';
+  };
+
   const DRIVER_PIN = 'ufuhreal?';
 
   // Play notification sound
@@ -651,7 +669,9 @@ export default function DriverDashboard() {
                   {booking.flightNumber && (
                     <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-bold text-blue-800">✈️ Flight {booking.flightNumber}</span>
+                        <span className="text-sm font-bold text-blue-800">
+                          ✈️ {getAirlineName(booking.flightNumber!) ? `${getAirlineName(booking.flightNumber!)} — ` : ''}{booking.flightNumber}
+                        </span>
                         {flightStatuses[booking.flightNumber] ? (
                           <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
                             flightStatuses[booking.flightNumber].status === 'landed' ? 'bg-green-100 text-green-800' :
