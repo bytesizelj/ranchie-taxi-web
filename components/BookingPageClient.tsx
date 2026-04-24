@@ -194,6 +194,44 @@ export default function BookingPageClient() {
   const [phoneValidation, setPhoneValidation] = useState<{ checked: boolean; valid: boolean; reason: string }>({ checked: false, valid: true, reason: '' });
   const [isValidatingPhone, setIsValidatingPhone] = useState(false);
 
+  const [flightCheck, setFlightCheck] = useState<{ checked: boolean; valid: boolean; message: string }>({ checked: false, valid: true, message: '' });
+  const [isCheckingFlight, setIsCheckingFlight] = useState(false);
+
+  const verifyFlight = async () => {
+    if (!formData.flightNumber || !validateFlightNumber(formData.flightNumber).valid) return;
+    setIsCheckingFlight(true);
+    try {
+      const res = await fetch(`/api/flight-status?flight=${formData.flightNumber}`);
+      if (!res.ok) {
+        setFlightCheck({ checked: true, valid: false, message: 'Flight not found. Please check your flight number and try again.' });
+        setIsCheckingFlight(false);
+        return;
+      }
+      const data = await res.json();
+
+      if (!data || data.error || !data.status) {
+        setFlightCheck({ checked: true, valid: false, message: 'Flight not found. Please check your flight number and try again.' });
+        setIsCheckingFlight(false);
+        return;
+      }
+
+      if (data.status === 'cancelled') {
+        setFlightCheck({ checked: true, valid: false, message: `Flight ${formData.flightNumber} has been cancelled. Please check your flight details.` });
+        setIsCheckingFlight(false);
+        return;
+      }
+
+      setFlightCheck({ 
+        checked: true, 
+        valid: true, 
+        message: `Flight verified — ${data.departure?.iata || '?'} → ${data.arrival?.iata || '?'} (${data.status})`
+      });
+    } catch {
+      setFlightCheck({ checked: true, valid: true, message: 'Flight format accepted' });
+    }
+    setIsCheckingFlight(false);
+  };
+
   const validatePhone = async (phone: string) => {
     const digits = phone.replace(/[^0-9]/g, '');
     if (digits.length < 10) {
@@ -284,7 +322,10 @@ export default function BookingPageClient() {
         return formData.destination.length > 0;
       case 3:
         if (isAirportRelated()) {
-          return validateFlightNumber(formData.flightNumber).valid;
+          if (!validateFlightNumber(formData.flightNumber).valid) return false;
+          if (!flightCheck.checked) return false;
+          if (!flightCheck.valid) return false;
+          return true;
         }
         return true;
       case 4:
@@ -658,18 +699,51 @@ export default function BookingPageClient() {
                     type="text"
                     placeholder={t.flightPlaceholder}
                     value={formData.flightNumber}
-                    onChange={(e) => setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() })}
-                    className="w-full p-4 border-2 border-white/3s0 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
+                    onChange={(e) => {
+                      setFormData({ ...formData, flightNumber: e.target.value.toUpperCase() });
+                      setFlightCheck({ checked: false, valid: true, message: '' });
+                    }}
+                    onBlur={() => {
+                      if (formData.flightNumber && validateFlightNumber(formData.flightNumber).valid) {
+                        verifyFlight();
+                      }
+                    }}
+                    className="w-full p-4 border-2 border-white/30 rounded-xl focus:border-white focus:outline-none text-lg transition-all text-white bg-white/20 placeholder:text-white/60"
                   />
-                  {formData.flightNumber && validateFlightNumber(formData.flightNumber).valid && (
-                    <p className="text-sm mt-2 bg-white/20 rounded-lg px-3 py-2">
-                      {validateFlightNumber(formData.flightNumber).message} — {t.flightTracked}
-                    </p>
-                  )}
                   {formData.flightNumber && !validateFlightNumber(formData.flightNumber).valid && (
                     <p className="text-sm mt-2 bg-red-500/40 rounded-lg px-3 py-2 text-white font-semibold">
                       {validateFlightNumber(formData.flightNumber).message}
                     </p>
+                  )}
+                  {isCheckingFlight && (
+                    <div className="mt-2 p-3 bg-white/20 rounded-lg flex items-center gap-3 animate-pulse">
+                      <Loader2 size={18} className="animate-spin text-white" />
+                      <p className="text-sm text-white font-semibold">Verifying flight {formData.flightNumber}...</p>
+                    </div>
+                  )}
+                  {formData.flightNumber && validateFlightNumber(formData.flightNumber).valid && !flightCheck.checked && !isCheckingFlight && (
+                    <p className="text-sm mt-2 bg-white/20 rounded-lg px-3 py-2 text-white animate-pulse font-semibold">
+                      🔍 Tap outside the field to verify your flight
+                    </p>
+                  )}
+                  {flightCheck.checked && flightCheck.valid && (
+                    <p className="text-sm mt-2 bg-green-500/40 rounded-lg px-3 py-2 text-white font-semibold">
+                      ✅ {flightCheck.message}
+                    </p>
+                  )}
+                  {flightCheck.checked && !flightCheck.valid && (
+                    <div className="mt-2 bg-red-500/50 rounded-lg px-3 py-3 text-white">
+                      <p className="text-sm font-semibold">⚠️ {flightCheck.message}</p>
+                      <button
+                        onClick={() => {
+                          setFlightCheck({ checked: false, valid: true, message: '' });
+                          setFormData({ ...formData, flightNumber: '' });
+                        }}
+                        className="mt-2 text-xs underline opacity-80"
+                      >
+                        Clear and try again
+                      </button>
+                    </div>
                   )}
                   {!formData.flightNumber && (
                     <div className="mt-2 rounded-lg px-3 py-2 font-semibold text-sm text-white relative overflow-hidden"
