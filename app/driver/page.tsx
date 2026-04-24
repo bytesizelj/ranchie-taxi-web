@@ -662,12 +662,14 @@ export default function DriverDashboard() {
                              flightStatuses[booking.flightNumber].status}
                           </span>
                         ) : (
-                          <button
-                            onClick={() => fetchFlightStatus(booking.flightNumber!)}
-                            className="text-xs px-2 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
-                          >
-                            Check Status
-                          </button>
+                          <div className="flex gap-1">
+                            <button
+                              onClick={() => fetchFlightStatus(booking.flightNumber!)}
+                              className="text-xs px-2 py-1 bg-blue-500 text-white rounded-full hover:bg-blue-600"
+                            >
+                              Track Flight
+                            </button>
+                          </div>
                         )}
                       </div>
 
@@ -760,6 +762,30 @@ export default function DriverDashboard() {
                       className="w-full py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-semibold hover:bg-blue-200 transition-all"
                     >
                       🔄 Refresh Flight Status
+                    </button>
+                  )}
+                  {booking.flightNumber && !flightStatuses[booking.flightNumber] && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(`/api/flight-status?flight=${booking.flightNumber}`);
+                          if (!res.ok) {
+                            alert(`⚠️ Flight ${booking.flightNumber} NOT FOUND.\n\nThis flight may be fake or not yet in the system.\n\nRecommendation: Contact the customer to verify before accepting.`);
+                            return;
+                          }
+                          const data = await res.json();
+                          if (!data || data.error) {
+                            alert(`⚠️ Flight ${booking.flightNumber} NOT FOUND.\n\nThis flight may be fake or not yet in the system.\n\nRecommendation: Contact the customer to verify before accepting.`);
+                            return;
+                          }
+                          alert(`✅ Flight ${booking.flightNumber} VERIFIED!\n\n✈️ ${data.airline}\n🛫 ${data.departure?.airport} (${data.departure?.iata})\n🛬 ${data.arrival?.airport} (${data.arrival?.iata})\n📊 Status: ${data.status}\n${data.arrival?.scheduled ? '📅 Arrival: ' + new Date(data.arrival.scheduled).toLocaleString() : ''}`);
+                        } catch {
+                          alert(`⚠️ Could not verify flight ${booking.flightNumber}.\n\nPlease try again later.`);
+                        }
+                      }}
+                      className="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
+                    >
+                      🔍 Verify Flight
                     </button>
                   )}
                   <div className="flex gap-2">
