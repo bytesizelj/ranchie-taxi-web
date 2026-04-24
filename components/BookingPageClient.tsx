@@ -203,14 +203,14 @@ export default function BookingPageClient() {
     try {
       const res = await fetch(`/api/flight-status?flight=${formData.flightNumber}`);
       if (!res.ok) {
-        setFlightCheck({ checked: true, valid: false, message: 'Flight not found. Please check your flight number and try again.' });
+        setFlightCheck({ checked: true, valid: true, message: 'Flight format verified — Ranchie will confirm closer to your travel date' });
         setIsCheckingFlight(false);
         return;
       }
       const data = await res.json();
 
       if (!data || data.error || !data.status) {
-        setFlightCheck({ checked: true, valid: false, message: 'Flight not found. Please check your flight number and try again.' });
+        setFlightCheck({ checked: true, valid: true, message: 'Flight format verified — Ranchie will confirm closer to your travel date' });
         setIsCheckingFlight(false);
         return;
       }
@@ -277,36 +277,20 @@ export default function BookingPageClient() {
     }
   };
 
-  // Airlines that serve Argyle International Airport (SVD)
-  const svdAirlines = ['AA', 'DL', 'B6', 'BW', 'AC', 'RV', 'VS', 'JY', '8R', 'WM', 'IJ', 'MN'];
-
-  const validateFlightNumber = (flight: string): { valid: boolean; message: string } => {
+    const validateFlightNumber = (flight: string): { valid: boolean; message: string } => {
     if (!flight) return { valid: false, message: '' };
     const trimmed = flight.trim().toUpperCase();
     
-    // Must be 4-8 characters
     if (trimmed.length < 4 || trimmed.length > 8) {
       return { valid: false, message: '⚠️ Flight number should be 4-8 characters (e.g. AA2302)' };
     }
     
-    // Extract airline code (first 2-3 characters that are letters/numbers)
     const match = trimmed.match(/^([A-Z]{2}|[A-Z0-9]{2})(\d{1,5})$/) || trimmed.match(/^([A-Z0-9]{3})(\d{1,4})$/);
     if (!match) {
       return { valid: false, message: '⚠️ Invalid format — use airline code + number (e.g. AA2302, BW600)' };
     }
 
-    const airlineCode = match[1];
-    const flightNum = match[2];
-
-    if (!flightNum || flightNum.length < 1) {
-      return { valid: false, message: '⚠️ Missing flight number after airline code' };
-    }
-
-    if (!svdAirlines.includes(airlineCode)) {
-      return { valid: false, message: `⚠️ ${airlineCode} does not fly to St. Vincent (SVD). Airlines: AA, DL, B6, BW, AC, VS, JY` };
-    }
-
-    return { valid: true, message: `✅ ${airlineCode} ${flightNum} — valid airline for St. Vincent` };
+    return { valid: true, message: `✅ ${match[1]} ${match[2]} — valid flight format` };
   };
 
   const isAirportRelated = () => {
