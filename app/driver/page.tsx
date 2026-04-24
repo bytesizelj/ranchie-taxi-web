@@ -112,8 +112,15 @@ export default function DriverDashboard() {
   const DRIVER_PIN = 'ufuhreal?';
 
   // Play notification sound
+  const audioContextRef = useRef<AudioContext | null>(null);
   const playNotificationSound = () => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    if (!audioContextRef.current) {
+      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    const audioContext = audioContextRef.current;
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    }
     
     // Play a pleasant two-tone chime
     const playTone = (frequency: number, startTime: number, duration: number) => {
