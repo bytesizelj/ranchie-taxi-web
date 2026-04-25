@@ -423,14 +423,14 @@ export default function HomePage() {
               </h2>
             </div>
             <p className="text-sm text-gray-400 mb-5">Upcoming events & celebrations</p>
-            <div className="space-y-5">
+            <div className="grid grid-cols-2 gap-4">
               {activeEvents.map((event, index) => (
                 <div key={index} className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all">
                   <div className="relative cursor-pointer" onClick={() => setViewImage(event.image)}>
                     <img
                       src={event.image}
                       alt={event.name}
-                      className="w-full h-64 sm:h-80 object-cover"
+                      className="w-full h-48 object-cover"
                     />
                     <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-3 py-1 rounded-full">
                       Tap to view flyer
