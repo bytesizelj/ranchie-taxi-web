@@ -339,6 +339,28 @@ export default function HomePage() {
             date: "March 14, 2026",
             endDate: new Date('2026-03-15'),
           },
+          
+          {
+            name: "Heroes Day 🇻🇨",
+            image: "/images/heroes-day.png",
+            description: "National Heroes Day — Honoring the heroes of Saint Vincent and the Grenadines.",
+            date: "March 14, 2026",
+            endDate: new Date('2026-03-15'),
+          },
+          {
+            name: "National Workers Day 💪",
+            image: "/images/workers-day.png",
+            description: "Honoring the hard work, celebrating the dedication, and building SVG together. Thank you workers of SVG!",
+            date: "May 1, 2026",
+            endDate: new Date('2026-05-02'),
+          },
+          {
+            name: "Whit Monday 💚",
+            image: "/images/whit-monday.png",
+            description: "A day of thanksgiving, unity & renewal. Let's keep the tradition alive! Safe. Reliable. Comfortable — Ranchie Taxi Service.",
+            date: "May 25, 2026",
+            endDate: new Date('2026-05-26'),
+          },
           {
             name: "Vincy Mas Carnival 🎭",
             image: "/images/carnival-2026.png",
