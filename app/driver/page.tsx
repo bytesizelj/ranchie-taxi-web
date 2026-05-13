@@ -302,9 +302,10 @@ export default function DriverDashboard() {
       setBookings(bookingsData);
       setLoading(false);
       
-      // Fetch flight status for bookings with flight numbers
+      // Auto-fetch flight status only for TODAY's bookings (saves API calls)
+      const today = new Date().toISOString().split('T')[0];
       bookingsData.forEach(b => {
-        if (b.flightNumber && b.status === 'pending') {
+        if (b.flightNumber && (b.date === today || b.date === 'Today') && !flightStatuses[b.flightNumber]) {
           fetchFlightStatus(b.flightNumber);
         }
       });
@@ -350,6 +351,7 @@ export default function DriverDashboard() {
       b.pickup.toLowerCase().includes(query) ||
       b.destination.toLowerCase().includes(query) ||
       b.date.includes(query) ||
+      (b.flightNumber && b.flightNumber.toLowerCase().includes(query)) ||
       (b.createdAt?.toDate?.() && b.createdAt.toDate().toLocaleDateString().toLowerCase().includes(query));
     return matchesFilter && matchesSearch;
   });
@@ -559,7 +561,7 @@ export default function DriverDashboard() {
 
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {['all', 'pending', 'accepted', 'completed'].map((status) => (
+          {['all', 'pending', 'accepted', 'completed', 'declined'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status as any)}
