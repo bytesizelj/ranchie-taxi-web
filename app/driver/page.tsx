@@ -127,7 +127,7 @@ export default function DriverDashboard() {
     return '';
   };
 
-  const DRIVER_PIN = 'ufuhreal?';
+  const DRIVER_PIN = process.env.NEXT_PUBLIC_DRIVER_PIN || '';
 
   // Play notification sound
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -602,6 +602,17 @@ export default function DriverDashboard() {
                     <p className="text-sm text-gray-700">
                       {booking.createdAt?.toDate?.()?.toLocaleDateString() || 'Recently'}
                     </p>
+                    {booking.status === 'pending' && booking.createdAt?.toDate && (
+                      (() => {
+                        const days = Math.floor((Date.now() - booking.createdAt.toDate().getTime()) / (1000 * 60 * 60 * 24));
+                        if (days >= 2) return (
+                          <p className="text-xs font-semibold text-red-500 animate-pulse mt-1">
+                            ⏰ Pending for {days} days — needs attention!
+                          </p>
+                        );
+                        return null;
+                      })()
+                    )}
                   </div>
                   <span className={`flex items-center gap-1 text-xs px-3 py-1 rounded-full font-semibold ${getStatusColor(booking.status)}`}>
                     {getStatusIcon(booking.status)}
@@ -633,7 +644,11 @@ export default function DriverDashboard() {
                   <div className="flex flex-wrap gap-4 sm:gap-6">
                     <div className="flex items-center gap-2">
                       <Calendar size={16} className="text-gray-600" />
-                      <span className="text-sm font-semibold text-gray-800">{booking.date}</span>
+                      <span className="text-sm font-semibold text-gray-800">
+                        {booking.date && booking.date.includes('-')
+                          ? new Date(booking.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                          : booking.date}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Clock size={16} className="text-gray-600" />
