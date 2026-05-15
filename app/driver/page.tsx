@@ -280,38 +280,75 @@ export default function DriverDashboard() {
   useEffect(() => {
     if (!isAuthenticated) return;
     
-    const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+    let unsubscribe: (() => void) | null = null;
     
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const bookingsData: Booking[] = [];
-      snapshot.forEach((doc) => {
-        bookingsData.push({ id: doc.id, ...doc.data() } as Booking);
-      });
-      
-      // Check for new bookings using docChanges (reliable detection)
-      if (!isFirstLoad.current) {
-        const newBookings = snapshot.docChanges().filter(change => change.type === 'added');
-        if (newBookings.length > 0 && notificationsEnabled) {
-          const newBooking = { id: newBookings[0].doc.id, ...newBookings[0].doc.data() } as Booking;
-          playNotificationSound();
-          showNotification(newBooking);
-        }
+    const subscribe = () => {
+      // Tear down any existing listener before re-subscribing
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
       }
-      isFirstLoad.current = false;
       
-      setBookings(bookingsData);
-      setLoading(false);
+      // Reset first-load flag so re-subscriptions don't fire notifications for existing bookings
+      isFirstLoad.current = true;
       
-      // Auto-fetch flight status only for TODAY's bookings (saves API calls)
-      const today = new Date().toISOString().split('T')[0];
-      bookingsData.forEach(b => {
-        if (b.flightNumber && (b.date === today || b.date === 'Today') && !flightStatuses[b.flightNumber]) {
-          fetchFlightStatus(b.flightNumber);
+      const q = query(collection(db, 'bookings'), orderBy('createdAt', 'desc'));
+      
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const bookingsData: Booking[] = [];
+        snapshot.forEach((doc) => {
+          bookingsData.push({ id: doc.id, ...doc.data() } as Booking);
+        });
+        
+        // Check for new bookings using docChanges (reliable detection)
+        if (!isFirstLoad.current) {
+          const newBookings = snapshot.docChanges().filter(change => change.type === 'added');
+          if (newBookings.length > 0 && notificationsEnabled) {
+            const newBooking = { id: newBookings[0].doc.id, ...newBookings[0].doc.data() } as Booking;
+            playNotificationSound();
+            showNotification(newBooking);
+          }
         }
+        isFirstLoad.current = false;
+        
+        setBookings(bookingsData);
+        setLoading(false);
+        
+        // Auto-fetch flight status only for TODAY's bookings (saves API calls)
+        const today = new Date().toISOString().split('T')[0];
+        bookingsData.forEach(b => {
+          if (b.flightNumber && (b.date === today || b.date === 'Today') && !flightStatuses[b.flightNumber]) {
+            fetchFlightStatus(b.flightNumber);
+          }
+        });
       });
-    });
-
-    return () => unsubscribe();
+    };
+    
+    // Initial subscription
+    subscribe();
+    
+    // Reconnect when tab becomes visible (fixes stale WebChannel after backgrounding / phone sleep)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Driver] Tab visible — reconnecting Firestore listener');
+        subscribe();
+      }
+    };
+    
+    // Reconnect when network is restored
+    const handleOnline = () => {
+      console.log('[Driver] Network online — reconnecting Firestore listener');
+      subscribe();
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+    
+    return () => {
+      if (unsubscribe) unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
   }, [isAuthenticated, notificationsEnabled]);
 
   const deleteBooking = async (bookingId: string) => {
