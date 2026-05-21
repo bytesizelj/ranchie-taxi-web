@@ -62,7 +62,7 @@ export default function DriverDashboard() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'completed'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'completed' | 'declined' | 'cancelled'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -370,6 +370,18 @@ export default function DriverDashboard() {
     }
   };
 
+  const cancelBooking = async (bookingId: string, cancelledBy: 'driver' | 'customer') => {
+    try {
+      await updateDoc(doc(db, 'bookings', bookingId), {
+        status: 'cancelled',
+        cancelledBy: cancelledBy,
+        cancelledAt: new Date()
+      });
+    } catch (error) {
+      console.error('Error cancelling booking:', error);
+    }
+  };
+
   const getTodayBookings = () => {
     const today = new Date().toISOString().split('T')[0];
     return bookings.filter(b => {
@@ -577,7 +589,7 @@ export default function DriverDashboard() {
         </div>
 
         {/* Status Counts */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="grid grid-cols-5 gap-2 mb-4">
           <div className="bg-yellow-50 rounded-xl p-2 text-center">
             <p className="text-lg font-bold text-yellow-700">{bookings.filter(b => b.status === 'pending').length}</p>
             <p className="text-[10px] text-yellow-600 font-semibold">Pending</p>
@@ -591,14 +603,18 @@ export default function DriverDashboard() {
             <p className="text-[10px] text-blue-600 font-semibold">Completed</p>
           </div>
           <div className="bg-red-50 rounded-xl p-2 text-center">
-            <p className="text-lg font-bold text-red-700">{bookings.filter(b => b.status === 'declined' || b.status === 'cancelled').length}</p>
+            <p className="text-lg font-bold text-red-700">{bookings.filter(b => b.status === 'declined').length}</p>
             <p className="text-[10px] text-red-600 font-semibold">Declined</p>
+          </div>
+          <div className="bg-orange-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-orange-700">{bookings.filter(b => b.status === 'cancelled').length}</p>
+            <p className="text-[10px] text-orange-600 font-semibold">Cancelled</p>
           </div>
         </div>
 
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {['all', 'pending', 'accepted', 'completed', 'declined'].map((status) => (
+          {['all', 'pending', 'accepted', 'completed', 'declined', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status as any)}
@@ -911,24 +927,60 @@ export default function DriverDashboard() {
                     </>
                   )}
                   {(booking.status === 'accepted' || booking.status === 'confirmed') && (
-                    <>
-                      <button
-                        onClick={() => updateStatus(booking.id, 'completed')}
-                        className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
-                      >
-                        Mark Complete
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (booking.phone && booking.phone !== 'Not provided') {
-                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
-                          }
-                        }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
-                      >
-                        💬 Message
-                      </button>
-                    </>
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => updateStatus(booking.id, 'completed')}
+                          className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                        >
+                          Mark Complete
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (booking.phone && booking.phone !== 'Not provided') {
+                              window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
+                            }
+                          }}
+                          className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
+                        >
+                          💬 Message
+                        </button>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            const msg = encodeURIComponent(
+                              `Hi ${booking.name}, I sincerely apologize, but I am no longer able to fulfill your booking confirmed for ${booking.date} at ${booking.time}.\n\n` +
+                              `I am very sorry for any inconvenience this may cause. Please feel free to contact me if you require assistance with alternative arrangements.\n\n` +
+                              `— Ranchie Taxi`
+                            );
+                            if (booking.phone && booking.phone !== 'Not provided') {
+                              window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
+                            }
+                            cancelBooking(booking.id, 'driver');
+                          }}
+                          className="flex-1 py-2 bg-red-500 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-all"
+                        >
+                          ⚠️ Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            const msg = encodeURIComponent(
+                              `Hi ${booking.name}, I have confirmed your cancellation of the booking previously scheduled for ${booking.date} at ${booking.time}.\n\n` +
+                              `Thank you for letting me know in advance. I hope to serve you on a future occasion.\n\n` +
+                              `— Ranchie Taxi`
+                            );
+                            if (booking.phone && booking.phone !== 'Not provided') {
+                              window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
+                            }
+                            cancelBooking(booking.id, 'customer');
+                          }}
+                          className="flex-1 py-2 bg-gray-500 text-white rounded-xl text-sm font-semibold hover:bg-gray-600 transition-all"
+                        >
+                          👤 Customer Cancelled
+                        </button>
+                      </div>
+                    </div>
                   )}
                   {(booking.status === 'completed' || booking.status === 'cancelled' || booking.status === 'declined') && (
                     <>
