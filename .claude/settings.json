@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(node:*)",
+      "Bash(code:*)",
+      "Bash(git status)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(vercel:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Read(.env)",
+      "Read(.env*)",
+      "Read(functions/.env*)"
+    ]
+  },
+  "defaultMode": "default"
+}

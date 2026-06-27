@@ -1,0 +1,2 @@
+# Normalize line endings: treat files as text and check out with LF
+* text=auto eol=lf
