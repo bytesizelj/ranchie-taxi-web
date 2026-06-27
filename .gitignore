@@ -43,3 +43,6 @@ next-env.d.ts
 # claude code (personal/machine-local overrides)
 .claude/settings.local.json
 .env.local
+
+# secrets / local credential scratch files
+twil.txt
