@@ -891,12 +891,13 @@ export default function DriverDashboard() {
                       <button
                         onClick={() => {
                           const msg = encodeURIComponent(
-                            `Hi ${booking.name}! 🚕 Great news — your booking is *confirmed*!\n\n` +
-                            `📍 *Pickup:* ${booking.pickup}\n` +
-                            `📍 *Destination:* ${booking.destination}\n` +
-                            `📅 *Date:* ${booking.date}\n` +
-                            `🕐 *Time:* ${booking.time}\n\n` +
-                            `Ranchie will be there. See you soon!\n— Ranchie Taxi`
+                            `Hello ${booking.name}. I am pleased to confirm your booking.\n\n` +
+                            `*Pickup:* ${booking.pickup}\n` +
+                            `*Destination:* ${booking.destination}\n` +
+                            `*Date:* ${booking.date}\n` +
+                            `*Time:* ${booking.time}\n\n` +
+                            `To ensure that I locate you without delay, kindly share your live location with me here on WhatsApp: tap the attachment icon, select *Location*, then choose *Share Live Location*.\n\n` +
+                            `I will be there for you. I look forward to seeing you soon.\n- Ranchie Taxi`
                           );
                           if (booking.phone && booking.phone !== 'Not provided') {
                             window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
