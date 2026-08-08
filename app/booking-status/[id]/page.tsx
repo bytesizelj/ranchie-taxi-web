@@ -18,6 +18,7 @@ interface BookingData {
   passengers: string;
   notes: string;
   status: string;
+  cancelledBy?: 'customer' | 'driver';
   driverMessage?: string;
   createdAt: any;
 }
@@ -74,49 +75,59 @@ export default function BookingStatusPage() {
   const statusConfig: Record<string, { icon: any; title: string; subtitle: string; bg: string; pulse: boolean }> = {
     pending: {
       icon: Loader2,
-      title: 'Waiting for Ranchie...',
-      subtitle: 'Your booking has been sent. Ranchie will confirm shortly.',
+      title: 'Your Request Is With Me',
+      subtitle: 'I have received your booking request. I could be driving, but I will send a confirmation within 10 minutes.',
       bg: 'from-orange-500 to-amber-500',
       pulse: true,
     },
     accepted: {
       icon: CheckCircle,
-      title: 'Ranchie Accepted! 🎉',
-      subtitle: 'Your ride is confirmed. Ranchie will be there!',
+      title: 'Your Ride Is Confirmed',
+      subtitle: 'I will be there. Thank you for choosing Ranchie Taxi.',
       bg: 'from-green-500 to-teal-500',
       pulse: false,
     },
     confirmed: {
       icon: CheckCircle,
-      title: 'Ranchie Accepted! 🎉',
-      subtitle: 'Your ride is confirmed. Ranchie will be there!',
+      title: 'Your Ride Is Confirmed',
+      subtitle: 'I will be there. Thank you for choosing Ranchie Taxi.',
       bg: 'from-green-500 to-teal-500',
       pulse: false,
     },
     declined: {
       icon: XCircle,
-      title: 'Ranchie is Unavailable',
-      subtitle: 'Please call or WhatsApp directly to arrange your ride.',
+      title: 'I Am Unavailable',
+      subtitle: 'Please call me or reach me on WhatsApp, and I will gladly help you arrange an alternative.',
       bg: 'from-red-500 to-orange-500',
       pulse: false,
     },
     cancelled: {
       icon: XCircle,
-      title: 'Ranchie is Unavailable',
-      subtitle: 'Please call or WhatsApp directly to arrange your ride.',
+      title: 'I Am Unavailable',
+      subtitle: 'Please call me or reach me on WhatsApp, and I will gladly help you arrange an alternative.',
+      bg: 'from-red-500 to-orange-500',
+      pulse: false,
+    },
+    cancelledByCustomer: {
+      icon: XCircle,
+      title: 'Booking Cancelled',
+      subtitle: 'You have cancelled this booking. If you would like to travel with me, please call or send a message on WhatsApp and I will be happy to assist.',
       bg: 'from-red-500 to-orange-500',
       pulse: false,
     },
     completed: {
       icon: CheckCircle,
-      title: 'Ride Completed ✅',
+      title: 'Ride Completed',
       subtitle: 'Thanks for riding with Ranchie Taxi!',
       bg: 'from-green-500 to-teal-500',
       pulse: false,
     },
   };
 
-  const config = statusConfig[booking.status] || statusConfig.pending;
+  const config =
+    booking.status === 'cancelled' && booking.cancelledBy === 'customer'
+      ? statusConfig.cancelledByCustomer
+      : statusConfig[booking.status] || statusConfig.pending;
   const StatusIcon = config.icon;
 
   return (
@@ -152,7 +163,7 @@ export default function BookingStatusPage() {
             <p className="text-white/90">{config.subtitle}</p>
             {booking.driverMessage && (
               <div className="mt-4 bg-white/20 rounded-xl p-3">
-                <p className="text-sm">💬 Ranchie says: &quot;{booking.driverMessage}&quot;</p>
+                <p className="text-sm">I would like to say: &quot;{booking.driverMessage}&quot;</p>
               </div>
             )}
           </div>
@@ -160,10 +171,10 @@ export default function BookingStatusPage() {
           {/* Urgent Help - only show when pending */}
           {booking.status === 'pending' && (
             <div className="bg-yellow-50 border-2 border-yellow-300 rounded-2xl p-4 mb-6 text-center">
-              <p className="text-sm text-yellow-800 font-medium mb-3">Need it urgently? Contact Ranchie directly:</p>
+              <p className="text-sm text-yellow-800 font-medium mb-3">If this is urgent, please contact me directly:</p>
               <div className="grid grid-cols-2 gap-3">
                 <a
-                  href="https://wa.me/17844932354?text=Hi%20Ranchie%2C%20I%20just%20submitted%20a%20booking%20and%20need%20urgent%20confirmation!"
+                  href="https://wa.me/17844932354?text=Hello%2C%20I%20have%20just%20submitted%20a%20booking%20and%20would%20appreciate%20an%20urgent%20confirmation."
                   className="bg-green-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 text-sm hover:bg-green-600 transition-all"
                 >
                   <MessageCircle size={16} />
@@ -252,18 +263,20 @@ export default function BookingStatusPage() {
             </div>
           )}
 
-          {/* Travel Tips */}
-          <div className="bg-gradient-to-r from-green-50 to-teal-50 border-2 border-green-300 rounded-2xl p-5 mb-6 shadow-lg">
-            <h3 className="text-base font-semibold text-green-800 mb-3 flex items-center gap-2">
-              💡 Travel Tips
-            </h3>
-            <ul className="space-y-2 text-sm text-green-700">
-              <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Your driver will contact you before arrival</li>
-              <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Have your phone ready for communication</li>
-              <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Cash payment — EC$ or US$ accepted</li>
-              <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Ask your driver for local recommendations!</li>
-            </ul>
-          </div>
+          {/* Travel Tips - hidden when the ride is not going ahead */}
+          {booking.status !== 'cancelled' && booking.status !== 'declined' && (
+            <div className="bg-gradient-to-r from-green-50 to-teal-50 border-2 border-green-300 rounded-2xl p-5 mb-6 shadow-lg">
+              <h3 className="text-base font-semibold text-green-800 mb-3 flex items-center gap-2">
+                Travel Tips
+              </h3>
+              <ul className="space-y-2 text-sm text-green-700">
+                <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Your driver will contact you before arrival</li>
+                <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Have your phone ready for communication</li>
+                <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Cash payment - EC$ or US$ accepted</li>
+                <li className="flex items-start gap-2"><Check size={16} className="mt-0.5 flex-shrink-0" /> Ask your driver for local recommendations!</li>
+              </ul>
+            </div>
+          )}
 
           <div className="text-center space-y-3">
             <Link
