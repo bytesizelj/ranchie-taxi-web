@@ -511,7 +511,7 @@ export default function BookingPageClient() {
                   </div>
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
                     <span className="text-sm font-medium">AIA → Sandals ({t.persons3plus})</span>
-                    <span className="font-bold text-base sm:text-lg">US$30<span className="text-xs font-normal">/person</span></span>
+                    <span className="font-bold text-base sm:text-lg">US$25<span className="text-xs font-normal">/person</span></span>
                   </div>
                 </div>
               </div>
@@ -613,7 +613,7 @@ export default function BookingPageClient() {
                   </div>
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
                     <span className="text-sm font-medium">AIA → Sandals ({t.persons3plus})</span>
-                    <span className="font-bold text-lg">US$30<span className="text-xs font-normal">/person</span></span>
+                    <span className="font-bold text-lg">US$25<span className="text-xs font-normal">/person</span></span>
                   </div>
                 </div>
               </div>

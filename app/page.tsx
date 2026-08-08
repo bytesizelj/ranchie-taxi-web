@@ -285,7 +285,7 @@ export default function HomePage() {
             </div>
             <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
               <span className="text-white text-sm">AIA → Sandals (3+ persons)</span>
-              <span className="text-white font-bold">US$30<span className="text-xs font-normal">/pp</span></span>
+              <span className="text-white font-bold">US$25<span className="text-xs font-normal">/pp</span></span>
             </div>
           </div>
 
