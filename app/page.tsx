@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Phone, MessageCircle, X, Volume2, VolumeX } from 'lucide-react';
+import { Phone, MessageCircle, X, Volume2, VolumeX, Car, Calendar, Plane, CarTaxiFront, PartyPopper } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import BottomNav from '@/components/BottomNav';
 
@@ -258,7 +258,7 @@ export default function HomePage() {
               onClick={handleRideNow}
              className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4 sm:p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
-              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">🚗</div>
+              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3"><Car className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-gray-700" /></div>
               <h3 className="text-lg font-semibold mb-1 text-gray-900">Ride Now</h3>
               <p className="text-sm text-gray-600">Instant pickup</p>
             </button>
@@ -267,7 +267,7 @@ export default function HomePage() {
               href="/booking"
               className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-4 sm:p-6 text-center cursor-pointer transition-all hover:border-green-500 hover:bg-green-50 hover:-translate-y-0.5 hover:shadow-lg block"
             >
-              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3">📅</div>
+              <div className="text-2xl sm:text-3xl mb-2 sm:mb-3"><Calendar className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-gray-700" /></div>
               <h3 className="text-lg font-semibold mb-1 text-gray-900">Schedule</h3>
               <p className="text-sm text-gray-600">Book in advance</p>
             </Link>
@@ -277,7 +277,7 @@ export default function HomePage() {
           {/* Airport Transfer Promo */}
           <div className="promo-bg promo-shimmer promo-border bg-emerald-600 rounded-2xl p-3 sm:p-4 mb-4 sm:mb-6 relative overflow-hidden">
             <p className="promo-text text-yellow-300 text-center text-sm font-bold mb-2">
-              ✈️ Airport Transfer
+              <Plane className="w-4 h-4 inline-block align-text-bottom mr-1" />Airport Transfer
             </p>
             <div className="flex justify-between items-center bg-white/20 rounded-xl p-3 mb-2">
               <span className="text-white text-sm">AIA → Sandals (1-2 persons)</span>
@@ -419,7 +419,7 @@ export default function HomePage() {
             <div className="max-w-lg mx-auto relative z-10">
             <div className="overflow-hidden mb-1">
               <h2 className="text-2xl font-bold text-white font-serif whitespace-nowrap" style={{ animation: 'marquee 12s linear infinite' }}>
-                🎉 What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🎉 What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🎉 What's Happening in SVG!
+                <PartyPopper className="w-6 h-6 inline-block align-text-bottom mr-1" />What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <PartyPopper className="w-6 h-6 inline-block align-text-bottom mr-1" />What's Happening in SVG! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <PartyPopper className="w-6 h-6 inline-block align-text-bottom mr-1" />What's Happening in SVG!
               </h2>
             </div>
             <p className="text-sm text-gray-400 mb-5">Upcoming events & celebrations</p>
@@ -438,13 +438,13 @@ export default function HomePage() {
                   </div>
                   <div className="p-5">
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{event.name}</h3>
-                    <p className="text-sm text-orange-600 font-semibold mb-2">📅 {event.date}</p>
+                    <p className="text-sm text-orange-600 font-semibold mb-2"><Calendar className="w-4 h-4 inline-block align-text-bottom mr-1" />{event.date}</p>
                     <p className="text-sm text-gray-600 mb-3">{event.description}</p>
                     <Link
                       href="/booking"
                       className="inline-block bg-gradient-to-r from-orange-500 to-red-500 text-white px-5 py-2 rounded-xl text-sm font-semibold hover:-translate-y-0.5 hover:shadow-lg transition-all"
                     >
-                      🚕 Book a Ride There
+                      <CarTaxiFront className="w-4 h-4 inline-block align-text-bottom mr-1" />Book a Ride There
                     </Link>
                   </div>
                 </div>
@@ -506,7 +506,7 @@ export default function HomePage() {
             {/* Modal Header */}
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🚕</span>
+                <CarTaxiFront className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-2xl font-bold mb-2">Need a Ride Now?</h3>
               <p className="text-gray-600">Choose how to contact Ranchie Taxi</p>
