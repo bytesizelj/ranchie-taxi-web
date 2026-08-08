@@ -1,14 +1,50 @@
 const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { defineSecret } = require("firebase-functions/params");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
+const twilio = require("twilio");
+
+const TWILIO_ACCOUNT_SID = defineSecret("TWILIO_ACCOUNT_SID");
+const TWILIO_AUTH_TOKEN = defineSecret("TWILIO_AUTH_TOKEN");
+
+// Twilio SMS config
+const TWILIO_FROM = "+15674853767";
+const SMS_RECIPIENTS = ["+17844932354", "+17844977245"]; // Ranchie (primary), LJ (backup)
 
 initializeApp();
 
-exports.sendBookingNotification = onDocumentCreated("bookings/{bookingId}", async (event) => {
+exports.sendBookingNotification = onDocumentCreated(
+  {
+    document: "bookings/{bookingId}",
+    secrets: [TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN],
+  },
+  async (event) => {
   const booking = event.data.data();
   const db = getFirestore();
   const messaging = getMessaging();
+
+  // --- SMS notification (reliable channel, runs regardless of FCM) ---
+  try {
+    const smsClient = twilio(TWILIO_ACCOUNT_SID.value(), TWILIO_AUTH_TOKEN.value());
+    const smsBody =
+      `New Ranchie Booking\n` +
+      `${booking.name || "N/A"}\n` +
+      `${booking.pickup || "N/A"} to ${booking.destination || "N/A"}\n` +
+      `${booking.date || "N/A"} at ${booking.time || "N/A"}\n` +
+      `Phone: ${booking.phone || "N/A"}`;
+
+    for (const to of SMS_RECIPIENTS) {
+      try {
+        await smsClient.messages.create({ body: smsBody, from: TWILIO_FROM, to });
+        console.log(`SMS sent to ${to}`);
+      } catch (smsErr) {
+        console.error(`SMS failed to ${to}: ${smsErr.message}`);
+      }
+    }
+  } catch (twilioErr) {
+    console.error(`Twilio init/send error: ${twilioErr.message}`);
+  }
 
   const tokensSnapshot = await db.collection("fcmTokens").get();
 
