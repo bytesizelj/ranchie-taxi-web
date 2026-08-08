@@ -23,7 +23,8 @@ import {
   Car,
   Sparkles,
   Loader2,
-  Globe
+  Globe,
+  Wallet
 } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -244,15 +245,15 @@ export default function BookingPageClient() {
     const trimmed = flight.trim().toUpperCase();
     
     if (trimmed.length < 4 || trimmed.length > 8) {
-      return { valid: false, message: '⚠️ Flight number should be 4-8 characters (e.g. AA2302)' };
+      return { valid: false, message: 'Flight number should be 4-8 characters (e.g. AA2302)' };
     }
     
     const match = trimmed.match(/^([A-Z]{2}|[A-Z0-9]{2})(\d{1,5})$/) || trimmed.match(/^([A-Z0-9]{3})(\d{1,4})$/);
     if (!match) {
-      return { valid: false, message: '⚠️ Invalid format — use airline code + number (e.g. AA2302, BW600)' };
+      return { valid: false, message: 'Invalid format — use airline code + number (e.g. AA2302, BW600)' };
     }
 
-    return { valid: true, message: `✅ ${match[1]} ${match[2]} — valid flight format` };
+    return { valid: true, message: `${match[1]} ${match[2]} — valid flight format` };
   };
 
   const isAirportRelated = () => {
@@ -502,7 +503,7 @@ export default function BookingPageClient() {
                   className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
                   style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
                 >
-                  💰 {t.airportRates}
+                  <Wallet className="w-5 h-5" />{t.airportRates}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
@@ -604,7 +605,7 @@ export default function BookingPageClient() {
                   className="font-bold text-lg mb-3 flex items-center gap-2 text-yellow-300"
                   style={{ animation: 'booking-pulse 2s ease-in-out infinite' }}
                 >
-                  💰 {t.airportRates}
+                  <Wallet className="w-5 h-5" />{t.airportRates}
                 </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center bg-white/20 rounded-xl p-3">
@@ -664,7 +665,7 @@ export default function BookingPageClient() {
                       }}
                     >
                       <span className="inline-block" style={{ animation: 'booking-pulse 1.5s ease-in-out infinite' }}>
-                        ✈️ Please enter flight number — required for airport pickups
+                        Please enter flight number — required for airport pickups
                       </span>
                     </div>
                   )}
@@ -789,24 +790,24 @@ export default function BookingPageClient() {
                     )}
                     {!formData.phone && (
                       <p className="text-xs text-orange-500 mt-1 animate-pulse font-semibold">
-                        📱 Include your country code (e.g. +1 for US/Canada, +44 for UK, +1784 for SVG)
+                        Include your country code (e.g. +1 for US/Canada, +44 for UK, +1784 for SVG)
                       </p>
                     )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length >= 10 && !phoneValidation.checked && !isValidatingPhone && (
                       <p className="text-xs text-blue-500 mt-1 font-semibold animate-pulse">
-                        🔍 Your phone number will be verified — tap outside the field to continue
+                        Your phone number will be verified — tap outside the field to continue
                       </p>
                     )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length < 10 && (
                       <p className="text-xs text-red-500 mt-1 animate-pulse font-semibold">
-                        ⚠️ Include country code — e.g. 17844932354 (SVG), 447769974681 (UK), 13135551234 (US)
+                        Include country code — e.g. 17844932354 (SVG), 447769974681 (UK), 13135551234 (US)
                       </p>
                     )}
                     {phoneValidation.checked && !phoneValidation.valid && (
-                      <p className="text-xs text-red-500 mt-1">⚠️ {phoneValidation.reason}</p>
+                      <p className="text-xs text-red-500 mt-1">{phoneValidation.reason}</p>
                     )}
                     {phoneValidation.checked && phoneValidation.valid && formData.phone.replace(/[^0-9]/g, '').length >= 10 && (
-                      <p className="text-xs text-green-500 mt-1">✅ Phone number verified</p>
+                      <p className="text-xs text-green-500 mt-1">Phone number verified</p>
                     )}
                     </div>
                 </div>
@@ -837,7 +838,7 @@ export default function BookingPageClient() {
                   {formData.flightNumber && (
                     <div className="flex justify-between items-center py-2 border-t border-gray-200">
                       <span className="text-sm text-gray-800 font-medium">{t.flight}</span>
-                      <span className="text-sm font-semibold text-blue-600">✈️ {formData.flightNumber}</span>
+                      <span className="text-sm font-semibold text-blue-600">{formData.flightNumber}</span>
                     </div>
                   )}
                 </div>
@@ -924,7 +925,7 @@ export default function BookingPageClient() {
         >
           <div className="bg-white rounded-2xl w-[90%] max-w-[320px] max-h-[75vh] flex flex-col shadow-2xl">
             <div className="flex items-center justify-between p-4 border-b border-gray-200 shrink-0">
-              <p className="font-bold text-gray-900">🌐 Select Language</p>
+              <p className="font-bold text-gray-900"><Globe className="w-4 h-4 inline-block align-text-bottom mr-1" />Select Language</p>
               <button
                 onClick={() => setShowLanguageModal(false)}
                 className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold"
