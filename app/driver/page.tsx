@@ -71,6 +71,29 @@ const GREETINGS: Record<GreetingSlot, { title: string; subtitle: string }> = {
   night: { title: 'Good night, Ranchie.', subtitle: 'Safe travels through the night.' }
 };
 
+const GREETING_SUBTITLES: Record<GreetingSlot, string[]> = {
+  morning: [
+    'A new day of journeys awaits.',
+    'Wishing you safe travels today.',
+    'Your passengers are counting on you.'
+  ],
+  afternoon: [
+    'I hope your day is going well.',
+    'Keep up the excellent service.',
+    'Steady roads ahead.'
+  ],
+  evening: [
+    'The evening runs are ahead.',
+    'Thank you for your dedication today.',
+    'Drive safely as the light fades.'
+  ],
+  night: [
+    'Safe travels through the night.',
+    'Wishing you a calm and safe shift.',
+    'The roads are quiet now.'
+  ]
+};
+
 const getGreetingSlot = (hour: number): GreetingSlot => {
   if (hour >= 5 && hour < 12) return 'morning';
   if (hour >= 12 && hour < 17) return 'afternoon';
@@ -94,6 +117,7 @@ export default function DriverDashboard() {
   const [translatedBookings, setTranslatedBookings] = useState<Record<string, { pickup: string; destination: string; notes: string }>>({});
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [greetingSlot, setGreetingSlot] = useState<GreetingSlot | null>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -306,6 +330,20 @@ export default function DriverDashboard() {
     const timer = setInterval(updateGreeting, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  // Track the reduced-motion preference so the subtitle can stay static when requested
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const apply = () => setReducedMotion(query.matches);
+    apply();
+    query.addEventListener('change', apply);
+    return () => query.removeEventListener('change', apply);
+  }, []);
+
+  // Single ticker string for the current slot, with a trailing separator so the loop seam reads cleanly
+  const tickerText = greetingSlot
+    ? GREETING_SUBTITLES[greetingSlot].join('  .  ') + '  .  '
+    : '';
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -589,29 +627,51 @@ export default function DriverDashboard() {
                 78%  { transform: translateY(-3px) scale(0.995); }
                 100% { opacity: 1; transform: translateY(0) scale(1); }
               }
-              @keyframes ranchieGreetingGlow {
-                0%, 100% { box-shadow: 0 4px 14px -6px rgba(146, 94, 6, 0.35), 0 0 0 0 rgba(251, 191, 36, 0.0); }
-                50%      { box-shadow: 0 6px 18px -6px rgba(146, 94, 6, 0.40), 0 0 20px 4px rgba(251, 191, 36, 0.45); }
+              @keyframes ranchieTicker {
+                from { transform: translateX(0); }
+                to   { transform: translateX(-50%); }
               }
               .ranchie-greeting {
-                animation:
-                  ranchieGreetingRise 700ms cubic-bezier(0.22, 1, 0.36, 1) both,
-                  ranchieGreetingGlow 3800ms ease-in-out 700ms 8;
+                animation: ranchieGreetingRise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+              }
+              .ranchie-ticker {
+                animation: ranchieTicker 20s linear infinite;
+                will-change: transform;
+              }
+              .ranchie-ticker-mask:hover .ranchie-ticker,
+              .ranchie-ticker-mask:focus-within .ranchie-ticker {
+                animation-play-state: paused;
               }
               @media (prefers-reduced-motion: reduce) {
                 .ranchie-greeting { animation: none; }
+                .ranchie-ticker { animation: none; }
               }
             `}</style>
-            <div className="ranchie-greeting bg-gradient-to-r from-amber-400 to-yellow-300 border border-amber-300/70 rounded-2xl p-4 mb-6 flex items-center gap-4">
+            <div className="ranchie-greeting bg-gradient-to-r from-amber-400 to-yellow-300 border border-amber-300/70 rounded-2xl shadow-md p-4 mb-6 flex items-center gap-4">
               <div className="w-12 h-12 bg-white/75 text-amber-800 rounded-full flex items-center justify-center flex-shrink-0 ring-1 ring-white/80 shadow-sm">
                 {greetingSlot === 'morning' && <Sun size={24} />}
                 {greetingSlot === 'afternoon' && <Sunset size={24} />}
                 {greetingSlot === 'evening' && <Moon size={24} />}
                 {greetingSlot === 'night' && <Star size={24} />}
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="font-bold text-amber-950">{GREETINGS[greetingSlot].title}</p>
-                <p className="text-sm text-amber-900">{GREETINGS[greetingSlot].subtitle}</p>
+                {reducedMotion ? (
+                  <p className="text-sm text-amber-900 truncate">
+                    {GREETING_SUBTITLES[greetingSlot][0]}
+                  </p>
+                ) : (
+                  <div
+                    className="ranchie-ticker-mask relative overflow-hidden mt-0.5"
+                    tabIndex={0}
+                    aria-label={GREETING_SUBTITLES[greetingSlot].join('. ')}
+                  >
+                    <div className="ranchie-ticker flex w-max text-sm text-amber-900">
+                      <span className="whitespace-pre">{tickerText}</span>
+                      <span className="whitespace-pre" aria-hidden="true">{tickerText}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </>
