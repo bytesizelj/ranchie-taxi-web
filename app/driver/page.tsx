@@ -19,7 +19,11 @@ import {
   Lock,
   LogOut,
   Bell,
-  BellOff
+  BellOff,
+  Sun,
+  Sunset,
+  Moon,
+  Star
 } from 'lucide-react';
 
 interface FlightStatus {
@@ -57,6 +61,22 @@ interface Booking {
   createdAt: any;
 }
 
+type GreetingSlot = 'morning' | 'afternoon' | 'evening' | 'night';
+
+const GREETINGS: Record<GreetingSlot, { title: string; subtitle: string }> = {
+  morning: { title: 'Good morning, Ranchie.', subtitle: 'A new day of journeys awaits.' },
+  afternoon: { title: 'Good afternoon, Ranchie.', subtitle: 'I hope your day is going well.' },
+  evening: { title: 'Good evening, Ranchie.', subtitle: 'The evening runs are ahead.' },
+  night: { title: 'Good night, Ranchie.', subtitle: 'Safe travels through the night.' }
+};
+
+const getGreetingSlot = (hour: number): GreetingSlot => {
+  if (hour >= 5 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 17) return 'afternoon';
+  if (hour >= 17 && hour < 21) return 'evening';
+  return 'night';
+};
+
 export default function DriverDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -72,6 +92,7 @@ export default function DriverDashboard() {
   const [flightStatuses, setFlightStatuses] = useState<Record<string, FlightStatus>>({});
   const [translatedBookings, setTranslatedBookings] = useState<Record<string, { pickup: string; destination: string; notes: string }>>({});
   const [translatingId, setTranslatingId] = useState<string | null>(null);
+  const [greetingSlot, setGreetingSlot] = useState<GreetingSlot | null>(null);
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -276,6 +297,14 @@ export default function DriverDashboard() {
     setIsAuthenticated(false);
     localStorage.removeItem('driverAuth');
   };
+
+  // Time-aware greeting from the device's local clock (client-side only, avoids SSR mismatch)
+  useEffect(() => {
+    const updateGreeting = () => setGreetingSlot(getGreetingSlot(new Date().getHours()));
+    updateGreeting();
+    const timer = setInterval(updateGreeting, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -539,6 +568,22 @@ export default function DriverDashboard() {
       )}
 
       <div className="max-w-4xl mx-auto px-4 py-6">
+        {/* Time-Aware Greeting */}
+        {greetingSlot && (
+          <div className="bg-gradient-to-r from-teal-50 to-green-50 border border-teal-100 rounded-2xl p-4 mb-6 flex items-center gap-4">
+            <div className="w-12 h-12 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center flex-shrink-0">
+              {greetingSlot === 'morning' && <Sun size={24} />}
+              {greetingSlot === 'afternoon' && <Sunset size={24} />}
+              {greetingSlot === 'evening' && <Moon size={24} />}
+              {greetingSlot === 'night' && <Star size={24} />}
+            </div>
+            <div>
+              <p className="font-bold text-teal-900">{GREETINGS[greetingSlot].title}</p>
+              <p className="text-sm text-teal-700">{GREETINGS[greetingSlot].subtitle}</p>
+            </div>
+          </div>
+        )}
+
         {/* Today's Reminders */}
         {todayBookings.length > 0 && (
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white mb-6 shadow-lg">
