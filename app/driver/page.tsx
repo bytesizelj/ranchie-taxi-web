@@ -581,18 +581,40 @@ export default function DriverDashboard() {
       <div className="max-w-4xl mx-auto px-4 py-6">
         {/* Time-Aware Greeting */}
         {greetingSlot && (
-          <div className="bg-gradient-to-r from-teal-50 to-green-50 border border-teal-100 rounded-2xl p-4 mb-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-teal-100 text-teal-700 rounded-full flex items-center justify-center flex-shrink-0">
-              {greetingSlot === 'morning' && <Sun size={24} />}
-              {greetingSlot === 'afternoon' && <Sunset size={24} />}
-              {greetingSlot === 'evening' && <Moon size={24} />}
-              {greetingSlot === 'night' && <Star size={24} />}
+          <>
+            <style>{`
+              @keyframes ranchieGreetingRise {
+                0%   { opacity: 0; transform: translateY(-18px) scale(0.97); }
+                55%  { opacity: 1; transform: translateY(5px) scale(1.02); }
+                78%  { transform: translateY(-3px) scale(0.995); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+              }
+              @keyframes ranchieGreetingGlow {
+                0%, 100% { box-shadow: 0 4px 14px -6px rgba(146, 94, 6, 0.35), 0 0 0 0 rgba(251, 191, 36, 0.0); }
+                50%      { box-shadow: 0 6px 18px -6px rgba(146, 94, 6, 0.40), 0 0 20px 4px rgba(251, 191, 36, 0.45); }
+              }
+              .ranchie-greeting {
+                animation:
+                  ranchieGreetingRise 700ms cubic-bezier(0.22, 1, 0.36, 1) both,
+                  ranchieGreetingGlow 3800ms ease-in-out 700ms 8;
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .ranchie-greeting { animation: none; }
+              }
+            `}</style>
+            <div className="ranchie-greeting bg-gradient-to-r from-amber-400 to-yellow-300 border border-amber-300/70 rounded-2xl p-4 mb-6 flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/75 text-amber-800 rounded-full flex items-center justify-center flex-shrink-0 ring-1 ring-white/80 shadow-sm">
+                {greetingSlot === 'morning' && <Sun size={24} />}
+                {greetingSlot === 'afternoon' && <Sunset size={24} />}
+                {greetingSlot === 'evening' && <Moon size={24} />}
+                {greetingSlot === 'night' && <Star size={24} />}
+              </div>
+              <div>
+                <p className="font-bold text-amber-950">{GREETINGS[greetingSlot].title}</p>
+                <p className="text-sm text-amber-900">{GREETINGS[greetingSlot].subtitle}</p>
+              </div>
             </div>
-            <div>
-              <p className="font-bold text-teal-900">{GREETINGS[greetingSlot].title}</p>
-              <p className="text-sm text-teal-700">{GREETINGS[greetingSlot].subtitle}</p>
-            </div>
-          </div>
+          </>
         )}
 
         {/* Today's Reminders */}
