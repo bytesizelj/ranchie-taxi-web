@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { 
@@ -502,26 +503,36 @@ export default function DriverDashboard() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-gradient-to-r from-green-600 to-teal-600 text-white shadow-lg sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
-          <Link 
-            href="/" 
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+      <header className="bg-gradient-to-r from-green-600 via-teal-600 to-teal-700 text-white shadow-xl rounded-b-3xl sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-3 sm:py-4 flex items-center gap-2 sm:gap-4">
+          <Link
+            href="/"
+            className="w-10 h-10 flex-shrink-0 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
           >
             <ArrowLeft size={20} />
           </Link>
-          <div className="flex-1">
-            <h1 className="text-xl font-bold">Driver Dashboard</h1>
-            <p className="text-sm opacity-80">Manage your bookings</p>
+          <div className="relative w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0 rounded-full overflow-hidden ring-2 ring-white/60 shadow-lg">
+            <Image
+              src="/images/ranchie-dashboard.jpg"
+              alt="Ranchie of Ranchie Taxi"
+              fill
+              sizes="56px"
+              priority
+              className="object-cover object-center"
+            />
           </div>
-          <div className="text-right mr-1 sm:mr-2">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-base sm:text-xl font-bold tracking-tight truncate">Ranchie Taxi</h1>
+            <p className="text-[11px] sm:text-sm text-white/80 truncate">Your bookings, at a glance</p>
+          </div>
+          <div className="text-right mr-1 sm:mr-2 flex-shrink-0">
             <p className="text-xl sm:text-2xl font-bold">{bookings.length}</p>
             <p className="text-xs opacity-80 hidden sm:block">Total Bookings</p>
           </div>
           {/* Notification Toggle */}
           <button
             onClick={toggleNotifications}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+            className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center transition-colors ${
               notificationsEnabled 
                 ? 'bg-yellow-400 text-yellow-900' 
                 : 'bg-white/20 hover:bg-white/30'
@@ -532,7 +543,7 @@ export default function DriverDashboard() {
           </button>
           <button
             onClick={handleLogout}
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
+            className="w-10 h-10 flex-shrink-0 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
             title="Logout"
           >
             <LogOut size={20} />
