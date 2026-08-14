@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   ArrowLeft, 
   Calendar, 
@@ -24,7 +24,8 @@ import {
   Sun,
   Sunset,
   Moon,
-  Star
+  Star,
+  Plus
 } from 'lucide-react';
 
 interface FlightStatus {
@@ -59,6 +60,7 @@ interface Booking {
   passengers: string;
   notes: string;
   status: string;
+  createdBy?: string;
   createdAt: any;
 }
 
@@ -101,6 +103,20 @@ const getGreetingSlot = (hour: number): GreetingSlot => {
   return 'night';
 };
 
+const EMPTY_ADD_FORM = {
+  name: '',
+  phone: '',
+  pickup: '',
+  destination: '',
+  date: '',
+  time: '',
+  passengers: '1',
+  notes: ''
+};
+
+const ADD_FIELD_CLASS =
+  'w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none text-sm text-gray-900 bg-white placeholder:text-gray-400';
+
 export default function DriverDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -118,6 +134,12 @@ export default function DriverDashboard() {
   const [translatingId, setTranslatingId] = useState<string | null>(null);
   const [greetingSlot, setGreetingSlot] = useState<GreetingSlot | null>(null);
   const [reducedMotion, setReducedMotion] = useState(false);
+
+  // Driver-only Quick Add Booking
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+  const [isSavingBooking, setIsSavingBooking] = useState(false);
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -450,6 +472,52 @@ export default function DriverDashboard() {
     }
   };
 
+  const closeAddModal = () => {
+    if (isSavingBooking) return;
+    setShowAddModal(false);
+    setAddForm(EMPTY_ADD_FORM);
+    setAddErrors({});
+  };
+
+  const saveManualBooking = async () => {
+    if (isSavingBooking) return;
+
+    const errors: Record<string, string> = {};
+    if (!addForm.name.trim()) errors.name = 'Name is required.';
+    if (!addForm.pickup.trim()) errors.pickup = 'Pickup is required.';
+    if (!addForm.destination.trim()) errors.destination = 'Destination is required.';
+    if (!addForm.date) errors.date = 'Date is required.';
+    if (!addForm.time) errors.time = 'Time is required.';
+
+    setAddErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+
+    setIsSavingBooking(true);
+    try {
+      await addDoc(collection(db, 'bookings'), {
+        name: addForm.name.trim(),
+        phone: addForm.phone.trim() || 'Not provided',
+        pickup: addForm.pickup.trim(),
+        destination: addForm.destination.trim(),
+        date: addForm.date,
+        time: addForm.time,
+        passengers: addForm.passengers,
+        notes: addForm.notes.trim() || 'None',
+        flightNumber: '',
+        status: 'accepted',
+        createdBy: 'driver',
+        createdAt: serverTimestamp()
+      });
+      setShowAddModal(false);
+      setAddForm(EMPTY_ADD_FORM);
+      setAddErrors({});
+    } catch (error) {
+      console.error('Error adding booking:', error);
+      setAddErrors({ form: 'I could not save this booking. Please try again.' });
+    }
+    setIsSavingBooking(false);
+  };
+
   const getTodayBookings = () => {
     const today = new Date().toISOString().split('T')[0];
     return bookings.filter(b => {
@@ -616,7 +684,7 @@ export default function DriverDashboard() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-4 py-6">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-24">
         {/* Time-Aware Greeting */}
         {greetingSlot && (
           <>
@@ -1154,6 +1222,186 @@ export default function DriverDashboard() {
           </div>
         )}
       </div>
+
+      {/* Floating Add Booking Button */}
+      <style>{`
+        @keyframes ranchieFabSlam {
+          0%   { opacity: 0; transform: translateY(48px) scale(0.65); }
+          55%  { opacity: 1; transform: translateY(-9px) scale(1.14); }
+          78%  { transform: translateY(5px) scale(0.96); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes ranchieFabPing {
+          0%   { transform: scale(1); opacity: 0.5; }
+          75%  { transform: scale(1.85); opacity: 0; }
+          100% { transform: scale(1.85); opacity: 0; }
+        }
+        .ranchie-fab {
+          animation: ranchieFabSlam 640ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .ranchie-fab-ping {
+          animation: ranchieFabPing 2800ms cubic-bezier(0, 0, 0.2, 1) infinite;
+          will-change: transform, opacity;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ranchie-fab { animation: none; }
+          .ranchie-fab-ping { animation: none; opacity: 0; }
+        }
+      `}</style>
+      <button
+        onClick={() => setShowAddModal(true)}
+        title="Add Booking"
+        className={`fixed bottom-6 right-6 z-30 flex items-center gap-2 ${reducedMotion ? '' : 'ranchie-fab'}`}
+      >
+        <span className="bg-white text-teal-700 font-bold text-sm shadow-lg rounded-full px-3 py-1.5">
+          Add Booking
+        </span>
+        <span className="relative w-14 h-14 flex-shrink-0">
+          {!reducedMotion && (
+            <span
+              className="ranchie-fab-ping absolute inset-0 rounded-full bg-teal-400"
+              aria-hidden="true"
+            />
+          )}
+          <span className="relative w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-2xl flex items-center justify-center">
+            <Plus size={28} />
+          </span>
+        </span>
+      </button>
+
+      {/* Add Booking Modal */}
+      {showAddModal && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 flex items-start justify-center p-4 overflow-y-auto"
+          onClick={(e) => { if (e.target === e.currentTarget) closeAddModal(); }}
+        >
+          <div className="bg-white rounded-3xl p-6 shadow-2xl max-w-sm w-full my-8">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-gray-800">Add a Booking</h2>
+              <button
+                onClick={closeAddModal}
+                className="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold hover:bg-red-600 transition-colors"
+                title="Close"
+              >
+                &#10005;
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={addForm.name}
+                  onChange={(e) => setAddForm({ ...addForm, name: e.target.value })}
+                  placeholder="Passenger name"
+                  className={ADD_FIELD_CLASS}
+                />
+                {addErrors.name && <p className="text-xs text-red-500 mt-1">{addErrors.name}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Phone (optional)</label>
+                <input
+                  type="tel"
+                  value={addForm.phone}
+                  onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })}
+                  placeholder="1784XXXXXXX"
+                  className={ADD_FIELD_CLASS}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Pickup</label>
+                <input
+                  type="text"
+                  value={addForm.pickup}
+                  onChange={(e) => setAddForm({ ...addForm, pickup: e.target.value })}
+                  placeholder="Pickup location"
+                  className={ADD_FIELD_CLASS}
+                />
+                {addErrors.pickup && <p className="text-xs text-red-500 mt-1">{addErrors.pickup}</p>}
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Destination</label>
+                <input
+                  type="text"
+                  value={addForm.destination}
+                  onChange={(e) => setAddForm({ ...addForm, destination: e.target.value })}
+                  placeholder="Destination"
+                  className={ADD_FIELD_CLASS}
+                />
+                {addErrors.destination && <p className="text-xs text-red-500 mt-1">{addErrors.destination}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={addForm.date}
+                    onChange={(e) => setAddForm({ ...addForm, date: e.target.value })}
+                    className={ADD_FIELD_CLASS}
+                  />
+                  {addErrors.date && <p className="text-xs text-red-500 mt-1">{addErrors.date}</p>}
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Time</label>
+                  <input
+                    type="time"
+                    value={addForm.time}
+                    onChange={(e) => setAddForm({ ...addForm, time: e.target.value })}
+                    className={ADD_FIELD_CLASS}
+                  />
+                  {addErrors.time && <p className="text-xs text-red-500 mt-1">{addErrors.time}</p>}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Passengers</label>
+                <select
+                  value={addForm.passengers}
+                  onChange={(e) => setAddForm({ ...addForm, passengers: e.target.value })}
+                  className={ADD_FIELD_CLASS}
+                >
+                  {['1', '2', '3', '4', '5+'].map((num) => (
+                    <option key={num} value={num}>{num}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Notes (optional)</label>
+                <textarea
+                  value={addForm.notes}
+                  onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })}
+                  placeholder="Anything I should remember"
+                  rows={2}
+                  className={`${ADD_FIELD_CLASS} resize-none`}
+                />
+              </div>
+            </div>
+
+            {addErrors.form && <p className="text-xs text-red-500 mt-3">{addErrors.form}</p>}
+
+            <button
+              onClick={saveManualBooking}
+              disabled={isSavingBooking}
+              className="w-full mt-5 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl font-bold hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSavingBooking ? (
+                <>
+                  <RefreshCw size={16} className="animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Booking'
+              )}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
