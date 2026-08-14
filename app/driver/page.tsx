@@ -684,7 +684,7 @@ export default function DriverDashboard() {
         </div>
       )}
 
-      <div className="max-w-4xl mx-auto px-4 pt-6 pb-24">
+      <div className="max-w-4xl mx-auto px-4 pt-6 pb-28">
         {/* Time-Aware Greeting */}
         {greetingSlot && (
           <>
@@ -1253,17 +1253,17 @@ export default function DriverDashboard() {
         title="Add Booking"
         className={`fixed bottom-6 right-6 z-30 flex items-center gap-2 ${reducedMotion ? '' : 'ranchie-fab'}`}
       >
-        <span className="bg-white text-teal-700 font-bold text-sm shadow-lg rounded-full px-3 py-1.5">
+        <span className="bg-amber-950 text-amber-50 font-bold text-sm shadow-lg rounded-full px-3 py-1.5">
           Add Booking
         </span>
         <span className="relative w-14 h-14 flex-shrink-0">
           {!reducedMotion && (
             <span
-              className="ranchie-fab-ping absolute inset-0 rounded-full bg-teal-400"
+              className="ranchie-fab-ping absolute inset-0 rounded-full bg-amber-400"
               aria-hidden="true"
             />
           )}
-          <span className="relative w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-teal-500 text-white shadow-2xl flex items-center justify-center">
+          <span className="relative w-14 h-14 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 shadow-2xl ring-2 ring-white/70 flex items-center justify-center">
             <Plus size={28} />
           </span>
         </span>
