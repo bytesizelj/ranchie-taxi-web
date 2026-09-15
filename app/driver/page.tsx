@@ -25,7 +25,8 @@ import {
   Sunset,
   Moon,
   Star,
-  Plus
+  Plus,
+  CalendarClock
 } from 'lucide-react';
 
 interface FlightStatus {
@@ -122,7 +123,7 @@ export default function DriverDashboard() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'completed' | 'declined' | 'cancelled'>('all');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'scheduled' | 'completed' | 'declined' | 'cancelled'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -547,6 +548,7 @@ export default function DriverDashboard() {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'accepted': return 'bg-green-100 text-green-800';
+      case 'scheduled': return 'bg-purple-100 text-purple-800';
       case 'confirmed': return 'bg-blue-100 text-blue-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
@@ -558,6 +560,7 @@ export default function DriverDashboard() {
     switch (status) {
       case 'pending': return <AlertCircle size={16} />;
       case 'accepted': return <CheckCircle size={16} />;
+      case 'scheduled': return <CalendarClock size={16} />;
       case 'confirmed': return <Car size={16} />;
       case 'completed': return <CheckCircle size={16} />;
       case 'cancelled': return <XCircle size={16} />;
@@ -795,7 +798,7 @@ export default function DriverDashboard() {
         </div>
 
         {/* Status Counts */}
-        <div className="grid grid-cols-5 gap-2 mb-4">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
           <div className="bg-yellow-50 rounded-xl p-2 text-center">
             <p className="text-lg font-bold text-yellow-700">{bookings.filter(b => b.status === 'pending').length}</p>
             <p className="text-[10px] text-yellow-600 font-semibold">Pending</p>
@@ -803,6 +806,10 @@ export default function DriverDashboard() {
           <div className="bg-green-50 rounded-xl p-2 text-center">
             <p className="text-lg font-bold text-green-700">{bookings.filter(b => b.status === 'accepted' || b.status === 'confirmed').length}</p>
             <p className="text-[10px] text-green-600 font-semibold">Accepted</p>
+          </div>
+          <div className="bg-purple-50 rounded-xl p-2 text-center">
+            <p className="text-lg font-bold text-purple-700">{bookings.filter(b => b.status === 'scheduled').length}</p>
+            <p className="text-[10px] text-purple-600 font-semibold">Scheduled</p>
           </div>
           <div className="bg-blue-50 rounded-xl p-2 text-center">
             <p className="text-lg font-bold text-blue-700">{bookings.filter(b => b.status === 'completed').length}</p>
@@ -820,7 +827,7 @@ export default function DriverDashboard() {
 
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
-          {['all', 'pending', 'accepted', 'completed', 'declined', 'cancelled'].map((status) => (
+          {['all', 'pending', 'accepted', 'scheduled', 'completed', 'declined', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status as any)}
@@ -1133,15 +1140,24 @@ export default function DriverDashboard() {
                       </button>
                     </>
                   )}
-                  {(booking.status === 'accepted' || booking.status === 'confirmed') && (
+                  {(booking.status === 'accepted' || booking.status === 'confirmed' || booking.status === 'scheduled') && (
                     <div className="w-full flex flex-col gap-2">
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => updateStatus(booking.id, 'completed')}
-                          className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
-                        >
-                          Mark Complete
-                        </button>
+                        {booking.status === 'scheduled' ? (
+                          <button
+                            onClick={() => updateStatus(booking.id, 'accepted')}
+                            className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                          >
+                            Confirm Booking
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => updateStatus(booking.id, 'completed')}
+                            className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                          >
+                            Mark Complete
+                          </button>
+                        )}
                         <button
                           onClick={() => {
                             if (booking.phone && booking.phone !== 'Not provided') {
@@ -1153,6 +1169,14 @@ export default function DriverDashboard() {
                           💬 Message
                         </button>
                       </div>
+                      {booking.status !== 'scheduled' && (
+                        <button
+                          onClick={() => updateStatus(booking.id, 'scheduled')}
+                          className="w-full py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-semibold hover:bg-purple-200 transition-all"
+                        >
+                          Schedule
+                        </button>
+                      )}
                       <div className="flex gap-2">
                         <button
                           onClick={() => {

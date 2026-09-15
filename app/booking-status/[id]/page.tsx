@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { db } from '@/lib/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { ArrowLeft, MapPin, Calendar, Clock, Users, Phone, MessageCircle, CheckCircle, XCircle, Loader2, Sparkles, Car, Check } from 'lucide-react';
+import { ArrowLeft, MapPin, Calendar, Clock, Users, Phone, MessageCircle, CheckCircle, XCircle, Loader2, Sparkles, Car, Check, CalendarClock } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 
 interface BookingData {
@@ -92,6 +92,13 @@ export default function BookingStatusPage() {
       title: 'Your Ride Is Confirmed',
       subtitle: 'I will be there. Thank you for choosing Ranchie Taxi.',
       bg: 'from-green-500 to-teal-500',
+      pulse: false,
+    },
+    scheduled: {
+      icon: CalendarClock,
+      title: 'Your Booking Is Scheduled',
+      subtitle: 'I have reserved your booking. I will confirm with you closer to your travel date.',
+      bg: 'from-purple-500 to-indigo-500',
       pulse: false,
     },
     declined: {
