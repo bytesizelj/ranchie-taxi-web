@@ -461,6 +461,22 @@ export default function DriverDashboard() {
     }
   };
 
+  const acceptBooking = (booking: Booking) => {
+    const msg = encodeURIComponent(
+      `Hello ${booking.name}. I am pleased to confirm your booking.\n\n` +
+      `*Pickup:* ${booking.pickup}\n` +
+      `*Destination:* ${booking.destination}\n` +
+      `*Date:* ${booking.date}\n` +
+      `*Time:* ${booking.time}\n\n` +
+      `To ensure that I locate you without delay, kindly share your live location with me here on WhatsApp: tap the attachment icon, select *Location*, then choose *Share Live Location*.\n\n` +
+      `I will be there for you. I look forward to seeing you soon.\n- Ranchie Taxi`
+    );
+    if (booking.phone && booking.phone !== 'Not provided') {
+      window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
+    }
+    updateStatus(booking.id, 'accepted');
+  };
+
   const cancelBooking = async (bookingId: string, cancelledBy: 'driver' | 'customer') => {
     try {
       await updateDoc(doc(db, 'bookings', bookingId), {
@@ -1102,21 +1118,7 @@ export default function DriverDashboard() {
                   {booking.status === 'pending' && (
                     <>
                       <button
-                        onClick={() => {
-                          const msg = encodeURIComponent(
-                            `Hello ${booking.name}. I am pleased to confirm your booking.\n\n` +
-                            `*Pickup:* ${booking.pickup}\n` +
-                            `*Destination:* ${booking.destination}\n` +
-                            `*Date:* ${booking.date}\n` +
-                            `*Time:* ${booking.time}\n\n` +
-                            `To ensure that I locate you without delay, kindly share your live location with me here on WhatsApp: tap the attachment icon, select *Location*, then choose *Share Live Location*.\n\n` +
-                            `I will be there for you. I look forward to seeing you soon.\n- Ranchie Taxi`
-                          );
-                          if (booking.phone && booking.phone !== 'Not provided') {
-                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}?text=${msg}`, '_blank');
-                          }
-                          updateStatus(booking.id, 'accepted');
-                        }}
+                        onClick={() => acceptBooking(booking)}
                         className="flex-1 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-bold hover:shadow-lg transition-all"
                       >
                         ✅ Accept
@@ -1145,8 +1147,8 @@ export default function DriverDashboard() {
                       <div className="flex gap-2">
                         {booking.status === 'scheduled' ? (
                           <button
-                            onClick={() => updateStatus(booking.id, 'accepted')}
-                            className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                            onClick={() => acceptBooking(booking)}
+                            className="flex-1 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
                           >
                             Confirm Booking
                           </button>
@@ -1172,8 +1174,9 @@ export default function DriverDashboard() {
                       {booking.status !== 'scheduled' && (
                         <button
                           onClick={() => updateStatus(booking.id, 'scheduled')}
-                          className="w-full py-2 bg-purple-100 text-purple-700 rounded-xl text-sm font-semibold hover:bg-purple-200 transition-all"
+                          className="w-full py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
                         >
+                          <CalendarClock size={16} />
                           Schedule
                         </button>
                       )}
