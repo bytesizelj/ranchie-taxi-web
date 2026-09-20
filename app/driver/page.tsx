@@ -26,7 +26,8 @@ import {
   Moon,
   Star,
   Plus,
-  CalendarClock
+  CalendarClock,
+  BellRing
 } from 'lucide-react';
 
 interface FlightStatus {
@@ -96,6 +97,14 @@ const GREETING_SUBTITLES: Record<GreetingSlot, string[]> = {
     'The roads are quiet now.'
   ]
 };
+
+// Local YYYY-MM-DD key. Built from the device clock, never toISOString - UTC would roll
+// the date over at 8pm AST and mark tomorrow's trips as today.
+const toLocalDateKey = (d: Date): string =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+const ATTENTION_HORIZON_DAYS = 3;
+const ATTENTION_VISIBLE_LIMIT = 4;
 
 const getGreetingSlot = (hour: number): GreetingSlot => {
   if (hour >= 5 && hour < 12) return 'morning';
@@ -558,6 +567,27 @@ export default function DriverDashboard() {
     return matchesFilter && matchesSearch;
   });
 
+  // Needs Attention - derived per render from bookings already in state, no extra listener.
+  const todayKey = toLocalDateKey(new Date());
+  const horizonDate = new Date();
+  horizonDate.setDate(horizonDate.getDate() + ATTENTION_HORIZON_DAYS);
+  const horizonKey = toLocalDateKey(horizonDate);
+
+  const attentionItems = bookings
+    .filter(b => b.status === 'scheduled')
+    .map(b => ({ booking: b, key: b.date === 'Today' ? todayKey : b.date }))
+    .filter(item => /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(item.key) && item.key <= horizonKey)
+    .map(item => ({ ...item, isOverdue: item.key < todayKey }))
+    .sort((a, b) => {
+      if (a.isOverdue !== b.isOverdue) return a.isOverdue ? -1 : 1;
+      if (a.key !== b.key) return a.key < b.key ? -1 : 1;
+      return (a.booking.time || '').localeCompare(b.booking.time || '');
+    });
+
+  const visibleAttention = attentionItems.slice(0, ATTENTION_VISIBLE_LIMIT);
+  const hiddenAttentionCount = attentionItems.length - visibleAttention.length;
+  const hasAttention = attentionItems.length > 0;
+
   const todayBookings = getTodayBookings();
 
   const getStatusColor = (status: string) => {
@@ -764,6 +794,61 @@ export default function DriverDashboard() {
           </>
         )}
 
+        {/* Needs Attention */}
+        {hasAttention && (
+          <>
+            <style>{`
+              @keyframes ranchieAttentionPulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50%      { transform: scale(1.4); opacity: 0.5; }
+              }
+              .ranchie-attention-dot {
+                animation: ranchieAttentionPulse 1800ms ease-in-out infinite;
+                will-change: transform, opacity;
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .ranchie-attention-dot { animation: none; }
+              }
+            `}</style>
+            <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 shadow-md mb-6">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-9 h-9 rounded-full bg-amber-200 text-amber-900 flex items-center justify-center shrink-0">
+                  <BellRing size={18} />
+                </div>
+                <p className="font-bold text-amber-950">Needs Attention</p>
+                <span className="ml-auto text-xs font-bold text-amber-800">{attentionItems.length}</span>
+              </div>
+              <div className="space-y-2">
+                {visibleAttention.map(item => (
+                  <div
+                    key={item.booking.id}
+                    className="bg-white/70 border border-amber-200 rounded-xl px-3 py-2 flex items-center gap-3"
+                  >
+                    <p className="flex-1 min-w-0 truncate text-sm text-amber-950">
+                      <span className="font-semibold">{item.booking.name}</span>
+                      {` - ${item.booking.date} at ${item.booking.time} - ${item.booking.pickup} -> ${item.booking.destination}`}
+                    </p>
+                    {item.isOverdue ? (
+                      <span className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
+                        Date passed
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-purple-100 text-purple-800">
+                        Scheduled
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {hiddenAttentionCount > 0 && (
+                <p className="mt-2 text-xs font-semibold text-amber-800">
+                  {`+${hiddenAttentionCount} more in Scheduled`}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+
         {/* Today's Reminders */}
         {todayBookings.length > 0 && (
           <div className="bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl p-5 text-white mb-6 shadow-lg">
@@ -823,7 +908,10 @@ export default function DriverDashboard() {
             <p className="text-lg font-bold text-green-700">{bookings.filter(b => b.status === 'accepted' || b.status === 'confirmed').length}</p>
             <p className="text-[10px] text-green-600 font-semibold">Accepted</p>
           </div>
-          <div className="bg-purple-50 rounded-xl p-2 text-center">
+          <div className="relative bg-purple-50 rounded-xl p-2 text-center">
+            {hasAttention && (
+              <span className="ranchie-attention-dot absolute top-1 right-1 w-2 h-2 rounded-full bg-amber-500" />
+            )}
             <p className="text-lg font-bold text-purple-700">{bookings.filter(b => b.status === 'scheduled').length}</p>
             <p className="text-[10px] text-purple-600 font-semibold">Scheduled</p>
           </div>
@@ -842,17 +930,20 @@ export default function DriverDashboard() {
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <div className="flex gap-2 mb-4 overflow-x-auto pt-2 pb-2">
           {['all', 'pending', 'accepted', 'scheduled', 'completed', 'declined', 'cancelled'].map((status) => (
             <button
               key={status}
               onClick={() => setFilter(status as any)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
+              className={`relative px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all ${
                 filter === status
                   ? 'bg-green-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-100'
               }`}
             >
+              {status === 'scheduled' && hasAttention && (
+                <span className="ranchie-attention-dot absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-white" />
+              )}
               {status.charAt(0).toUpperCase() + status.slice(1)}
               {status !== 'all' && (
                 <span className="ml-1 opacity-70">
