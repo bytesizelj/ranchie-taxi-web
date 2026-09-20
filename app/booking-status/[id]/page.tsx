@@ -97,7 +97,7 @@ export default function BookingStatusPage() {
     scheduled: {
       icon: CalendarClock,
       title: 'Your Booking Is Scheduled',
-      subtitle: 'I have reserved your booking. I will confirm with you closer to your travel date.',
+      subtitle: 'I have reserved your booking. I will be in contact closer to your travel date.',
       bg: 'from-purple-500 to-indigo-500',
       pulse: false,
     },

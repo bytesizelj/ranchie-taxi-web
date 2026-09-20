@@ -1145,21 +1145,12 @@ export default function DriverDashboard() {
                   {(booking.status === 'accepted' || booking.status === 'confirmed' || booking.status === 'scheduled') && (
                     <div className="w-full flex flex-col gap-2">
                       <div className="flex gap-2">
-                        {booking.status === 'scheduled' ? (
-                          <button
-                            onClick={() => acceptBooking(booking)}
-                            className="flex-1 py-2 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg transition-all"
-                          >
-                            Confirm Booking
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => updateStatus(booking.id, 'completed')}
-                            className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
-                          >
-                            Mark Complete
-                          </button>
-                        )}
+                        <button
+                          onClick={() => updateStatus(booking.id, 'completed')}
+                          className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
+                        >
+                          Mark Complete
+                        </button>
                         <button
                           onClick={() => {
                             if (booking.phone && booking.phone !== 'Not provided') {
@@ -1178,6 +1169,14 @@ export default function DriverDashboard() {
                         >
                           <CalendarClock size={16} />
                           Schedule
+                        </button>
+                      )}
+                      {booking.status === 'scheduled' && (
+                        <button
+                          onClick={() => updateStatus(booking.id, 'accepted')}
+                          className="w-full py-1 text-sm text-purple-600 underline underline-offset-4 hover:text-purple-800 transition-colors"
+                        >
+                          Return to Accepted
                         </button>
                       )}
                       <div className="flex gap-2">
@@ -1217,24 +1216,28 @@ export default function DriverDashboard() {
                     </div>
                   )}
                   {(booking.status === 'completed' || booking.status === 'cancelled' || booking.status === 'declined') && (
-                    <>
-                      <button
-                        onClick={() => updateStatus(booking.id, 'pending')}
-                        className="flex-1 py-2 bg-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-300 transition-all"
-                      >
-                        Reset to Pending
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (booking.phone && booking.phone !== 'Not provided') {
-                            window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
-                          }
-                        }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
-                      >
-                        💬 Message
-                      </button>
-                    </>
+                    <div className="w-full flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            if (booking.phone && booking.phone !== 'Not provided') {
+                              window.open(`https://wa.me/${booking.phone.replace(/[^0-9]/g, '')}`, '_blank');
+                            }
+                          }}
+                          className="flex-1 py-2 bg-blue-500 text-white rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all"
+                        >
+                          💬 Message
+                        </button>
+                      </div>
+                      {booking.status === 'completed' && (
+                        <button
+                          onClick={() => updateStatus(booking.id, 'accepted')}
+                          className="w-full py-1 text-sm text-purple-600 underline underline-offset-4 hover:text-purple-800 transition-colors"
+                        >
+                          Return to Accepted
+                        </button>
+                      )}
+                    </div>
                   )}
                   </div>
                   <button
