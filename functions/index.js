@@ -21,6 +21,13 @@ exports.sendBookingNotification = onDocumentCreated(
   },
   async (event) => {
   const booking = event.data.data();
+
+  // Bookings entered by Ranchie in the dashboard need no alert back to Ranchie.
+  if (booking.createdBy === "driver") {
+    console.log(`Driver-created booking ${event.params.bookingId} - notifications skipped`);
+    return;
+  }
+
   const db = getFirestore();
   const messaging = getMessaging();
 
