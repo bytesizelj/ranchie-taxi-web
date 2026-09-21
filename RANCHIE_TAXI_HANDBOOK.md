@@ -2,7 +2,7 @@
 
 > **Purpose:** Single source of truth for the Ranchie Taxi PWA. Prime a new chat by sharing this file. Keep it updated as the project evolves.
 >
-> **Last updated:** Session ending with FCM restoration + Cancel buttons deployed. Greeting + location-message upgrades in progress.
+> **Last updated:** 20 September 2026 — customer booking-received SMS + E.164 normalization deployed. Phone verification is next.
 
 ---
 
@@ -26,6 +26,7 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Icons | lucide-react |
 | Database | Firebase Firestore |
 | Push notifications | Firebase Cloud Messaging (FCM) + Cloud Functions (Gen 2) |
+| SMS notifications | Twilio (driver alerts, customer booking-received confirmation, 6PM AST daily digest) |
 | Hosting | Vercel (auto-deploy on push to `main`) |
 | Version control | GitHub |
 | Maps / autocomplete | Google Maps Places API (country-restricted to SVG) |
@@ -57,8 +58,9 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Item | Value |
 |---|---|
 | Firebase project ID | `ranchie-taxi-1e166` |
-| Cloud Function name | `sendBookingNotification` (Gen 2, Node.js 24, us-central1, 256MB) |
-| Trigger | Firestore `bookings/{bookingId}` document.create |
+| Cloud Functions | `sendBookingNotification` (Gen 2, Node.js 24, us-central1, 256MB) · `sendDailyDigest` (Gen 2, Cloud Scheduler) |
+| Triggers | `sendBookingNotification`: Firestore `bookings/{bookingId}` document.create · `sendDailyDigest`: cron `0 18 * * *`, `America/St_Vincent` |
+| Twilio secrets | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` — Firebase Secret Manager (`defineSecret`), never in code |
 | Firestore collections | `bookings`, `fcmTokens` |
 | Billing account | `0162FD-5CB0DC-1D6739` ("My Billing Account") — **shared** across Ranchie Taxi, Cell World St Vincent, and ranchie-taxi-1e166 |
 | Firebase CLI login | `ictcleslie@gmail.com` |
@@ -80,12 +82,13 @@ booking {
   id, name, phone, flightNumber?,
   pickup, destination, date, time, passengers, notes,
   status, createdAt,
+  createdBy?    ('driver' — quick-add bookings; suppresses notifications),
   cancelledBy?  ('driver' | 'customer'),
   cancelledAt?
 }
 ```
 
-**Status values:** `pending` → `accepted` / `confirmed` → `completed`, plus `declined` (rejected before accepting) and `cancelled` (accepted but not done).
+**Status values:** `pending` → `accepted` / `confirmed` → `scheduled` → `completed`, plus `declined` (rejected before accepting) and `cancelled` (accepted but not done). Scheduled and completed cards can be returned to `accepted` for recovery.
 
 ---
 
@@ -99,6 +102,7 @@ booking {
 **Cloud Function (Firebase):**
 ```powershell
 firebase deploy --only functions:sendBookingNotification
+firebase deploy --only functions:sendDailyDigest
 ```
 > ⚠️ Before deploying functions, if `package-lock.json` is out of sync, Cloud Build's `npm ci` fails. Fix: `cd functions` → delete `node_modules` + `package-lock.json` → `npm install` → redeploy. Commit the regenerated lock file.
 
@@ -129,19 +133,21 @@ firebase deploy --only functions:sendBookingNotification
 
 ---
 
-## 8. Current Position (as of latest session)
+## 8. Current Position (as of 20 September 2026)
 
-### ✅ Completed & deployed this session
-1. **Notification listener self-healing** — driver dashboard `onSnapshot` listener now auto-reconnects on tab visibility change + network restore (fixed stale WebChannel that required manual refresh).
-2. **Cancel + Customer Cancelled buttons** — on accepted bookings, with distinct WhatsApp messages. Both set `status: 'cancelled'` + `cancelledBy` field.
-3. **Cancelled filter tab + count card** — split from Declined.
-4. **Billing crisis resolved** — expired card replaced, closed billing account reopened.
-5. **FCM Cloud Function redeployed** — `sendBookingNotification` live and verified end-to-end (chime + browser notification + phone push all working).
+### ✅ Completed & verified in production
+1. **Twilio token swap** — exposed auth token invalidated and replaced; secrets live only in Firebase Secret Manager.
+2. **Driver-created booking notification suppression** — quick-add bookings (`createdBy: 'driver'`) do not trigger FCM/SMS alerts.
+3. **Scheduled status + flow** — Schedule / Mark Complete / Return to Accepted on booking cards, purple pill + tab + count, customer-facing scheduled view.
+4. **Needs Attention strip** — upcoming (3-day window) and overdue scheduled bookings surfaced with tab badges.
+5. **6PM AST daily SMS digest** — `sendDailyDigest` Cloud Function on Cloud Scheduler: tomorrow's pickups + scheduled bookings needing review.
+6. **Customer booking-received SMS** — sent on submission with a tracking link; phone numbers normalized to E.164 (SVG local, 784-prefixed, 1-prefixed, international).
+7. **Phone guidance on booking form** — amber attention glow until the number is verified, international placeholder, country-code helper, tinted status cards.
+8. **Quick-add booking + amber FAB** — driver modal form, FAB with ping + slam-in entrance, sentinel-safe fields.
+9. **Premium dashboard header + greeting ticker** — Ranchie photo, gradient, curves; time-aware amber greeting banner with rise-in entrance, capped pulse-glow, seamless subtitle marquee (pause on hover/focus, reduced-motion fallback).
 
-### 🔄 In progress (resume here)
-**Greeting + location-message upgrades** — file open, code prepared:
-- **Step 1 (READY, not yet applied):** Add live-location request to the Accept message (find-and-replace prepared — customer-facing text guides them to share location via WhatsApp attachment → Location). Doubles as a fake-booking verification signal.
-- **Step 2 (designed, not built):** Time-aware greeting banner below dashboard header. Permanent banner. Greetings: Morning ☀️ / Afternoon 🚕 / Evening 🌙 / Night 🌃, each with a supportive subtitle. Soft teal/green to match theme.
+### 🔄 Next up (resume here)
+**Phone verification at booking form** — see To-Do #1.
 
 ---
 
@@ -149,10 +155,14 @@ firebase deploy --only functions:sendBookingNotification
 
 | # | Item | Approach |
 |---|---|---|
-| 1 | **Activity log / audit trail dashboard** | Soft delete (`isDeleted` flag) + `statusHistory` array on each booking; new dashboard view showing full history including deleted. Independent of Cloud Functions. |
-| 2 | **WhatsApp notification redundancy** | Cloud Function sends WhatsApp alongside FCM. **Blocked:** Meta face verification (LJ unable/unwilling). Workaround: **Twilio WhatsApp API** (~$0.005-0.015/msg) or third-party (Wati, AiSensy, MSG91) that handle Meta verification on their side. |
-| 3 | **Phone verification at booking form** | Customer enters phone → app sends WhatsApp code → customer confirms before booking submits. Eliminates fake/unreachable bookings at the source. (Root cause: two fake bookings had numbers not registered on WhatsApp — auto-replies bounced with "not on WhatsApp".) |
-| 4 | **(Optional) Dedupe notifications** | Currently in-page listener + FCM service worker can both fire = duplicate notifications. Add dedup logic. Low priority — extra notifications better than none. |
+| 1 | **Phone verification at booking form** (NEXT) | Customer enters phone → app sends a code → customer confirms before booking submits. Eliminates fake/unreachable bookings at the source. (Root cause: two fake bookings had numbers not registered on WhatsApp — auto-replies bounced with "not on WhatsApp".) |
+| 2 | **Reports + fare capture** | Capture fare on bookings; reporting view for the driver. |
+| 3 | **Google reviews page** | Dedicated reviews page. |
+| 4 | **Events archive / Previous Events** | Archive past events into a Previous Events section. |
+| 5 | **Housekeeping list** | Stray files (untracked images in `public/images/`, `HIGHMARK-BUILD-HANDBOOK-v2.md`), `firebase-functions` upgrade (needs its own pass), small bugs. |
+| 6 | **Section 14 compliance (HighMark studio standard)** | Verify Ranchie Taxi has a Privacy Policy page, Terms page, and the current HighMark footer credit; add whatever is missing. |
+| 7 | **Activity log / audit trail** (parked / later) | Soft delete + `statusHistory` per booking, dashboard history view. |
+| 8 | **Dedupe notifications** (parked / later) | In-page listener + FCM SW can both fire. |
 
 ### Confirmed NOT needed
 - Mobile 5-card count row layout — confirmed fine on Ranchie's phone, no fix required.
@@ -163,7 +173,7 @@ firebase deploy --only functions:sendBookingNotification
 
 - **`functions/` has 3 index files** — only `index.js` is deployed (see §3).
 - **`package-lock.json` sync** — regenerate cleanly before function deploys (see §6).
-- **Notification doubles** — known, see To-Do #4.
+- **Notification doubles** — in-page listener + FCM service worker can both fire. Known, low priority — extra notifications better than none.
 - **Billing is shared** across multiple projects — a lapse affects Ranchie Taxi AND Cell World.
 - **Google Cloud APIs** (Maps, etc.) share the same billing — a billing lapse can break Places Autocomplete on the booking form.
 
