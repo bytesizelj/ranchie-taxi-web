@@ -766,7 +766,7 @@ export default function BookingPageClient() {
                     />
                  <input
                       type="tel"
-                      placeholder="e.g. 17844932354 (include country code)"
+                      placeholder="+1 784 XXX XXXX"
                       value={formData.phone}
                       onChange={(e) => {
                         setFormData({ ...formData, phone: e.target.value });
@@ -779,35 +779,73 @@ export default function BookingPageClient() {
                       }}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none resize-none text-gray-900 bg-white placeholder:text-gray-500"
                     />
+                    <style>{`
+                      @keyframes ranchiePhoneNoteRise {
+                        0%   { opacity: 0; transform: translateY(18px); }
+                        60%  { opacity: 1; transform: translateY(-5px); }
+                        100% { opacity: 1; transform: translateY(0); }
+                      }
+                      /* Container only - border and shadow never touch the text layer. */
+                      @keyframes ranchiePhoneNoteGlow {
+                        0%, 100% { border-color: #99f6e4; box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+                        50%      { border-color: #fbbf24; box-shadow: 0 0 16px 2px rgba(251, 191, 36, 0.55); }
+                      }
+                      .ranchie-phone-note {
+                        animation: ranchiePhoneNoteRise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+                        will-change: transform, opacity;
+                      }
+                      /* Same rise at list index 0 so dropping the glow never restarts the entrance. */
+                      .ranchie-phone-note.ranchie-phone-glow {
+                        animation:
+                          ranchiePhoneNoteRise 700ms cubic-bezier(0.22, 1, 0.36, 1) both,
+                          ranchiePhoneNoteGlow 1500ms ease-in-out 700ms infinite both;
+                        will-change: transform, opacity, box-shadow;
+                      }
+                      @media (prefers-reduced-motion: reduce) {
+                        .ranchie-phone-note,
+                        .ranchie-phone-note.ranchie-phone-glow {
+                          animation: none;
+                          opacity: 1;
+                          transform: none;
+                          box-shadow: none;
+                        }
+                      }
+                    `}</style>
+                    <p
+                      className={`ranchie-phone-note ${
+                        phoneValidation.checked && phoneValidation.valid ? '' : 'ranchie-phone-glow'
+                      } text-sm text-teal-800 bg-teal-50 border border-teal-200 rounded-lg px-3 py-2 mt-2`}
+                    >
+                      For international bookings, kindly include your country code, for example +44 for the United Kingdom or +1 for the United States. Without it, I may be unable to reach you to confirm your booking.
+                    </p>
                     {isValidatingPhone && (
-                      <div className="mt-2 p-3 bg-blue-50 border-2 border-blue-300 rounded-xl flex items-center gap-3 animate-pulse">
-                        <Loader2 size={20} className="animate-spin text-blue-600" />
+                      <div className="mt-2 bg-blue-50 border border-blue-300 rounded-lg px-3 py-2 flex items-center gap-3">
+                        <Loader2 size={20} className="animate-spin text-blue-600 shrink-0" />
                         <div>
-                          <p className="text-sm font-semibold text-blue-700">Verifying phone number...</p>
-                          <p className="text-xs text-blue-500">Please wait — this only takes a moment</p>
+                          <p className="text-sm sm:text-base font-semibold text-blue-800">Verifying phone number...</p>
+                          <p className="text-xs sm:text-sm text-blue-600">Please wait - this only takes a moment</p>
                         </div>
                       </div>
                     )}
-                    {!formData.phone && (
-                      <p className="text-xs text-orange-500 mt-1 animate-pulse font-semibold">
-                        Include your country code (e.g. +1 for US/Canada, +44 for UK, +1784 for SVG)
-                      </p>
-                    )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length >= 10 && !phoneValidation.checked && !isValidatingPhone && (
-                      <p className="text-xs text-blue-500 mt-1 font-semibold animate-pulse">
-                        Your phone number will be verified — tap outside the field to continue
+                      <p className="text-sm sm:text-base font-semibold text-blue-800 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 mt-2">
+                        Your phone number will be verified - tap outside the field to continue
                       </p>
                     )}
                     {formData.phone && formData.phone.replace(/[^0-9]/g, '').length < 10 && (
-                      <p className="text-xs text-red-500 mt-1 animate-pulse font-semibold">
-                        Include country code — e.g. 17844932354 (SVG), 447769974681 (UK), 13135551234 (US)
+                      <p className="text-sm sm:text-base font-semibold text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mt-2">
+                        Include country code - e.g. 17844932354 (SVG), 447700900123 (UK), 13135551234 (US)
                       </p>
                     )}
                     {phoneValidation.checked && !phoneValidation.valid && (
-                      <p className="text-xs text-red-500 mt-1">{phoneValidation.reason}</p>
+                      <p className="text-sm sm:text-base font-semibold text-red-800 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mt-2">
+                        {phoneValidation.reason}
+                      </p>
                     )}
                     {phoneValidation.checked && phoneValidation.valid && formData.phone.replace(/[^0-9]/g, '').length >= 10 && (
-                      <p className="text-xs text-green-500 mt-1">Phone number verified</p>
+                      <p className="text-sm sm:text-base font-semibold text-green-800 bg-green-50 border border-green-200 rounded-lg px-3 py-2 mt-2">
+                        Phone number verified
+                      </p>
                     )}
                     </div>
                 </div>
