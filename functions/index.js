@@ -13,6 +13,18 @@ const TWILIO_AUTH_TOKEN = defineSecret("TWILIO_AUTH_TOKEN");
 const TWILIO_FROM = "+15674853767";
 const SMS_RECIPIENTS = ["+17844932354", "+17844977245"]; // Ranchie (primary), LJ (backup)
 
+// Customer number to E.164. Returns null for anything unusable - never throws,
+// so a malformed phone can never interrupt Ranchie's own notifications.
+const toE164 = (raw) => {
+  if (!raw || raw === "Not provided") return null;
+  const digits = String(raw).replace(/[^0-9]/g, "");
+  if (digits.length === 7) return `+1784${digits}`; // SVG local
+  if (digits.length === 10 && digits.startsWith("784")) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  if (digits.length >= 11 && digits.length <= 15) return `+${digits}`; // international as typed
+  return null;
+};
+
 initializeApp();
 
 exports.sendBookingNotification = onDocumentCreated(
@@ -52,6 +64,32 @@ exports.sendBookingNotification = onDocumentCreated(
     }
   } catch (twilioErr) {
     console.error(`Twilio init/send error: ${twilioErr.message}`);
+  }
+
+  // --- Customer confirmation SMS (fully isolated: nothing here can affect the blocks above or below) ---
+  try {
+    const customerNumber = toE164(booking.phone);
+    if (!customerNumber) {
+      console.log(
+        `customer-sms-skipped: booking ${event.params.bookingId} has no usable phone ` +
+        `(${booking.phone || "missing"})`
+      );
+    } else {
+      const customerClient = twilio(TWILIO_ACCOUNT_SID.value(), TWILIO_AUTH_TOKEN.value());
+      const customerBody =
+        "Ranchie Taxi: I have received your booking request. " +
+        "I could be driving, but I will send a confirmation within 10 minutes. " +
+        `Track your booking: https://www.ranchietaxisvg.com/booking-status/${event.params.bookingId}`;
+
+      await customerClient.messages.create({
+        body: customerBody,
+        from: TWILIO_FROM,
+        to: customerNumber,
+      });
+      console.log(`Customer confirmation SMS sent to ${customerNumber}`);
+    }
+  } catch (customerSmsErr) {
+    console.error(`customer-sms-failed: ${customerSmsErr.message}`);
   }
 
   const tokensSnapshot = await db.collection("fcmTokens").get();
