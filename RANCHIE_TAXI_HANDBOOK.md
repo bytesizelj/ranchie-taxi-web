@@ -2,7 +2,7 @@
 
 > **Purpose:** Single source of truth for the Ranchie Taxi PWA. Prime a new chat by sharing this file. Keep it updated as the project evolves.
 >
-> **Last updated:** 20 September 2026 — customer booking-received SMS + E.164 normalization deployed. Phone verification is next.
+> **Last updated:** 18 October 2026 — invoice generation deployed (numbered from 00055, branded printable view). Phone verification is next.
 
 ---
 
@@ -48,6 +48,10 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Cloud Function (stale compiled — unused) | `functions/lib/index.js` |
 | FCM service worker | `public/firebase-messaging-sw.js` |
 | Translations | `lib/translations/index.ts` |
+| Invoice numbering + types | `lib/invoices.ts` |
+| Invoice form modal | `components/InvoiceFormModal.tsx` |
+| Invoice printable view | `app/driver/invoice/[id]/page.tsx` |
+| Invoice assets (logo, QR, signature) | `public/images/rts-logo.png`, `public/images/ranchie-qr.png`, `public/images/signature.png` |
 
 > ⚠️ **Functions folder quirk:** `functions/package.json` has `"main": "index.js"`, so only `functions/index.js` is deployed. The `src/index.ts` and `lib/index.js` files are leftover zombies from an aborted TypeScript migration — ignore them. Cleanup is optional, not urgent.
 
@@ -61,7 +65,7 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Cloud Functions | `sendBookingNotification` (Gen 2, Node.js 24, us-central1, 256MB) · `sendDailyDigest` (Gen 2, Cloud Scheduler) |
 | Triggers | `sendBookingNotification`: Firestore `bookings/{bookingId}` document.create · `sendDailyDigest`: cron `0 18 * * *`, `America/St_Vincent` |
 | Twilio secrets | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` — Firebase Secret Manager (`defineSecret`), never in code |
-| Firestore collections | `bookings`, `fcmTokens` |
+| Firestore collections | `bookings`, `fcmTokens`, `invoices`, `counters` (`counters/invoices` holds the next invoice number) |
 | Billing account | `0162FD-5CB0DC-1D6739` ("My Billing Account") — **shared** across Ranchie Taxi, Cell World St Vincent, and ranchie-taxi-1e166 |
 | Firebase CLI login | `ictcleslie@gmail.com` |
 | Driver PIN | stored in env var `NEXT_PUBLIC_DRIVER_PIN` |
@@ -89,6 +93,22 @@ booking {
 ```
 
 **Status values:** `pending` → `accepted` / `confirmed` → `scheduled` → `completed`, plus `declined` (rejected before accepting) and `cancelled` (accepted but not done). Scheduled and completed cards can be returned to `accepted` for recovery.
+
+**Invoice schema (`invoices` collection):**
+
+```
+invoice {
+  invoiceNumber ("00055" — zero-padded, 5 digits),
+  invoiceDate (YYYY-MM-DD), billToName, billToLocation,
+  passengerName, route, serviceDate,
+  lineItems [{ description, price, jobs, subtotal }],
+  total, currency ('EC$' | 'US$'),
+  bookingId?  (set when generated from a completed booking),
+  createdAt
+}
+```
+
+Numbering: `counters/invoices { next }` is read and incremented inside the same Firestore transaction that writes the invoice, so two saves can never share a number. Seeds at 55 if the counter does not exist (continues Ranchie's paper sequence after 00054).
 
 ---
 
@@ -133,7 +153,7 @@ firebase deploy --only functions:sendDailyDigest
 
 ---
 
-## 8. Current Position (as of 20 September 2026)
+## 8. Current Position (as of 18 October 2026)
 
 ### ✅ Completed & verified in production
 1. **Twilio token swap** — exposed auth token invalidated and replaced; secrets live only in Firebase Secret Manager.
@@ -145,6 +165,7 @@ firebase deploy --only functions:sendDailyDigest
 7. **Phone guidance on booking form** — amber attention glow until the number is verified, international placeholder, country-code helper, tinted status cards.
 8. **Quick-add booking + amber FAB** — driver modal form, FAB with ping + slam-in entrance, sentinel-safe fields.
 9. **Premium dashboard header + greeting ticker** — Ranchie photo, gradient, curves; time-aware amber greeting banner with rise-in entrance, capped pulse-glow, seamless subtitle marquee (pause on hover/focus, reduced-motion fallback).
+10. **Invoice generation** — numbered sequentially from 00055 via a Firestore transaction counter (`counters/invoices`); branded printable view at `/driver/invoice/[id]` (logo, QR, signature assets in `public/images/`, Print / Save as PDF); **New Invoice** button + prefill-from-completed-booking entry points; amber UI; invoice history list on the dashboard. Invoices are **create-only from the client** (no update/delete) to protect numbering — a mistaken invoice can only be deleted from the Firebase console.
 
 ### 🔄 Next up (resume here)
 **Phone verification at booking form** — see To-Do #1.
@@ -156,13 +177,14 @@ firebase deploy --only functions:sendDailyDigest
 | # | Item | Approach |
 |---|---|---|
 | 1 | **Phone verification at booking form** (NEXT) | Customer enters phone → app sends a code → customer confirms before booking submits. Eliminates fake/unreachable bookings at the source. (Root cause: two fake bookings had numbers not registered on WhatsApp — auto-replies bounced with "not on WhatsApp".) |
-| 2 | **Reports + fare capture** | Capture fare on bookings; reporting view for the driver. |
-| 3 | **Google reviews page** | Dedicated reviews page. |
-| 4 | **Events archive / Previous Events** | Archive past events into a Previous Events section. |
-| 5 | **Housekeeping list** | Stray files (untracked images in `public/images/`, `HIGHMARK-BUILD-HANDBOOK-v2.md`), `firebase-functions` upgrade (needs its own pass), small bugs. |
-| 6 | **Section 14 compliance (HighMark studio standard)** | Verify Ranchie Taxi has a Privacy Policy page, Terms page, and the current HighMark footer credit; add whatever is missing. |
-| 7 | **Activity log / audit trail** (parked / later) | Soft delete + `statusHistory` per booking, dashboard history view. |
-| 8 | **Dedupe notifications** (parked / later) | In-page listener + FCM SW can both fire. |
+| 2 | **Invoice WhatsApp share + post-complete offer** (next build) | Invoice WhatsApp share (html2canvas image + Web Share API) and post-Mark-Complete invoice offer. |
+| 3 | **Reports + fare capture** | Capture fare on bookings; reporting view for the driver. |
+| 4 | **Google reviews page** | Dedicated reviews page. |
+| 5 | **Events archive / Previous Events** | Archive past events into a Previous Events section. |
+| 6 | **Housekeeping list** | Stray files (untracked images in `public/images/`, `HIGHMARK-BUILD-HANDBOOK-v2.md`), `firebase-functions` upgrade (needs its own pass), small bugs. |
+| 7 | **Section 14 compliance (HighMark studio standard)** | Verify Ranchie Taxi has a Privacy Policy page, Terms page, and the current HighMark footer credit; add whatever is missing. |
+| 8 | **Activity log / audit trail** (parked / later) | Soft delete + `statusHistory` per booking, dashboard history view. |
+| 9 | **Dedupe notifications** (parked / later) | In-page listener + FCM SW can both fire. |
 
 ### Confirmed NOT needed
 - Mobile 5-card count row layout — confirmed fine on Ranchie's phone, no fix required.
@@ -176,6 +198,7 @@ firebase deploy --only functions:sendDailyDigest
 - **Notification doubles** — in-page listener + FCM service worker can both fire. Known, low priority — extra notifications better than none.
 - **Billing is shared** across multiple projects — a lapse affects Ranchie Taxi AND Cell World.
 - **Google Cloud APIs** (Maps, etc.) share the same billing — a billing lapse can break Places Autocomplete on the booking form.
+- **Firestore rules are per-collection, NOT global.** Any NEW collection (e.g. `invoices`, `counters`) is permission-denied until its own `match` block is added at https://console.firebase.google.com/project/ranchie-taxi-1e166/firestore/rules and published (no expiration). Symptom: listeners silently rejected, saves fail, views may show misleading empty states. This cost a full debugging session on 2026-10-17.
 
 ---
 
