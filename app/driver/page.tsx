@@ -3,7 +3,10 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
+import InvoiceFormModal, { type InvoicePrefill } from '@/components/InvoiceFormModal';
+import { formatMoney, formatInvoiceDate, type InvoiceRecord } from '@/lib/invoices';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   ArrowLeft, 
@@ -27,7 +30,10 @@ import {
   Star,
   Plus,
   CalendarClock,
-  BellRing
+  BellRing,
+  FileText,
+  Receipt,
+  ChevronRight
 } from 'lucide-react';
 
 interface FlightStatus {
@@ -150,6 +156,15 @@ export default function DriverDashboard() {
   const [addForm, setAddForm] = useState(EMPTY_ADD_FORM);
   const [addErrors, setAddErrors] = useState<Record<string, string>>({});
   const [isSavingBooking, setIsSavingBooking] = useState(false);
+
+  // Invoices
+  const router = useRouter();
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [invoicePrefill, setInvoicePrefill] = useState<InvoicePrefill | null>(null);
+  const [showInvoices, setShowInvoices] = useState(false);
+  const [invoices, setInvoices] = useState<(InvoiceRecord & { id: string })[]>([]);
+  const [invoicesLoading, setInvoicesLoading] = useState(false);
+  const [invoicesError, setInvoicesError] = useState('');
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -450,6 +465,50 @@ export default function DriverDashboard() {
       window.removeEventListener('online', handleOnline);
     };
   }, [isAuthenticated, notificationsEnabled]);
+
+  // Invoice history - subscribed only while the panel is open, newest first.
+  useEffect(() => {
+    if (!isAuthenticated || !showInvoices) return;
+    setInvoicesLoading(true);
+    setInvoicesError('');
+    const q = query(collection(db, 'invoices'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const rows: (InvoiceRecord & { id: string })[] = [];
+        snapshot.forEach((d) => rows.push({ id: d.id, ...(d.data() as InvoiceRecord) }));
+        setInvoices(rows);
+        setInvoicesError('');
+        setInvoicesLoading(false);
+      },
+      (err) => {
+        console.error('Invoices listener error:', err);
+        setInvoicesError('I could not load invoices.');
+        setInvoicesLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, [isAuthenticated, showInvoices]);
+
+  const openInvoiceForm = (prefill: InvoicePrefill | null) => {
+    setInvoicePrefill(prefill);
+    setShowInvoiceModal(true);
+  };
+
+  const openInvoiceForBooking = (booking: Booking) => {
+    openInvoiceForm({
+      passengerName: booking.name,
+      route: `${booking.pickup} to ${booking.destination}`,
+      serviceDate: booking.date === 'Today' ? toLocalDateKey(new Date()) : booking.date,
+      bookingId: booking.id
+    });
+  };
+
+  const handleInvoiceSaved = (invoiceId: string) => {
+    setShowInvoiceModal(false);
+    setInvoicePrefill(null);
+    router.push(`/driver/invoice/${invoiceId}`);
+  };
 
   const deleteBooking = async (bookingId: string) => {
     if (!confirm('Are you sure you want to delete this booking? This cannot be undone.')) return;
@@ -929,6 +988,89 @@ export default function DriverDashboard() {
           </div>
         </div>
 
+        {/* Invoice Actions */}
+        <div className="flex gap-2 mb-3">
+          <button
+            onClick={() => openInvoiceForm(null)}
+            className="flex-1 sm:flex-none px-5 py-3 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-sm font-bold shadow-lg ring-2 ring-white/70 hover:shadow-xl hover:brightness-105 transition-all flex items-center justify-center gap-2"
+          >
+            <FileText size={18} />
+            New Invoice
+          </button>
+          <button
+            onClick={() => setShowInvoices(v => !v)}
+            aria-expanded={showInvoices}
+            className={`flex-1 sm:flex-none px-5 py-3 rounded-full text-sm font-bold shadow-lg ring-2 ring-white/70 transition-all flex items-center justify-center gap-2 ${
+              showInvoices
+                ? 'bg-amber-950 text-amber-50'
+                : 'bg-amber-100 text-amber-950 hover:bg-amber-200'
+            }`}
+          >
+            <Receipt size={18} />
+            Invoices
+          </button>
+        </div>
+
+        {/* Invoice History */}
+        {showInvoices && (
+          <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl shadow-lg mb-6 overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-400">
+              <div className="w-9 h-9 rounded-full bg-white/80 text-amber-900 flex items-center justify-center shrink-0 ring-1 ring-white/90 shadow-sm">
+                <Receipt size={18} />
+              </div>
+              <p className="font-bold text-amber-950 text-base">Invoices</p>
+              <span className="ml-auto text-xs font-bold text-amber-950 bg-white/80 rounded-full px-2.5 py-1 ring-1 ring-white/90">
+                {invoices.length}
+              </span>
+            </div>
+            {invoicesLoading ? (
+              <div className="text-center py-10">
+                <RefreshCw className="animate-spin mx-auto mb-2 text-amber-500" size={26} />
+                <p className="text-sm font-semibold text-amber-900">Loading invoices...</p>
+              </div>
+            ) : invoicesError ? (
+              <div className="text-center py-10 px-6">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-red-500 flex items-center justify-center ring-2 ring-red-200 shadow-sm">
+                  <AlertCircle size={28} />
+                </div>
+                <p className="text-sm font-bold text-red-700">{invoicesError}</p>
+                <p className="text-sm text-amber-900 mt-1">Please check the connection and try again.</p>
+              </div>
+            ) : invoices.length === 0 ? (
+              <div className="text-center py-10 px-6">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-amber-500 flex items-center justify-center ring-2 ring-amber-200 shadow-sm">
+                  <FileText size={28} />
+                </div>
+                <p className="text-sm font-bold text-amber-950">No invoices yet.</p>
+                <p className="text-sm text-amber-900 mt-1">Tap New Invoice to create your first.</p>
+              </div>
+            ) : (
+              <ul className="p-3 space-y-2">
+                {invoices.map((inv) => (
+                  <li key={inv.id}>
+                    <Link
+                      href={`/driver/invoice/${inv.id}`}
+                      className="flex items-center gap-3 px-3 py-3 bg-white border border-amber-200 rounded-xl shadow-sm hover:border-amber-400 hover:shadow-md transition-all"
+                    >
+                      <span className="shrink-0 font-mono text-sm font-bold text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-lg px-2.5 py-1 ring-1 ring-amber-300/70">
+                        #{inv.invoiceNumber}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-sm font-bold text-gray-900 truncate">{inv.billToName || 'Unnamed'}</span>
+                        <span className="block text-xs font-semibold text-amber-800">{formatInvoiceDate(inv.invoiceDate)}</span>
+                      </span>
+                      <span className="shrink-0 text-sm font-extrabold text-amber-950">
+                        {inv.currency || 'EC$'} {formatMoney(Number(inv.total))}
+                      </span>
+                      <ChevronRight size={18} className="shrink-0 text-amber-500" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
         {/* Filter Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pt-2 pb-2">
           {['all', 'pending', 'accepted', 'scheduled', 'completed', 'declined', 'cancelled'].map((status) => (
@@ -1319,6 +1461,16 @@ export default function DriverDashboard() {
                         >
                           💬 Message
                         </button>
+                        {booking.status === 'completed' && (
+                          <button
+                            onClick={() => openInvoiceForBooking(booking)}
+                            className="px-4 py-2 bg-amber-100 text-amber-900 rounded-xl text-sm font-semibold ring-1 ring-amber-300/70 hover:bg-amber-200 transition-all flex items-center gap-1.5"
+                            title="Create an invoice for this booking"
+                          >
+                            <FileText size={14} />
+                            Invoice
+                          </button>
+                        )}
                       </div>
                       {booking.status === 'completed' && (
                         <button
@@ -1389,6 +1541,14 @@ export default function DriverDashboard() {
           </span>
         </span>
       </button>
+
+      {/* Invoice Modal */}
+      <InvoiceFormModal
+        open={showInvoiceModal}
+        prefill={invoicePrefill}
+        onClose={() => { setShowInvoiceModal(false); setInvoicePrefill(null); }}
+        onSaved={handleInvoiceSaved}
+      />
 
       {/* Add Booking Modal */}
       {showAddModal && (
