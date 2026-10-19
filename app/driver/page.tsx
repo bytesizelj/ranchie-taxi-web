@@ -165,6 +165,7 @@ export default function DriverDashboard() {
   const [invoices, setInvoices] = useState<(InvoiceRecord & { id: string })[]>([]);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [invoicesError, setInvoicesError] = useState('');
+  const [invoiceOffer, setInvoiceOffer] = useState<Booking | null>(null);
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -519,14 +520,22 @@ export default function DriverDashboard() {
     }
   };
 
-  const updateStatus = async (bookingId: string, newStatus: string) => {
+  const updateStatus = async (bookingId: string, newStatus: string): Promise<boolean> => {
     try {
       await updateDoc(doc(db, 'bookings', bookingId), {
         status: newStatus
       });
+      return true;
     } catch (error) {
       console.error('Error updating status:', error);
+      return false;
     }
+  };
+
+  // Mark Complete, then offer an invoice. The status write is never blocked by the offer.
+  const completeBooking = async (booking: Booking) => {
+    const ok = await updateStatus(booking.id, 'completed');
+    if (ok) setInvoiceOffer(booking);
   };
 
   const acceptBooking = (booking: Booking) => {
@@ -1379,7 +1388,7 @@ export default function DriverDashboard() {
                     <div className="w-full flex flex-col gap-2">
                       <div className="flex gap-2">
                         <button
-                          onClick={() => updateStatus(booking.id, 'completed')}
+                          onClick={() => completeBooking(booking)}
                           className="flex-1 py-2 bg-green-500 text-white rounded-xl text-sm font-semibold hover:bg-green-600 transition-all"
                         >
                           Mark Complete
@@ -1495,6 +1504,40 @@ export default function DriverDashboard() {
           </div>
         )}
       </div>
+
+      {/* Post-complete invoice offer */}
+      {invoiceOffer && (
+        <div
+          role="status"
+          className={`fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-20 bg-white border-2 border-amber-300 rounded-2xl shadow-2xl p-4 ${reducedMotion ? '' : 'ranchie-fab'}`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 shrink-0 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
+              <CheckCircle size={20} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-gray-900">Job complete.</p>
+              <p className="text-sm text-gray-700">Generate an invoice for this job?</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{invoiceOffer.name} - {invoiceOffer.pickup} to {invoiceOffer.destination}</p>
+            </div>
+          </div>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => { const b = invoiceOffer; setInvoiceOffer(null); openInvoiceForBooking(b); }}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-sm font-bold shadow-md ring-2 ring-white/70 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              <FileText size={16} />
+              Generate Invoice
+            </button>
+            <button
+              onClick={() => setInvoiceOffer(null)}
+              className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-all"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Floating Add Booking Button */}
       <style>{`
