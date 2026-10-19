@@ -2,7 +2,7 @@
 
 > **Purpose:** Single source of truth for the Ranchie Taxi PWA. Prime a new chat by sharing this file. Keep it updated as the project evolves.
 >
-> **Last updated:** 18 October 2026 — invoice WhatsApp share + post-complete invoice offer deployed. Phone verification is next.
+> **Last updated:** 18 October 2026 — invoice void support deployed; live Firestore rules recorded in §4. Phone verification is next.
 
 ---
 
@@ -74,6 +74,37 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 - Firebase client config (`apiKey`, `messagingSenderId: 878235673378`, `appId: 1:878235673378:web:...`) — these are client-side public keys, safe in browser code
 - Google Maps API key — stored in code/env
 - AviationStack API key — stored in code/env (free tier: 100 calls/month)
+
+**Live Firestore rules (published 18 October 2026 — verbatim, so future sessions do not need to probe):**
+
+Edit at https://console.firebase.google.com/project/ranchie-taxi-1e166/firestore/rules. Rules are per-collection: a new collection needs its own `match` block (see §10).
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /bookings/{bookingId} {
+      allow read, write: if true;
+    }
+
+    match /fcmTokens/{tokenId} {
+      allow read, write: if true;
+    }
+
+    match /invoices/{invoiceId} {
+      allow read, create: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && request.resource.data.status == 'void';
+      allow delete: if false;
+    }
+
+    match /counters/{counterId} {
+      allow read, write: if true;
+    }
+  }
+}
+```
 
 > Google Ads is a **completely separate billing system** from Google Cloud. A Google Cloud billing problem does NOT affect ad campaigns (unless the same card is declined there too).
 
@@ -166,7 +197,7 @@ firebase deploy --only functions:sendDailyDigest
 8. **Quick-add booking + amber FAB** — driver modal form, FAB with ping + slam-in entrance, sentinel-safe fields.
 9. **Premium dashboard header + greeting ticker** — Ranchie photo, gradient, curves; time-aware amber greeting banner with rise-in entrance, capped pulse-glow, seamless subtitle marquee (pause on hover/focus, reduced-motion fallback).
 10. **Invoice generation** — numbered sequentially from 00055 via a Firestore transaction counter (`counters/invoices`); branded printable view at `/driver/invoice/[id]` (logo, QR, signature assets in `public/images/`, Print / Save as PDF); **New Invoice** button + prefill-from-completed-booking entry points; amber UI; invoice history list on the dashboard. Invoices are **create-only from the client** (no update/delete) to protect numbering — a mistaken invoice can only be deleted from the Firebase console.
-11. **Invoice WhatsApp share + post-complete offer** — A4 PNG capture via `html2canvas-pro` (**NOT** vanilla `html2canvas` — Tailwind 4 emits oklch colors that vanilla throws on); Web Share API (`navigator.share` with files) with desktop download fallback ("Image downloaded - attach it in WhatsApp."); the invoice sheet is a fixed 794px A4 document scaled to fit on phones, so screen / print / shared image all match; post-Mark-Complete invoice offer card ("Job complete. Generate an invoice for this job?") is non-blocking — the status write never waits on it.
+11. **Invoice WhatsApp share + post-complete offer** — A4 PNG capture via `html2canvas-pro` (**NOT** vanilla `html2canvas` — Tailwind 4 emits oklch colors that vanilla throws on); Web Share API (`navigator.share` with files) with desktop download fallback ("Image downloaded - attach it in WhatsApp."); the invoice sheet is a fixed 794px A4 document scaled to fit on phones, so screen / print / shared image all match; post-Mark-Complete invoice offer card ("Job complete. Generate an invoice for this job?") is non-blocking — the status write never waits on it. **Void support** — invoices are never deleted; a narrow Firestore rule allows updating ONLY `status` to `'void'` (amounts/number/parties immutable, no un-void from client). Voided invoices show a diagonal VOID watermark on view/print/shared PNG and a muted VOID row in history. Deletion remains Firebase-console-only.
 
 ### 🔄 Next up (resume here)
 **Phone verification at booking form** — see To-Do #1.
