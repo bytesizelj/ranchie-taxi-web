@@ -17,6 +17,13 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    match /receipts/{receiptId} {
+      allow read, create: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && request.resource.data.status == 'void';
+      allow delete: if false;
+    }
+
     match /counters/{counterId} {
       allow read, write: if true;
     }

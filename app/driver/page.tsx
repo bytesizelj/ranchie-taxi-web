@@ -6,7 +6,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import InvoiceFormModal, { type InvoicePrefill } from '@/components/InvoiceFormModal';
+import ReceiptFormModal, { type ReceiptPrefill } from '@/components/ReceiptFormModal';
 import { formatMoney, formatInvoiceDate, isVoid, type InvoiceRecord } from '@/lib/invoices';
+import { isReceiptVoid, type ReceiptRecord } from '@/lib/receipts';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   ArrowLeft, 
@@ -33,6 +35,7 @@ import {
   BellRing,
   FileText,
   Receipt,
+  FolderOpen,
   ChevronRight
 } from 'lucide-react';
 
@@ -157,15 +160,21 @@ export default function DriverDashboard() {
   const [addErrors, setAddErrors] = useState<Record<string, string>>({});
   const [isSavingBooking, setIsSavingBooking] = useState(false);
 
-  // Invoices
+  // Invoices + receipts (paperwork)
   const router = useRouter();
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [invoicePrefill, setInvoicePrefill] = useState<InvoicePrefill | null>(null);
-  const [showInvoices, setShowInvoices] = useState(false);
+  const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [receiptPrefill, setReceiptPrefill] = useState<ReceiptPrefill | null>(null);
+  const [showPaperwork, setShowPaperwork] = useState(false);
+  const [paperworkTab, setPaperworkTab] = useState<'invoices' | 'receipts'>('invoices');
   const [invoices, setInvoices] = useState<(InvoiceRecord & { id: string })[]>([]);
   const [invoicesLoading, setInvoicesLoading] = useState(false);
   const [invoicesError, setInvoicesError] = useState('');
-  const [invoiceOffer, setInvoiceOffer] = useState<Booking | null>(null);
+  const [receipts, setReceipts] = useState<(ReceiptRecord & { id: string })[]>([]);
+  const [receiptsLoading, setReceiptsLoading] = useState(false);
+  const [receiptsError, setReceiptsError] = useState('');
+  const [paperworkOffer, setPaperworkOffer] = useState<Booking | null>(null);
 
   const translateText = async (text: string): Promise<string> => {
     const res = await fetch(
@@ -467,9 +476,9 @@ export default function DriverDashboard() {
     };
   }, [isAuthenticated, notificationsEnabled]);
 
-  // Invoice history - subscribed only while the panel is open, newest first.
+  // Invoice history - subscribed only while the paperwork panel is open, newest first.
   useEffect(() => {
-    if (!isAuthenticated || !showInvoices) return;
+    if (!isAuthenticated || !showPaperwork) return;
     setInvoicesLoading(true);
     setInvoicesError('');
     const q = query(collection(db, 'invoices'), orderBy('createdAt', 'desc'));
@@ -489,7 +498,31 @@ export default function DriverDashboard() {
       }
     );
     return () => unsubscribe();
-  }, [isAuthenticated, showInvoices]);
+  }, [isAuthenticated, showPaperwork]);
+
+  // Receipt history - same lifecycle as invoices, so both tab counts stay live.
+  useEffect(() => {
+    if (!isAuthenticated || !showPaperwork) return;
+    setReceiptsLoading(true);
+    setReceiptsError('');
+    const q = query(collection(db, 'receipts'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const rows: (ReceiptRecord & { id: string })[] = [];
+        snapshot.forEach((d) => rows.push({ id: d.id, ...(d.data() as ReceiptRecord) }));
+        setReceipts(rows);
+        setReceiptsError('');
+        setReceiptsLoading(false);
+      },
+      (err) => {
+        console.error('Receipts listener error:', err);
+        setReceiptsError('I could not load receipts.');
+        setReceiptsLoading(false);
+      }
+    );
+    return () => unsubscribe();
+  }, [isAuthenticated, showPaperwork]);
 
   const openInvoiceForm = (prefill: InvoicePrefill | null) => {
     setInvoicePrefill(prefill);
@@ -509,6 +542,26 @@ export default function DriverDashboard() {
     setShowInvoiceModal(false);
     setInvoicePrefill(null);
     router.push(`/driver/invoice/${invoiceId}`);
+  };
+
+  const openReceiptForm = (prefill: ReceiptPrefill | null) => {
+    setReceiptPrefill(prefill);
+    setShowReceiptModal(true);
+  };
+
+  const openReceiptForBooking = (booking: Booking) => {
+    openReceiptForm({
+      receivedFrom: booking.name,
+      description: `${booking.pickup} to ${booking.destination}`,
+      serviceDate: booking.date === 'Today' ? toLocalDateKey(new Date()) : booking.date,
+      bookingId: booking.id
+    });
+  };
+
+  const handleReceiptSaved = (receiptId: string) => {
+    setShowReceiptModal(false);
+    setReceiptPrefill(null);
+    router.push(`/driver/receipt/${receiptId}`);
   };
 
   const deleteBooking = async (bookingId: string) => {
@@ -532,10 +585,10 @@ export default function DriverDashboard() {
     }
   };
 
-  // Mark Complete, then offer an invoice. The status write is never blocked by the offer.
+  // Mark Complete, then offer paperwork (invoice or receipt). The status write is never blocked by the offer.
   const completeBooking = async (booking: Booking) => {
     const ok = await updateStatus(booking.id, 'completed');
-    if (ok) setInvoiceOffer(booking);
+    if (ok) setPaperworkOffer(booking);
   };
 
   const acceptBooking = (booking: Booking) => {
@@ -997,8 +1050,8 @@ export default function DriverDashboard() {
           </div>
         </div>
 
-        {/* Invoice Actions */}
-        <div className="flex gap-2 mb-3">
+        {/* Paperwork Actions: two New buttons, one toggle for the tabbed history panel */}
+        <div className="flex gap-2 mb-2">
           <button
             onClick={() => openInvoiceForm(null)}
             className="flex-1 sm:flex-none px-5 py-3 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-sm font-bold shadow-lg ring-2 ring-white/70 hover:shadow-xl hover:brightness-105 transition-all flex items-center justify-center gap-2"
@@ -1007,88 +1060,177 @@ export default function DriverDashboard() {
             New Invoice
           </button>
           <button
-            onClick={() => setShowInvoices(v => !v)}
-            aria-expanded={showInvoices}
+            onClick={() => openReceiptForm(null)}
+            className="flex-1 sm:flex-none px-5 py-3 rounded-full bg-gradient-to-r from-yellow-400 to-amber-500 text-amber-950 text-sm font-bold shadow-lg ring-2 ring-white/70 hover:shadow-xl hover:brightness-105 transition-all flex items-center justify-center gap-2"
+          >
+            <Receipt size={18} />
+            New Receipt
+          </button>
+        </div>
+        <div className="flex mb-3">
+          <button
+            onClick={() => setShowPaperwork(v => !v)}
+            aria-expanded={showPaperwork}
             className={`flex-1 sm:flex-none px-5 py-3 rounded-full text-sm font-bold shadow-lg ring-2 ring-white/70 transition-all flex items-center justify-center gap-2 ${
-              showInvoices
+              showPaperwork
                 ? 'bg-amber-950 text-amber-50'
                 : 'bg-amber-100 text-amber-950 hover:bg-amber-200'
             }`}
           >
-            <Receipt size={18} />
-            Invoices
+            <FolderOpen size={18} />
+            Invoices and Receipts
           </button>
         </div>
 
-        {/* Invoice History */}
-        {showInvoices && (
+        {/* Paperwork History: Invoices | Receipts */}
+        {showPaperwork && (
           <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl shadow-lg mb-6 overflow-hidden">
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-400">
               <div className="w-9 h-9 rounded-full bg-white/80 text-amber-900 flex items-center justify-center shrink-0 ring-1 ring-white/90 shadow-sm">
-                <Receipt size={18} />
+                {paperworkTab === 'invoices' ? <FileText size={18} /> : <Receipt size={18} />}
               </div>
-              <p className="font-bold text-amber-950 text-base">Invoices</p>
-              <span className="ml-auto text-xs font-bold text-amber-950 bg-white/80 rounded-full px-2.5 py-1 ring-1 ring-white/90">
-                {invoices.length}
-              </span>
-            </div>
-            {invoicesLoading ? (
-              <div className="text-center py-10">
-                <RefreshCw className="animate-spin mx-auto mb-2 text-amber-500" size={26} />
-                <p className="text-sm font-semibold text-amber-900">Loading invoices...</p>
-              </div>
-            ) : invoicesError ? (
-              <div className="text-center py-10 px-6">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-red-500 flex items-center justify-center ring-2 ring-red-200 shadow-sm">
-                  <AlertCircle size={28} />
-                </div>
-                <p className="text-sm font-bold text-red-700">{invoicesError}</p>
-                <p className="text-sm text-amber-900 mt-1">Please check the connection and try again.</p>
-              </div>
-            ) : invoices.length === 0 ? (
-              <div className="text-center py-10 px-6">
-                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-amber-500 flex items-center justify-center ring-2 ring-amber-200 shadow-sm">
-                  <FileText size={28} />
-                </div>
-                <p className="text-sm font-bold text-amber-950">No invoices yet.</p>
-                <p className="text-sm text-amber-900 mt-1">Tap New Invoice to create your first.</p>
-              </div>
-            ) : (
-              <ul className="p-3 space-y-2">
-                {invoices.map((inv) => (
-                  <li key={inv.id}>
-                    <Link
-                      href={`/driver/invoice/${inv.id}`}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl shadow-sm transition-all ${
-                        isVoid(inv)
-                          ? 'bg-gray-50 border border-gray-200 hover:border-gray-300'
-                          : 'bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md'
-                      }`}
-                    >
-                      <span className={`shrink-0 font-mono text-sm font-bold rounded-lg px-2.5 py-1 ring-1 ${
-                        isVoid(inv)
-                          ? 'text-gray-500 bg-gray-200 ring-gray-300'
-                          : 'text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 ring-amber-300/70'
-                      }`}>
-                        #{inv.invoiceNumber}
-                      </span>
-                      <span className="flex-1 min-w-0">
-                        <span className={`flex items-center gap-2 text-sm font-bold truncate ${isVoid(inv) ? 'text-gray-500' : 'text-gray-900'}`}>
-                          <span className="truncate">{inv.billToName || 'Unnamed'}</span>
-                          {isVoid(inv) && (
-                            <span className="shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">VOID</span>
-                          )}
-                        </span>
-                        <span className={`block text-xs font-semibold ${isVoid(inv) ? 'text-gray-400' : 'text-amber-800'}`}>{formatInvoiceDate(inv.invoiceDate)}</span>
-                      </span>
-                      <span className={`shrink-0 text-sm font-extrabold ${isVoid(inv) ? 'text-gray-400 line-through' : 'text-amber-950'}`}>
-                        {inv.currency || 'EC$'} {formatMoney(Number(inv.total))}
-                      </span>
-                      <ChevronRight size={18} className={`shrink-0 ${isVoid(inv) ? 'text-gray-300' : 'text-amber-500'}`} />
-                    </Link>
-                  </li>
+              <div className="flex rounded-full bg-amber-950/15 p-0.5 ring-1 ring-white/60" role="tablist" aria-label="Paperwork">
+                {([['invoices', 'Invoices', invoices.length], ['receipts', 'Receipts', receipts.length]] as const).map(([key, label, count]) => (
+                  <button
+                    key={key}
+                    role="tab"
+                    aria-selected={paperworkTab === key}
+                    onClick={() => setPaperworkTab(key)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+                      paperworkTab === key
+                        ? 'bg-white text-amber-950 shadow-sm'
+                        : 'text-amber-950/80 hover:text-amber-950'
+                    }`}
+                  >
+                    {label}
+                    <span className={`text-[10px] font-extrabold rounded-full px-1.5 py-0.5 ${
+                      paperworkTab === key ? 'bg-amber-200 text-amber-950' : 'bg-white/50 text-amber-950/80'
+                    }`}>
+                      {count}
+                    </span>
+                  </button>
                 ))}
-              </ul>
+              </div>
+            </div>
+
+            {paperworkTab === 'invoices' ? (
+              invoicesLoading ? (
+                <div className="text-center py-10">
+                  <RefreshCw className="animate-spin mx-auto mb-2 text-amber-500" size={26} />
+                  <p className="text-sm font-semibold text-amber-900">Loading invoices...</p>
+                </div>
+              ) : invoicesError ? (
+                <div className="text-center py-10 px-6">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-red-500 flex items-center justify-center ring-2 ring-red-200 shadow-sm">
+                    <AlertCircle size={28} />
+                  </div>
+                  <p className="text-sm font-bold text-red-700">{invoicesError}</p>
+                  <p className="text-sm text-amber-900 mt-1">Please check the connection and try again.</p>
+                </div>
+              ) : invoices.length === 0 ? (
+                <div className="text-center py-10 px-6">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-amber-500 flex items-center justify-center ring-2 ring-amber-200 shadow-sm">
+                    <FileText size={28} />
+                  </div>
+                  <p className="text-sm font-bold text-amber-950">No invoices yet.</p>
+                  <p className="text-sm text-amber-900 mt-1">Tap New Invoice to create your first.</p>
+                </div>
+              ) : (
+                <ul className="p-3 space-y-2">
+                  {invoices.map((inv) => (
+                    <li key={inv.id}>
+                      <Link
+                        href={`/driver/invoice/${inv.id}`}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl shadow-sm transition-all ${
+                          isVoid(inv)
+                            ? 'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                            : 'bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md'
+                        }`}
+                      >
+                        <span className={`shrink-0 font-mono text-sm font-bold rounded-lg px-2.5 py-1 ring-1 ${
+                          isVoid(inv)
+                            ? 'text-gray-500 bg-gray-200 ring-gray-300'
+                            : 'text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 ring-amber-300/70'
+                        }`}>
+                          #{inv.invoiceNumber}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className={`flex items-center gap-2 text-sm font-bold truncate ${isVoid(inv) ? 'text-gray-500' : 'text-gray-900'}`}>
+                            <span className="truncate">{inv.billToName || 'Unnamed'}</span>
+                            {isVoid(inv) && (
+                              <span className="shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">VOID</span>
+                            )}
+                          </span>
+                          <span className={`block text-xs font-semibold ${isVoid(inv) ? 'text-gray-400' : 'text-amber-800'}`}>{formatInvoiceDate(inv.invoiceDate)}</span>
+                        </span>
+                        <span className={`shrink-0 text-sm font-extrabold ${isVoid(inv) ? 'text-gray-400 line-through' : 'text-amber-950'}`}>
+                          {inv.currency || 'EC$'} {formatMoney(Number(inv.total))}
+                        </span>
+                        <ChevronRight size={18} className={`shrink-0 ${isVoid(inv) ? 'text-gray-300' : 'text-amber-500'}`} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )
+            ) : (
+              receiptsLoading ? (
+                <div className="text-center py-10">
+                  <RefreshCw className="animate-spin mx-auto mb-2 text-amber-500" size={26} />
+                  <p className="text-sm font-semibold text-amber-900">Loading receipts...</p>
+                </div>
+              ) : receiptsError ? (
+                <div className="text-center py-10 px-6">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-red-500 flex items-center justify-center ring-2 ring-red-200 shadow-sm">
+                    <AlertCircle size={28} />
+                  </div>
+                  <p className="text-sm font-bold text-red-700">{receiptsError}</p>
+                  <p className="text-sm text-amber-900 mt-1">Please check the connection and try again.</p>
+                </div>
+              ) : receipts.length === 0 ? (
+                <div className="text-center py-10 px-6">
+                  <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-amber-500 flex items-center justify-center ring-2 ring-amber-200 shadow-sm">
+                    <Receipt size={28} />
+                  </div>
+                  <p className="text-sm font-bold text-amber-950">No receipts yet.</p>
+                  <p className="text-sm text-amber-900 mt-1">Tap New Receipt to create your first.</p>
+                </div>
+              ) : (
+                <ul className="p-3 space-y-2">
+                  {receipts.map((rec) => (
+                    <li key={rec.id}>
+                      <Link
+                        href={`/driver/receipt/${rec.id}`}
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl shadow-sm transition-all ${
+                          isReceiptVoid(rec)
+                            ? 'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                            : 'bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md'
+                        }`}
+                      >
+                        <span className={`shrink-0 font-mono text-sm font-bold rounded-lg px-2.5 py-1 ring-1 ${
+                          isReceiptVoid(rec)
+                            ? 'text-gray-500 bg-gray-200 ring-gray-300'
+                            : 'text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 ring-amber-300/70'
+                        }`}>
+                          {rec.receiptNumber}
+                        </span>
+                        <span className="flex-1 min-w-0">
+                          <span className={`flex items-center gap-2 text-sm font-bold truncate ${isReceiptVoid(rec) ? 'text-gray-500' : 'text-gray-900'}`}>
+                            <span className="truncate">{rec.receivedFrom || 'Unnamed'}</span>
+                            {isReceiptVoid(rec) && (
+                              <span className="shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">VOID</span>
+                            )}
+                          </span>
+                          <span className={`block text-xs font-semibold ${isReceiptVoid(rec) ? 'text-gray-400' : 'text-amber-800'}`}>{formatInvoiceDate(rec.receiptDate)}</span>
+                        </span>
+                        <span className={`shrink-0 text-sm font-extrabold ${isReceiptVoid(rec) ? 'text-gray-400 line-through' : 'text-amber-950'}`}>
+                          {rec.currency || 'EC$'} {formatMoney(Number(rec.total))}
+                        </span>
+                        <ChevronRight size={18} className={`shrink-0 ${isReceiptVoid(rec) ? 'text-gray-300' : 'text-amber-500'}`} />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )
             )}
           </div>
         )}
@@ -1484,14 +1626,24 @@ export default function DriverDashboard() {
                           💬 Message
                         </button>
                         {booking.status === 'completed' && (
-                          <button
-                            onClick={() => openInvoiceForBooking(booking)}
-                            className="px-4 py-2 bg-amber-100 text-amber-900 rounded-xl text-sm font-semibold ring-1 ring-amber-300/70 hover:bg-amber-200 transition-all flex items-center gap-1.5"
-                            title="Create an invoice for this booking"
-                          >
-                            <FileText size={14} />
-                            Invoice
-                          </button>
+                          <>
+                            <button
+                              onClick={() => openInvoiceForBooking(booking)}
+                              className="px-3 py-2 bg-amber-100 text-amber-900 rounded-xl text-sm font-semibold ring-1 ring-amber-300/70 hover:bg-amber-200 transition-all flex items-center gap-1.5"
+                              title="Create an invoice for this booking"
+                            >
+                              <FileText size={14} />
+                              Invoice
+                            </button>
+                            <button
+                              onClick={() => openReceiptForBooking(booking)}
+                              className="px-3 py-2 bg-amber-100 text-amber-900 rounded-xl text-sm font-semibold ring-1 ring-amber-300/70 hover:bg-amber-200 transition-all flex items-center gap-1.5"
+                              title="Create a receipt for this booking"
+                            >
+                              <Receipt size={14} />
+                              Receipt
+                            </button>
+                          </>
                         )}
                       </div>
                       {booking.status === 'completed' && (
@@ -1518,8 +1670,8 @@ export default function DriverDashboard() {
         )}
       </div>
 
-      {/* Post-complete invoice offer */}
-      {invoiceOffer && (
+      {/* Post-complete paperwork offer: Invoice | Receipt | Not now */}
+      {paperworkOffer && (
         <div
           role="status"
           className={`fixed bottom-24 left-4 right-4 sm:left-auto sm:right-6 sm:w-96 z-20 bg-white border-2 border-amber-300 rounded-2xl shadow-2xl p-4 ${reducedMotion ? '' : 'ranchie-fab'}`}
@@ -1530,21 +1682,28 @@ export default function DriverDashboard() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-gray-900">Job complete.</p>
-              <p className="text-sm text-gray-700">Generate an invoice for this job?</p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">{invoiceOffer.name} - {invoiceOffer.pickup} to {invoiceOffer.destination}</p>
+              <p className="text-sm text-gray-700">Generate paperwork for this job?</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">{paperworkOffer.name} - {paperworkOffer.pickup} to {paperworkOffer.destination}</p>
             </div>
           </div>
           <div className="flex gap-2 mt-3">
             <button
-              onClick={() => { const b = invoiceOffer; setInvoiceOffer(null); openInvoiceForBooking(b); }}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-sm font-bold shadow-md ring-2 ring-white/70 hover:shadow-lg transition-all flex items-center justify-center gap-2"
+              onClick={() => { const b = paperworkOffer; setPaperworkOffer(null); openInvoiceForBooking(b); }}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-amber-950 text-sm font-bold shadow-md ring-2 ring-white/70 hover:shadow-lg transition-all flex items-center justify-center gap-1.5"
             >
               <FileText size={16} />
-              Generate Invoice
+              Invoice
             </button>
             <button
-              onClick={() => setInvoiceOffer(null)}
-              className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-all"
+              onClick={() => { const b = paperworkOffer; setPaperworkOffer(null); openReceiptForBooking(b); }}
+              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 text-amber-950 text-sm font-bold shadow-md ring-2 ring-white/70 hover:shadow-lg transition-all flex items-center justify-center gap-1.5"
+            >
+              <Receipt size={16} />
+              Receipt
+            </button>
+            <button
+              onClick={() => setPaperworkOffer(null)}
+              className="px-3 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-all"
             >
               Not now
             </button>
@@ -1604,6 +1763,14 @@ export default function DriverDashboard() {
         prefill={invoicePrefill}
         onClose={() => { setShowInvoiceModal(false); setInvoicePrefill(null); }}
         onSaved={handleInvoiceSaved}
+      />
+
+      {/* Receipt Modal */}
+      <ReceiptFormModal
+        open={showReceiptModal}
+        prefill={receiptPrefill}
+        onClose={() => { setShowReceiptModal(false); setReceiptPrefill(null); }}
+        onSaved={handleReceiptSaved}
       />
 
       {/* Add Booking Modal */}
