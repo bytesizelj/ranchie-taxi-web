@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { Great_Vibes } from 'next/font/google';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { ArrowLeft, Lock, Printer, RefreshCw, FileText, MessageCircle } from 'lucide-react';
-import { formatMoney, formatInvoiceDate, type InvoiceRecord } from '@/lib/invoices';
+import { ArrowLeft, Lock, Printer, RefreshCw, FileText, MessageCircle, Ban } from 'lucide-react';
+import { formatMoney, formatInvoiceDate, isVoid, voidInvoice, type InvoiceRecord } from '@/lib/invoices';
 
 const scriptFont = Great_Vibes({ weight: '400', subsets: ['latin'], display: 'swap' });
 
@@ -50,6 +50,11 @@ export default function InvoiceViewPage() {
   // Share to WhatsApp
   const [sharing, setSharing] = useState(false);
   const [shareNote, setShareNote] = useState('');
+
+  // Void
+  const [confirmVoid, setConfirmVoid] = useState(false);
+  const [voiding, setVoiding] = useState(false);
+  const [voidError, setVoidError] = useState('');
 
   // Same gate as the dashboard: PIN once, remembered in localStorage.
   useEffect(() => {
@@ -176,6 +181,21 @@ export default function InvoiceViewPage() {
     setSharing(false);
   };
 
+  const handleVoid = async () => {
+    if (!invoice || voiding) return;
+    setVoiding(true);
+    setVoidError('');
+    try {
+      await voidInvoice(invoiceId);
+      setInvoice({ ...invoice, status: 'void' });
+      setConfirmVoid(false);
+    } catch (err) {
+      console.error('Void error:', err);
+      setVoidError('I could not void this invoice.');
+    }
+    setVoiding(false);
+  };
+
   if (!authChecked) return null;
 
   if (!isAuthenticated) {
@@ -242,8 +262,11 @@ export default function InvoiceViewPage() {
             <ArrowLeft size={20} />
           </Link>
           <div className="flex-1 min-w-0">
-            <p className="font-bold text-gray-900 truncate">
+            <p className="font-bold text-gray-900 truncate flex items-center gap-2">
               {invoice ? `Invoice #${invoice.invoiceNumber}` : 'Invoice'}
+              {invoice && isVoid(invoice) && (
+                <span className="text-[10px] font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">VOID</span>
+              )}
             </p>
             <p className="text-xs text-gray-500 truncate">Ranchie Taxi Service</p>
           </div>
@@ -336,6 +359,26 @@ export default function InvoiceViewPage() {
                 }}
               />
             </div>
+
+            {/* VOID watermark: part of the sheet, so it prints and is captured in the share image */}
+            {isVoid(invoice) && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none select-none" aria-hidden="true">
+                <span
+                  className="font-extrabold tracking-[0.3em] leading-none"
+                  style={{
+                    color: '#dc2626',
+                    opacity: 0.18,
+                    fontSize: '220px',
+                    transform: 'rotate(-30deg)',
+                    border: '14px solid #dc2626',
+                    borderRadius: '24px',
+                    padding: '10px 40px 10px 54px'
+                  }}
+                >
+                  VOID
+                </span>
+              </div>
+            )}
 
             {/* Header content */}
             <div className="relative px-12 pt-8 flex items-start justify-between">
@@ -440,6 +483,45 @@ export default function InvoiceViewPage() {
               </div>
             </div>
           </div>
+          </div>
+        )}
+
+        {/* Void action: deliberately understated, voiding is rare */}
+        {invoice && !isVoid(invoice) && (
+          <div className="no-print max-w-[794px] mx-auto mt-4 text-center">
+            {!confirmVoid ? (
+              <button
+                onClick={() => { setConfirmVoid(true); setVoidError(''); }}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-red-600 underline underline-offset-4 transition-colors"
+              >
+                <Ban size={12} />
+                Void Invoice
+              </button>
+            ) : (
+              <div className="inline-block bg-white border border-red-200 rounded-2xl shadow-md px-5 py-4 text-left">
+                <p className="text-sm font-semibold text-gray-900">
+                  Void invoice {invoice.invoiceNumber}? It will remain in your records marked VOID.
+                </p>
+                {voidError && <p className="text-xs text-red-600 mt-1">{voidError}</p>}
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={handleVoid}
+                    disabled={voiding}
+                    className="px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold hover:bg-red-700 transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {voiding ? <RefreshCw size={14} className="animate-spin" /> : <Ban size={14} />}
+                    {voiding ? 'Voiding...' : 'Yes, void it'}
+                  </button>
+                  <button
+                    onClick={() => { setConfirmVoid(false); setVoidError(''); }}
+                    disabled={voiding}
+                    className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition-all disabled:opacity-60"
+                  >
+                    Keep
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import InvoiceFormModal, { type InvoicePrefill } from '@/components/InvoiceFormModal';
-import { formatMoney, formatInvoiceDate, type InvoiceRecord } from '@/lib/invoices';
+import { formatMoney, formatInvoiceDate, isVoid, type InvoiceRecord } from '@/lib/invoices';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, setDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
 import { 
   ArrowLeft, 
@@ -1059,19 +1059,32 @@ export default function DriverDashboard() {
                   <li key={inv.id}>
                     <Link
                       href={`/driver/invoice/${inv.id}`}
-                      className="flex items-center gap-3 px-3 py-3 bg-white border border-amber-200 rounded-xl shadow-sm hover:border-amber-400 hover:shadow-md transition-all"
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl shadow-sm transition-all ${
+                        isVoid(inv)
+                          ? 'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                          : 'bg-white border border-amber-200 hover:border-amber-400 hover:shadow-md'
+                      }`}
                     >
-                      <span className="shrink-0 font-mono text-sm font-bold text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 rounded-lg px-2.5 py-1 ring-1 ring-amber-300/70">
+                      <span className={`shrink-0 font-mono text-sm font-bold rounded-lg px-2.5 py-1 ring-1 ${
+                        isVoid(inv)
+                          ? 'text-gray-500 bg-gray-200 ring-gray-300'
+                          : 'text-amber-950 bg-gradient-to-r from-amber-400 to-yellow-300 ring-amber-300/70'
+                      }`}>
                         #{inv.invoiceNumber}
                       </span>
                       <span className="flex-1 min-w-0">
-                        <span className="block text-sm font-bold text-gray-900 truncate">{inv.billToName || 'Unnamed'}</span>
-                        <span className="block text-xs font-semibold text-amber-800">{formatInvoiceDate(inv.invoiceDate)}</span>
+                        <span className={`flex items-center gap-2 text-sm font-bold truncate ${isVoid(inv) ? 'text-gray-500' : 'text-gray-900'}`}>
+                          <span className="truncate">{inv.billToName || 'Unnamed'}</span>
+                          {isVoid(inv) && (
+                            <span className="shrink-0 text-[10px] font-extrabold tracking-wider px-1.5 py-0.5 rounded-full bg-red-100 text-red-700 ring-1 ring-red-200">VOID</span>
+                          )}
+                        </span>
+                        <span className={`block text-xs font-semibold ${isVoid(inv) ? 'text-gray-400' : 'text-amber-800'}`}>{formatInvoiceDate(inv.invoiceDate)}</span>
                       </span>
-                      <span className="shrink-0 text-sm font-extrabold text-amber-950">
+                      <span className={`shrink-0 text-sm font-extrabold ${isVoid(inv) ? 'text-gray-400 line-through' : 'text-amber-950'}`}>
                         {inv.currency || 'EC$'} {formatMoney(Number(inv.total))}
                       </span>
-                      <ChevronRight size={18} className="shrink-0 text-amber-500" />
+                      <ChevronRight size={18} className={`shrink-0 ${isVoid(inv) ? 'text-gray-300' : 'text-amber-500'}`} />
                     </Link>
                   </li>
                 ))}

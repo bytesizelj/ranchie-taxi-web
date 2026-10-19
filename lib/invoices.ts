@@ -1,5 +1,5 @@
 import { db } from '@/lib/firebase';
-import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, runTransaction, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 export type InvoiceCurrency = 'EC$' | 'US$';
 
@@ -22,8 +22,19 @@ export interface InvoiceRecord {
   total: number;
   currency: InvoiceCurrency;
   bookingId?: string;
+  status?: 'void';
   createdAt: any;
 }
+
+export const isVoid = (inv: Pick<InvoiceRecord, 'status'> | null | undefined): boolean => inv?.status === 'void';
+
+/**
+ * Marks an invoice VOID. The document stays in place and keeps its number; the Firestore
+ * rules only permit this single-field change, so nothing else about the record can move.
+ */
+export const voidInvoice = async (invoiceId: string): Promise<void> => {
+  await updateDoc(doc(db, 'invoices', invoiceId), { status: 'void' });
+};
 
 export type NewInvoiceInput = Omit<InvoiceRecord, 'invoiceNumber' | 'createdAt'>;
 
