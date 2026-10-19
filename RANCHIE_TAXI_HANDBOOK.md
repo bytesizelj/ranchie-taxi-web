@@ -2,7 +2,7 @@
 
 > **Purpose:** Single source of truth for the Ranchie Taxi PWA. Prime a new chat by sharing this file. Keep it updated as the project evolves.
 >
-> **Last updated:** 18 October 2026 — invoice generation deployed (numbered from 00055, branded printable view). Phone verification is next.
+> **Last updated:** 18 October 2026 — invoice WhatsApp share + post-complete invoice offer deployed. Phone verification is next.
 
 ---
 
@@ -166,6 +166,7 @@ firebase deploy --only functions:sendDailyDigest
 8. **Quick-add booking + amber FAB** — driver modal form, FAB with ping + slam-in entrance, sentinel-safe fields.
 9. **Premium dashboard header + greeting ticker** — Ranchie photo, gradient, curves; time-aware amber greeting banner with rise-in entrance, capped pulse-glow, seamless subtitle marquee (pause on hover/focus, reduced-motion fallback).
 10. **Invoice generation** — numbered sequentially from 00055 via a Firestore transaction counter (`counters/invoices`); branded printable view at `/driver/invoice/[id]` (logo, QR, signature assets in `public/images/`, Print / Save as PDF); **New Invoice** button + prefill-from-completed-booking entry points; amber UI; invoice history list on the dashboard. Invoices are **create-only from the client** (no update/delete) to protect numbering — a mistaken invoice can only be deleted from the Firebase console.
+11. **Invoice WhatsApp share + post-complete offer** — A4 PNG capture via `html2canvas-pro` (**NOT** vanilla `html2canvas` — Tailwind 4 emits oklch colors that vanilla throws on); Web Share API (`navigator.share` with files) with desktop download fallback ("Image downloaded - attach it in WhatsApp."); the invoice sheet is a fixed 794px A4 document scaled to fit on phones, so screen / print / shared image all match; post-Mark-Complete invoice offer card ("Job complete. Generate an invoice for this job?") is non-blocking — the status write never waits on it.
 
 ### 🔄 Next up (resume here)
 **Phone verification at booking form** — see To-Do #1.
@@ -177,14 +178,13 @@ firebase deploy --only functions:sendDailyDigest
 | # | Item | Approach |
 |---|---|---|
 | 1 | **Phone verification at booking form** (NEXT) | Customer enters phone → app sends a code → customer confirms before booking submits. Eliminates fake/unreachable bookings at the source. (Root cause: two fake bookings had numbers not registered on WhatsApp — auto-replies bounced with "not on WhatsApp".) |
-| 2 | **Invoice WhatsApp share + post-complete offer** (next build) | Invoice WhatsApp share (html2canvas image + Web Share API) and post-Mark-Complete invoice offer. |
-| 3 | **Reports + fare capture** | Capture fare on bookings; reporting view for the driver. |
-| 4 | **Google reviews page** | Dedicated reviews page. |
-| 5 | **Events archive / Previous Events** | Archive past events into a Previous Events section. |
-| 6 | **Housekeeping list** | Stray files (untracked images in `public/images/`, `HIGHMARK-BUILD-HANDBOOK-v2.md`), `firebase-functions` upgrade (needs its own pass), small bugs. |
-| 7 | **Section 14 compliance (HighMark studio standard)** | Verify Ranchie Taxi has a Privacy Policy page, Terms page, and the current HighMark footer credit; add whatever is missing. |
-| 8 | **Activity log / audit trail** (parked / later) | Soft delete + `statusHistory` per booking, dashboard history view. |
-| 9 | **Dedupe notifications** (parked / later) | In-page listener + FCM SW can both fire. |
+| 2 | **Reports + fare capture** | Capture fare on bookings; reporting view for the driver. |
+| 3 | **Google reviews page** | Dedicated reviews page. |
+| 4 | **Events archive / Previous Events** | Archive past events into a Previous Events section. |
+| 5 | **Housekeeping list** | Stray files (untracked images in `public/images/`, `HIGHMARK-BUILD-HANDBOOK-v2.md`), `firebase-functions` upgrade (needs its own pass), small bugs. |
+| 6 | **Section 14 compliance (HighMark studio standard)** | Verify Ranchie Taxi has a Privacy Policy page, Terms page, and the current HighMark footer credit; add whatever is missing. |
+| 7 | **Activity log / audit trail** (parked / later) | Soft delete + `statusHistory` per booking, dashboard history view. |
+| 8 | **Dedupe notifications** (parked / later) | In-page listener + FCM SW can both fire. |
 
 ### Confirmed NOT needed
 - Mobile 5-card count row layout — confirmed fine on Ranchie's phone, no fix required.
@@ -199,6 +199,7 @@ firebase deploy --only functions:sendDailyDigest
 - **Billing is shared** across multiple projects — a lapse affects Ranchie Taxi AND Cell World.
 - **Google Cloud APIs** (Maps, etc.) share the same billing — a billing lapse can break Places Autocomplete on the booking form.
 - **Firestore rules are per-collection, NOT global.** Any NEW collection (e.g. `invoices`, `counters`) is permission-denied until its own `match` block is added at https://console.firebase.google.com/project/ranchie-taxi-1e166/firestore/rules and published (no expiration). Symptom: listeners silently rejected, saves fail, views may show misleading empty states. This cost a full debugging session on 2026-10-17.
+- **Stale webpack chunk in dev:** `Cannot read properties of undefined (reading 'call')` whenever a build adds new files or dependencies while `npm run dev` is running. Fix: stop the server, `Remove-Item -Recurse -Force .next`, `npm run dev`. Recurred 3x Oct 17-18. **Habit:** restart the dev server after any build that creates files or installs packages, before testing.
 
 ---
 
