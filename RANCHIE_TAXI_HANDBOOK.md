@@ -2,7 +2,7 @@
 
 > **Purpose:** Single source of truth for the Ranchie Taxi PWA. Prime a new chat by sharing this file. Keep it updated as the project evolves.
 >
-> **Last updated:** 18 October 2026 — invoice void support deployed; live Firestore rules recorded in §4. Phone verification is next.
+> **Last updated:** 20 October 2026 — POS-style receipts deployed (own R-sequence, WhatsApp share, void, three-way paperwork offer, tabbed history); `receipts` rules deployed from the repo. Phone verification is next.
 
 ---
 
@@ -52,6 +52,10 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Invoice form modal | `components/InvoiceFormModal.tsx` |
 | Invoice printable view | `app/driver/invoice/[id]/page.tsx` |
 | Invoice assets (logo, QR, signature) | `public/images/rts-logo.png`, `public/images/ranchie-qr.png`, `public/images/signature.png` |
+| Receipt numbering + types | `lib/receipts.ts` (reuses the invoice line-item and currency types) |
+| Receipt form modal | `components/ReceiptFormModal.tsx` |
+| Receipt printable view (POS strip) | `app/driver/receipt/[id]/page.tsx` (shares the invoice assets above) |
+| Firestore rules (source of truth, deployed from repo) | `firestore.rules` — `firebase deploy --only firestore:rules` |
 
 > ⚠️ **Functions folder quirk:** `functions/package.json` has `"main": "index.js"`, so only `functions/index.js` is deployed. The `src/index.ts` and `lib/index.js` files are leftover zombies from an aborted TypeScript migration — ignore them. Cleanup is optional, not urgent.
 
@@ -65,7 +69,7 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 | Cloud Functions | `sendBookingNotification` (Gen 2, Node.js 24, us-central1, 256MB) · `sendDailyDigest` (Gen 2, Cloud Scheduler) |
 | Triggers | `sendBookingNotification`: Firestore `bookings/{bookingId}` document.create · `sendDailyDigest`: cron `0 18 * * *`, `America/St_Vincent` |
 | Twilio secrets | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` — Firebase Secret Manager (`defineSecret`), never in code |
-| Firestore collections | `bookings`, `fcmTokens`, `invoices`, `counters` (`counters/invoices` holds the next invoice number) |
+| Firestore collections | `bookings`, `fcmTokens`, `invoices`, `receipts`, `counters` (`counters/invoices` holds the next invoice number; `counters/receipts` holds the next receipt number) |
 | Billing account | `0162FD-5CB0DC-1D6739` ("My Billing Account") — **shared** across Ranchie Taxi, Cell World St Vincent, and ranchie-taxi-1e166 |
 | Firebase CLI login | `ictcleslie@gmail.com` |
 | Driver PIN | stored in env var `NEXT_PUBLIC_DRIVER_PIN` |
@@ -75,9 +79,9 @@ A custom Next.js Progressive Web App (PWA) for a taxi/airport-transfer service i
 - Google Maps API key — stored in code/env
 - AviationStack API key — stored in code/env (free tier: 100 calls/month)
 
-**Live Firestore rules (published 18 October 2026 — verbatim, so future sessions do not need to probe):**
+**Live Firestore rules (published 19 October 2026 — verbatim, so future sessions do not need to probe):**
 
-Edit at https://console.firebase.google.com/project/ranchie-taxi-1e166/firestore/rules. Rules are per-collection: a new collection needs its own `match` block (see §10).
+Source of truth is the repo file `firestore.rules`, deployed with `firebase deploy --only firestore:rules` (wired in `firebase.json`). View at https://console.firebase.google.com/project/ranchie-taxi-1e166/firestore/rules. Rules are per-collection: a new collection needs its own `match` block (see §10).
 
 ```
 rules_version = '2';
@@ -93,6 +97,13 @@ service cloud.firestore {
     }
 
     match /invoices/{invoiceId} {
+      allow read, create: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+                    && request.resource.data.status == 'void';
+      allow delete: if false;
+    }
+
+    match /receipts/{receiptId} {
       allow read, create: if true;
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
                     && request.resource.data.status == 'void';
@@ -141,6 +152,24 @@ invoice {
 
 Numbering: `counters/invoices { next }` is read and incremented inside the same Firestore transaction that writes the invoice, so two saves can never share a number. Seeds at 55 if the counter does not exist (continues Ranchie's paper sequence after 00054).
 
+**Receipt schema (`receipts` collection):**
+
+```
+receipt {
+  receiptNumber ("R-00001" — R- prefix + zero-padded, 5 digits),
+  receiptDate (YYYY-MM-DD), receivedFrom (required),
+  description (route or free text), serviceDate,
+  lineItems [{ description, price, jobs, subtotal }],
+  total, currency ('EC$' | 'US$'),
+  paymentMethod ('Cash EC$' | 'Cash US$' | 'Bank transfer' | 'Cheque' | 'Other'),
+  bookingId?  (set when generated from a completed booking),
+  status?     ('void'),
+  createdAt
+}
+```
+
+Numbering: `counters/receipts { next }` — same transaction pattern as invoices, own sequence seeded at 1 (receipts are new to the app; no paper sequence to continue). Invoices and receipts never share a counter.
+
 ---
 
 ## 6. Deployment
@@ -184,7 +213,7 @@ firebase deploy --only functions:sendDailyDigest
 
 ---
 
-## 8. Current Position (as of 18 October 2026)
+## 8. Current Position (as of 20 October 2026)
 
 ### ✅ Completed & verified in production
 1. **Twilio token swap** — exposed auth token invalidated and replaced; secrets live only in Firebase Secret Manager.
@@ -198,6 +227,7 @@ firebase deploy --only functions:sendDailyDigest
 9. **Premium dashboard header + greeting ticker** — Ranchie photo, gradient, curves; time-aware amber greeting banner with rise-in entrance, capped pulse-glow, seamless subtitle marquee (pause on hover/focus, reduced-motion fallback).
 10. **Invoice generation** — numbered sequentially from 00055 via a Firestore transaction counter (`counters/invoices`); branded printable view at `/driver/invoice/[id]` (logo, QR, signature assets in `public/images/`, Print / Save as PDF); **New Invoice** button + prefill-from-completed-booking entry points; amber UI; invoice history list on the dashboard. Invoices are **create-only from the client** (no update/delete) to protect numbering — a mistaken invoice can only be deleted from the Firebase console.
 11. **Invoice WhatsApp share + post-complete offer** — A4 PNG capture via `html2canvas-pro` (**NOT** vanilla `html2canvas` — Tailwind 4 emits oklch colors that vanilla throws on); Web Share API (`navigator.share` with files) with desktop download fallback ("Image downloaded - attach it in WhatsApp."); the invoice sheet is a fixed 794px A4 document scaled to fit on phones, so screen / print / shared image all match; post-Mark-Complete invoice offer card ("Job complete. Generate an invoice for this job?") is non-blocking — the status write never waits on it. **Void support** — invoices are never deleted; a narrow Firestore rule allows updating ONLY `status` to `'void'` (amounts/number/parties immutable, no un-void from client). Voided invoices show a diagonal VOID watermark on view/print/shared PNG and a muted VOID row in history. Deletion remains Firebase-console-only.
+12. **POS-style receipts (360px strip)** — own R-00001 sequence via `counters/receipts` transaction, received-from + line items + payment method, WhatsApp share as `receipt-R-xxxxx.png`, void with watermark, create-only rules (same shape as invoices, deployed from repo `firestore.rules`), three-way post-complete offer (Invoice / Receipt / Not now), tabbed Invoices | Receipts history. Dashboard layout: New Invoice + New Receipt side by side, one "Invoices and Receipts" toggle beneath opens the tabbed panel; completed booking cards carry both Invoice and Receipt actions. Receipt view at `/driver/receipt/[id]` is PIN-gated like the invoice view; print CSS outputs the strip at natural width, centered, no app chrome.
 
 ### 🔄 Next up (resume here)
 **Phone verification at booking form** — see To-Do #1.
